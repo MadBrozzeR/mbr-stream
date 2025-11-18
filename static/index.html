@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MBR-Stream Dashboard</title>
+<style>
+.header {
+  display: flex;
+  justify-content: space-between;
+}
+.follower_number--wrapper {
+  position: relative;
+}
+.follower_number--list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+}
+.follower_number--wrapper:hover .follower_number--list {
+  display: block;
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>{{userName}} ({{status}})</div>
+  <div class="follower_number--wrapper">
+    {{followerNumber}}
+    <div class="follower_number--list">
+      {{followers}}
+    </div>
+  </div>
+</div>
+</body>
+</html>

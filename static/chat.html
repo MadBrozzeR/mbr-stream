@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Chat</title>
+<script>
+const session = {
+  id: '',
+};
+const ws = new WebSocket('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30');
+ws.onmessage = function (event) {
+  const data = JSON.parse(event.data);
+  console.log(data);
+  if (data.metadata.message_type === 'session_welcome') {
+    session.id = data.payload.session.id;
+  }
+}
+</script>
+</head>
+<body>
+<div id="chatbox"></div>
+</body>
+</html>

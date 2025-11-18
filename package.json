@@ -1,0 +1,37 @@
+{
+  "name": "mbr-stream",
+  "version": "0.0.1",
+  "description": "Streamer Lab",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build ./src/server/tsconfig.json",
+    "start": "mbr-dev-server --port=8922 ./server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadBrozzeR/mbr-streamer.git"
+  },
+  "keywords": [
+    "twitch",
+    "stream"
+  ],
+  "author": "MadBrozzeR",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MadBrozzeR/mbr-streamer/issues"
+  },
+  "homepage": "https://github.com/MadBrozzeR/mbr-streamer#readme",
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "mbr-config": "^1.1.1",
+    "mbr-logger": "^0.0.1",
+    "mbr-serv-request": "^0.3.0",
+    "mbr-state": "^0.2.0",
+    "mbr-style": "^1.1.2",
+    "splux": "^1.6.2"
+  }
+}
