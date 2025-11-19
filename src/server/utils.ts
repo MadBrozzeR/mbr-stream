@@ -1,5 +1,6 @@
 import { IncomingMessage, OutgoingHttpHeaders } from 'http';
 import https from 'https';
+import http from 'http';
 import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod } from './types';
 import { config } from './config';
@@ -58,8 +59,10 @@ export function apiRequest<R> (
     const data = headers['content-type'] === 'application/json' ? JSON.stringify(params) : jsonToUrlEncoded(params);
     const requestUrl = typeof url === 'string' ? url : urlWithParams(url[0], url[1]);
     log(`Request ${method} ${requestUrl}`);
+    const isTls = requestUrl.substring(0, 5) === 'https';
+    log(`Data: ${data}`);
 
-    https
+    (isTls ? https : http)
       .request(requestUrl, {
         method,
         headers: {
@@ -110,3 +113,6 @@ const logger = new Logger(config.logFile, {
 export function log(message: string, type: string = 'log') {
   logger.put(`[${new Date().toJSON()}]${type}|${message}`)
 };
+
+export const isKeyOf = <T extends {}>(key: string | number | symbol, source: T): key is keyof T => key in source;
+export const isDefined = <T>(value: T | undefined): value is T => !(value === undefined);

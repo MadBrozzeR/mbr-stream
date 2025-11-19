@@ -249,10 +249,58 @@ export type DeleteEventSubSubscriptionRequest = {
 
 export type DeleteEventSubSubscriptionResponse = void;
 
+type EventSubStatus = 'enabled'
+  | 'webhook_callback_verification_pending'
+  | 'webhook_callback_verification_failed'
+  | 'notification_failures_exceeded'
+  | 'authorization_revoked'
+  | 'moderator_removed'
+  | 'user_removed'
+  | 'chat_user_banned'
+  | 'version_removed'
+  | 'beta_maintenance'
+  | 'websocket_disconnected'
+  | 'websocket_failed_ping_pong'
+  | 'websocket_received_inbound_traffic'
+  | 'websocket_connection_unused'
+  | 'websocket_internal_error'
+  | 'websocket_network_timeout'
+  | 'websocket_network_error'
+  | 'websocket_failed_to_reconnect';
+
 export type GetEventSubSubscriptionRequest = {
+  status?: EventSubStatus;
+  type?: keyof EventSubType;
+  user_id?: string;
+  subscription_id?: string;
+  after?: string;
 };
 
-export type GetEventSubSubscriptionResponse = {
+export type GetEventSubSubscriptionResponse<T extends keyof EventSubType = keyof EventSubType> = {
+  data: Array<{
+    id: string;
+    status: EventSubStatus;
+    type: T;
+    version: string;
+    condition: { [K in keyof EventTypeConditions<T>]: EventTypeConditions<T>[K] };
+    created_at: string;
+    transport: {
+      method: 'webhook';
+      callback: string;
+    } | {
+      method: 'websocket';
+      session_id: string;
+      connected_at: string;
+      disconnected_at: string;
+    };
+    cost: number;
+  }>;
+  total: number;
+  total_cost: number;
+  max_total_cost: number;
+  pagination: {
+    cursor: string;
+  };
 };
 
 export type GetUsersRequest = { id?: string, login?: string };

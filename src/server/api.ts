@@ -5,17 +5,19 @@ import { apiRequest } from './utils';
 import { getAppGrantToken, refreshUserToken, requestAppGrantToken } from './auth';
 import { config, tokenStorage } from './config';
 
-function getHeaders (token: string): OutgoingHttpHeaders {
+function getHeaders (token: string, headers?: OutgoingHttpHeaders): OutgoingHttpHeaders {
   return {
     Authorization: `Bearer ${token}`,
     'Client-Id': config.clientId,
+    ...headers,
   };
 }
 
 export async function appApiRequest<R> (
   url: Types.RequestUrl,
   method: Types.RESTMethod = 'GET',
-  params: Types.RequestParams = {}
+  params: Types.RequestParams = {},
+  headers: OutgoingHttpHeaders = {}
 ): Promise<R> {
   const token = await getAppGrantToken();
 
@@ -24,7 +26,7 @@ export async function appApiRequest<R> (
   } catch (error: any) {
     if ('status' in error && error.status === 401) {
       const token = await requestAppGrantToken();
-      return await apiRequest(url, method, params, getHeaders(token.access_token));
+      return await apiRequest(url, method, params, getHeaders(token.access_token, headers));
     }
 
     throw error;
@@ -34,7 +36,8 @@ export async function appApiRequest<R> (
 export async function userApiRequest<R> (
   url: Types.RequestUrl,
   method: Types.RESTMethod = 'GET',
-  params: Types.RequestParams = {}
+  params: Types.RequestParams = {},
+  headers: OutgoingHttpHeaders = {}
 ): Promise<R> {
   const { access_token, refresh_token } = tokenStorage.get('user');
 
@@ -43,9 +46,9 @@ export async function userApiRequest<R> (
   }
 
   try {
-    return await apiRequest<R>(url, method, params, getHeaders(access_token));
+    return await apiRequest<R>(url, method, params, getHeaders(access_token, headers));
   } catch (error: any) {
-    if ('status' in error && status === '401') {
+    if ('status' in error && error.status === '401') {
       const { access_token } = await refreshUserToken();
       return await apiRequest<R>(url, method, params, getHeaders(access_token));
     }
@@ -75,7 +78,8 @@ export const api = {
       return userApiRequest<Types.CreateEventSubSubscriptionResponse<K>>(
         `${API.EVENTSUB}/subscriptions`,
         'POST',
-        params
+        params,
+        { 'content-type': 'application/json' },
       );
     },
     deleteEventSubSubscription(params: Types.DeleteEventSubSubscriptionRequest) {
@@ -86,7 +90,10 @@ export const api = {
     },
     getEventSubSubscription(params: Types.GetEventSubSubscriptionRequest) {
       return userApiRequest<Types.GetEventSubSubscriptionResponse>(
-        [`${API.EVENTSUB}/subscriptions`, params]
+        [`${API.EVENTSUB}/subscriptions`, params],
+        'GET',
+        undefined,
+        { 'content-type': 'application/json' },
       );
     },
   },
