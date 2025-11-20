@@ -1,4 +1,4 @@
-import { Splux } from 'splux';
+import { Splux } from './lib-ref/splux';
 import { host } from './splux-host';
 import { wsConnect } from './ws';
 import { Chatbox } from './chat';

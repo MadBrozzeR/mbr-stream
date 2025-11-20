@@ -1,5 +1,5 @@
-import { Splux } from 'splux';
-import { Styles } from 'mbr-style';
+import { Splux } from './lib-ref/splux';
+import { Styles } from './lib-ref/mbr-style';
 import { EventPayloadData } from './type';
 
 export const host = {

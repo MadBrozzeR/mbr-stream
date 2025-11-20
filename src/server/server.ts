@@ -56,14 +56,24 @@ async function getUserInfo(request: Request) {
 export async function server (request: Request) {
   // console.log(request.request.url);
   request.match(/^\/modules\/(.+)$/, function (regMatch) {
-    this.sendFile(`${regMatch[1]}.js`, {
-      root: CLIENT_ROOT,
-      extension: 'js',
-    });
+    switch (regMatch[1]) {
+      case 'lib-ref/splux':
+        this.sendFile(`${MODULES_ROOT}splux/index.js`)
+        break;
+      case 'lib-ref/mbr-style':
+        this.sendFile(`${MODULES_ROOT}mbr-style/index.js`)
+        break;
+      default:
+        this.sendFile(`${regMatch[1]}.js`, {
+          root: CLIENT_ROOT,
+          extension: 'js',
+        });
+        break;
+    }
   })
   || request.route({
-    '/lib/mbr-style.js': `${MODULES_ROOT}mbr-style/index.js`,
-    '/lib/splux.js': `${MODULES_ROOT}splux/index.js`,
+    // '/lib/mbr-style.js': `${MODULES_ROOT}mbr-style/index.js`,
+    // '/lib/splux.js': `${MODULES_ROOT}splux/index.js`,
 
     '/chat': STATIC_ROOT + 'chat.html',
     '/connect'(request) {
