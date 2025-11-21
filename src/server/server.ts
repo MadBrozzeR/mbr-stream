@@ -71,6 +71,18 @@ export async function server (request: Request) {
         break;
     }
   })
+  || request.match(/^\/static\/(.+)$/, async function (regMatch) {
+    try {
+      if (!regMatch[1]) {
+        throw '';
+      }
+
+      await this.sendFile(regMatch[1], { root: STATIC_ROOT });
+    } catch (error) {
+      request.status = 404;
+      request.send();
+    };
+  })
   || request.route({
     // '/lib/mbr-style.js': `${MODULES_ROOT}mbr-style/index.js`,
     // '/lib/splux.js': `${MODULES_ROOT}splux/index.js`,

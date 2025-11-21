@@ -1,4 +1,4 @@
-import { newComponent } from './splux-host';
+import { newComponent } from '../splux-host';
 
 const STYLES = {
   '.chatbox': {
@@ -27,7 +27,7 @@ const STYLES = {
   },
 };
 
-export const Chatbox = newComponent('div', function () {
+export const ChatBox = newComponent('div', function () {
   this.setParams({
     className: 'chatbox',
   });

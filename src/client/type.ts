@@ -63,11 +63,30 @@ export type EventPayloadData = {
     };
     is_source_only?: null | boolean;
   };
+  'channel.follow': {
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    followed_at: string;
+  };
+  'channel.subscribe': {
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    tier: string;
+    is_gift: boolean;
+  };
 };
 
 export type EventType = keyof EventPayloadData;
 
-export type Notification<T extends EventType = EventType> = {
+export type Notification<T extends keyof EventPayloadData = keyof EventPayloadData> = {
   subscription: {
     type: T;
   };
