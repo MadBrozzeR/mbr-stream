@@ -3,8 +3,9 @@ import { host } from './splux-host';
 import { wsConnect } from './ws';
 import { ChatBox } from './components/chat-box';
 import { isEventType } from './utils';
+import { NotificationBox } from './components/notification-box';
 
-const START_CHAT = true;
+const START_CHAT = false;
 
 const STYLES = {
   'html, body': {
@@ -13,6 +14,22 @@ const STYLES = {
     overflow: 'hidden',
   },
 };
+/*
+{
+        subscription: {
+          type: 'channel.follow',
+        },
+        event: {
+          user_id: '',
+          user_login: '',
+          user_name: '',
+          broadcaster_user_id: '',
+          broadcaster_user_login: '',
+          broadcaster_user_name: '',
+          followed_at: '',
+        }
+      }
+*/
 
 Splux.start(function (body, head) {
   const host = this.host;
@@ -20,15 +37,22 @@ Splux.start(function (body, head) {
   host.styles.add('main', STYLES);
 
   body.dom(ChatBox);
+  body.dom(NotificationBox);
 
   if (START_CHAT) {
     wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
       if (isEventType(message, 'channel.chat.message')) {
         host.appendMessage(message.event);
       } else if (isEventType(message, 'channel.follow', 'channel.subscribe')) {
-        host.pushNotification(message);
+        // host.pushNotification(message);
       }
     });
   }
+
+  body.setParams({
+    onclick() {
+      host.pushNotification({ text: 'Hello, world!' });
+    }
+  });
 }, host);
 

@@ -92,3 +92,8 @@ export type Notification<T extends keyof EventPayloadData = keyof EventPayloadDa
   };
   event: EventPayloadData[T];
 };
+
+export type NotificationToast = {
+  text: string;
+  timeout?: number;
+};
