@@ -4,6 +4,7 @@ import { wsConnect } from './ws';
 import { ChatBox } from './components/chat-box';
 import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
+import { Audio } from './components/audio';
 
 const START_CHAT = false;
 
@@ -38,6 +39,7 @@ Splux.start(function (body, head) {
 
   body.dom(ChatBox);
   body.dom(NotificationBox);
+  body.dom(Audio);
 
   if (START_CHAT) {
     wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
@@ -51,7 +53,7 @@ Splux.start(function (body, head) {
 
   body.setParams({
     onclick() {
-      host.pushNotification({ text: 'Hello, world!' });
+      host.pushNotification({ text: 'Hello, world!', audio: 'witch-ambient1.ogg' });
     }
   });
 }, host);

@@ -10,6 +10,9 @@ export const host = {
   pushNotification(data: NotificationToast) {
     console.log(data);
   },
+  play(src: string) {
+    console.log(src);
+  },
 };
 
 export type Host = typeof host;

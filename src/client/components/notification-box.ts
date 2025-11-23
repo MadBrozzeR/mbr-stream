@@ -139,7 +139,10 @@ const STYLES = {
   },
 };
 
-const Popup = newComponent('div', function (_popup, { text, timeout = TIMEOUT, onEnd }: NotificationToast & { onEnd: (this: Splux<HTMLDivElement, Host>) => void }) {
+const Popup = newComponent('div', function (
+  _popup,
+  { text, timeout = TIMEOUT, audio, onEnd }: NotificationToast & { onEnd: (this: Splux<HTMLDivElement, Host>) => void }
+) {
   const popup = this;
 
   this.params({
@@ -160,6 +163,10 @@ const Popup = newComponent('div', function (_popup, { text, timeout = TIMEOUT, o
       innerText: text,
     });
   });
+
+  if (audio) {
+    this.host.play(audio);
+  }
 
   setTimeout(function () {
     popup.node.classList.add('notification_popup-hide');
