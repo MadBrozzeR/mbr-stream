@@ -2,6 +2,7 @@ import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
 import { imageAtlas } from '../utils';
+import { Toolbox } from './toolbar';
 
 const toastAtlas = imageAtlas('/static/images/toast.png', {
   topLeft: [0, 0, 150, 16],
@@ -77,10 +78,17 @@ const STYLES = {
     position: 'absolute',
     top: '20px',
     right: 0,
-    width: '244px',
+    width: '264px',
     height: '264px',
-    paddingRight: '20px',
-    overflow: 'hidden',
+
+    '--list': {
+      width: '100%',
+      height: '100%',
+      position: 'relative',
+      paddingRight: '20px',
+      overflow: 'hidden',
+      boxSizing: 'border-box',
+    },
   },
 
   '.notification_popup': {
@@ -139,6 +147,12 @@ const STYLES = {
       animation: '1s ease-in-out toast-background',
     },
 
+    '--info_text': {
+      width: '100%',
+      height: '100%',
+      overflow: 'hidden',
+    },
+
     '.notification_popup-hide': {
       transition: '0.3s transform ease-in-out',
       transform: 'translateX(150%)',
@@ -146,29 +160,18 @@ const STYLES = {
   },
 };
 
-const Popup = newComponent('div', function (
-  _popup,
+const Popup = newComponent('div.notification_popup', function (
+  popup,
   { text, timeout = TIMEOUT, audio, onEnd }: NotificationToast & { onEnd: (this: Splux<HTMLDivElement, Host>) => void }
 ) {
-  const popup = this;
-
-  this.params({
-    className: 'notification_popup',
+  this.dom('div.notification_popup--foreground', foreground => {
+    foreground.dom('div.notification_popup--foreground_part1');
+    foreground.dom('div.notification_popup--foreground_part2');
+    foreground.dom('div.notification_popup--foreground_part3');
+    foreground.dom('div.notification_popup--foreground_part4');
   });
-  this.dom('div', foreground => {
-    foreground.params({
-      className: 'notification_popup--foreground',
-    });
-    foreground.dom('div').params({ className: 'notification_popup--foreground_part1' });
-    foreground.dom('div').params({ className: 'notification_popup--foreground_part2' });
-    foreground.dom('div').params({ className: 'notification_popup--foreground_part3' });
-    foreground.dom('div').params({ className: 'notification_popup--foreground_part4' });
-  });
-  this.dom('div', block => {
-    block.params({
-      className: 'notification_popup--info',
-      innerText: text,
-    });
+  this.dom('div.notification_popup--info', block => {
+    block.dom('div.notification_popup--info_text').params({ innerText: text });
   });
 
   if (audio) {
@@ -185,43 +188,41 @@ const Popup = newComponent('div', function (
   }, timeout + 300);
 });
 
-export const NotificationBox = newComponent('div', function () {
+export const NotificationBox = newComponent('div.notification_box', function () {
   const host = this.host;
-  const root = this;
-  this.params({
-    className: 'notification_box',
-    onclick() {
-      if (TEST_MODE.isActive) {
-        host.pushNotification(TEST_MODE.notification);
-      }
-    },
-  });
   host.styles.add('notifications', STYLES);
 
-  const notificationList = {
-    pending: [] as Array<NotificationToast>,
-    max: 3,
-    current: 0,
-    push(data: NotificationToast) {
-      this.pending.push(data);
-      if (this.current < this.max) {
-        this.action();
-      }
-    },
-    action() {
-      const popup = this.pending.shift();
+  this.dom(Toolbox, {
+    position: 'bottom',
+    items: {
+      test() { host.pushNotification(TEST_MODE.notification) },
+    }
+  }).dom('div.notification_box--list', function (list) {
+    const notificationList = {
+      pending: [] as Array<NotificationToast>,
+      max: 3,
+      current: 0,
+      push(data: NotificationToast) {
+        this.pending.push(data);
+        if (this.current < this.max) {
+          this.action();
+        }
+      },
+      action() {
+        const popup = this.pending.shift();
 
-      if (popup) {
-        ++notificationList.current;
-        root.dom(Popup, { ...popup, onEnd() {
-          --notificationList.current;
-          notificationList.action();
-        } });
-      }
-    },
-  };
+        if (popup) {
+          ++notificationList.current;
+          list.dom(Popup, { ...popup, onEnd() {
+            --notificationList.current;
+            notificationList.action();
+          } });
+        }
+      },
+    };
 
-  host.pushNotification = function (data) {
-    notificationList.push(data);
-  };
+    host.pushNotification = function (data) {
+      notificationList.push(data);
+    };
+  });
 });

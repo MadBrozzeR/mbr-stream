@@ -32,6 +32,6 @@
     "mbr-serv-request": "^0.3.0",
     "mbr-state": "^0.2.0",
     "mbr-style": "^1.1.2",
-    "splux": "^1.6.2"
+    "splux": "^1.7.1"
   }
 }
