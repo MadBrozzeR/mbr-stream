@@ -48,9 +48,9 @@ export async function userApiRequest<R> (
   try {
     return await apiRequest<R>(url, method, params, getHeaders(access_token, headers));
   } catch (error: any) {
-    if ('status' in error && error.status === '401') {
+    if ('status' in error && error.status === 401) {
       const { access_token } = await refreshUserToken();
-      return await apiRequest<R>(url, method, params, getHeaders(access_token));
+      return await apiRequest<R>(url, method, params, getHeaders(access_token, headers));
     }
 
     throw error;

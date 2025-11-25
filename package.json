@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build ./src/server/tsconfig.json ./src/client/tsconfig.json",
-    "start": "mbr-dev-server --port=8922 ./server.js"
+    "start": "npm run build && mbr-dev-server --port=8922 ./server.js"
   },
   "repository": {
     "type": "git",
