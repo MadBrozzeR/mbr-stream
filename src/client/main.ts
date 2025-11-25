@@ -6,7 +6,7 @@ import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 
-const START_CHAT = false;
+const START_CHAT = true;
 
 const STYLES = {
   'html, body': {
@@ -45,15 +45,20 @@ Splux.start(function (body, head) {
     wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
       if (isEventType(message, 'channel.chat.message')) {
         host.appendMessage(message.event);
-      } else if (isEventType(message, 'channel.follow', 'channel.subscribe')) {
+        host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
+      } else if (isEventType(message, 'channel.follow')) {
+        host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
+      } else if (isEventType(message, 'channel.subscribe')) {
         // host.pushNotification(message);
+        host.pushNotification({ text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`, audio: 'witch-ambient1.ogg' });
       }
     });
   }
 
   body.setParams({
     onclick() {
-      host.pushNotification({ text: 'Hello, world!', audio: 'witch-ambient1.ogg' });
+      // host.pushNotification({ text: 'Hello, world!', audio: 'witch-ambient1.ogg' });
+      host.pushNotification({ text: 'Hello, world! This is kind of long message to check how much notification can fit into it. I hope it can handle at least three lines of raw text.', audio: 'amethyst-break1.ogg' });
     }
   });
 }, host);
