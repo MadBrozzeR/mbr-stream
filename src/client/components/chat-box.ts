@@ -1,7 +1,8 @@
 import { newComponent } from '../splux-host';
 import type { EventPayloadData } from '../type';
+import { Toolbox } from './toolbar';
 
-const TIMEOUT = 1000;
+const TIMEOUT = 20000;
 
 const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.message'] } = {
   isActive: true,
@@ -35,7 +36,13 @@ const STYLES = {
     width: '50%',
     bottom: '20px',
     left: '20px',
-    overflow: 'hidden',
+
+    '--wrapper': {
+      position: 'relative',
+      height: '100%',
+      width: '100%',
+      overflow: 'hidden',
+    },
 
     '--log': {
       position: 'absolute',
@@ -56,36 +63,60 @@ const STYLES = {
         opacity: '0.5',
         transition: '.5s opacity ease-in-out',
       },
+
+      '_name': {
+        color: 'var(--color, white)',
+      },
     },
   },
 };
 
+const ChatEntry = newComponent('div', function (
+  entry,
+  { messageEvent }: { messageEvent: EventPayloadData['channel.chat.message']}
+) {
+  entry.setParams({
+    className: 'chatbox--entry',
+  });
+
+  const name = entry.dom('span').params({
+    innerText: messageEvent.chatter_user_name,
+    className: 'chatbox--entry_name',
+  });
+  entry.dom('span').params({ innerText: ': ' });
+  entry.dom('span').params({ innerText: messageEvent.message.text });
+
+  if (messageEvent.color) {
+    name.node.style.setProperty('--color', messageEvent.color);
+  }
+
+  setTimeout(function () {
+    entry.node.classList.add('chatbox--entry-dim');
+  }, TIMEOUT);
+});
+
 export const ChatBox = newComponent('div', function () {
   const host = this.host;
 
-  this.setParams({
-    className: 'chatbox',
-    onclick() {
-      if (TEST_MODE.isActive) {
-        host.appendMessage(TEST_MODE.message);
-      }
-    },
-  });
-
   this.host.styles.add('chat', STYLES);
+  this.setParams({ className: 'chatbox' });
 
-  this.dom('div', function () {
-    const log = this.setParams({ className: 'chatbox--log' });
+  let clear = function () {};
 
-    this.host.appendMessage = function (messageEvent) {
-      const entry = log.dom('div').setParams({
-        className: 'chatbox--entry',
-        innerText: messageEvent.chatter_user_name + ': ' + messageEvent.message.text
-      });
+  this.dom(Toolbox, { items: {
+    test() { host.appendMessage(TEST_MODE.message) },
+    clear() { clear() },
+  } }).dom('div', function () {
+    this.params({ className: 'chatbox--wrapper' }).dom('div', function () {
+      const log = this.setParams({ className: 'chatbox--log' });
 
-      setTimeout(function () {
-        entry.node.classList.add('chatbox--entry-dim');
-      }, TIMEOUT);
-    };
+      clear = function () {
+        log.clear();
+      };
+
+      this.host.appendMessage = function (messageEvent) {
+        log.dom(ChatEntry, { messageEvent });
+      };
+    });
   });
 });

@@ -6,7 +6,7 @@ import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 
-const START_CHAT = true;
+const START_CHAT = false;
 
 const STYLES = {
   'html, body': {
