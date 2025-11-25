@@ -13,6 +13,11 @@ const toastAtlas = imageAtlas('/static/images/toast.png', {
 
 const TIMEOUT = 5000;
 
+const TEST_MODE = {
+  isActive: true,
+  notification: { text: 'Hello, world! This is kind of long message to check how much notification can fit into it. I hope it can handle at least three lines of raw text.', audio: 'amethyst-break1.ogg' },
+};
+
 const STYLES = {
   '@keyframes toast-enter': {
     '0%': {
@@ -72,6 +77,8 @@ const STYLES = {
     position: 'absolute',
     top: '20px',
     right: 0,
+    width: '244px',
+    height: '264px',
     paddingRight: '20px',
     overflow: 'hidden',
   },
@@ -181,7 +188,14 @@ const Popup = newComponent('div', function (
 export const NotificationBox = newComponent('div', function () {
   const host = this.host;
   const root = this;
-  this.params({ className: 'notification_box' })
+  this.params({
+    className: 'notification_box',
+    onclick() {
+      if (TEST_MODE.isActive) {
+        host.pushNotification(TEST_MODE.notification);
+      }
+    },
+  });
   host.styles.add('notifications', STYLES);
 
   const notificationList = {

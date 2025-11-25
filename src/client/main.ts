@@ -54,12 +54,5 @@ Splux.start(function (body, head) {
       }
     });
   }
-
-  body.setParams({
-    onclick() {
-      // host.pushNotification({ text: 'Hello, world!', audio: 'witch-ambient1.ogg' });
-      host.pushNotification({ text: 'Hello, world! This is kind of long message to check how much notification can fit into it. I hope it can handle at least three lines of raw text.', audio: 'amethyst-break1.ogg' });
-    }
-  });
 }, host);
 
