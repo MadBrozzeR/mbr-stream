@@ -6,6 +6,7 @@ export const config = Config.use(__dirname + '/../../.config.json', {
   clientSecret: '',
   redirectUri: 'http://localhost/',
   logFile: __dirname + '/../../log.txt',
+  startChat: true,
 });
 
 type TokenStorage = {

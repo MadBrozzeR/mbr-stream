@@ -2,6 +2,8 @@ import { Splux } from './lib-ref/splux';
 import { Styles } from './lib-ref/mbr-style';
 import type { EventPayloadData, NotificationToast } from './type';
 
+type Config = { startChat: boolean };
+
 export const host = {
   styles: Styles.create(),
   appendMessage(message: EventPayloadData['channel.chat.message']) {
@@ -13,6 +15,25 @@ export const host = {
   play(src: string) {
     console.log(src);
   },
+  getConfig: (function (): Promise<Config | null> {
+    let config: null | Config = null;
+
+    if (config) {
+      return Promise.resolve(config);
+    }
+
+    return fetch('/config').then(function (response) {
+      if (response.ok) {
+        return response.json();
+      }
+
+      return Promise.reject();
+    }).then(function (result) {
+      return config = result;
+    }).catch(function (error) {
+      console.error('Failed to fetch config', error)
+    });
+  }),
 };
 
 export type Host = typeof host;

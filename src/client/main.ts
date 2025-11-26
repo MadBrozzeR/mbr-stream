@@ -6,8 +6,6 @@ import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 
-const START_CHAT = false;
-
 const STYLES = {
   'html, body': {
     margin: 0,
@@ -41,18 +39,20 @@ Splux.start(function (body, head) {
   body.dom(NotificationBox);
   body.dom(Audio);
 
-  if (START_CHAT) {
-    wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
-      if (isEventType(message, 'channel.chat.message')) {
-        host.appendMessage(message.event);
-        host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
-      } else if (isEventType(message, 'channel.follow')) {
-        host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
-      } else if (isEventType(message, 'channel.subscribe')) {
-        // host.pushNotification(message);
-        host.pushNotification({ text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`, audio: 'witch-ambient1.ogg' });
-      }
-    });
-  }
+  host.getConfig().then(function (config) {
+    if (config && config.startChat) {
+      wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
+        if (isEventType(message, 'channel.chat.message')) {
+          host.appendMessage(message.event);
+          host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
+        } else if (isEventType(message, 'channel.follow')) {
+          host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
+        } else if (isEventType(message, 'channel.subscribe')) {
+          // host.pushNotification(message);
+          host.pushNotification({ text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`, audio: 'witch-ambient1.ogg' });
+        }
+      });
+    }
+  });
 }, host);
 

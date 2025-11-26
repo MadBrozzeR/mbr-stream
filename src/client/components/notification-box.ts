@@ -4,7 +4,7 @@ import type { NotificationToast } from '../type';
 import { imageAtlas } from '../utils';
 import { Toolbox } from './toolbar';
 
-const toastAtlas = imageAtlas('/static/images/toast.png', {
+const toastAtlas = imageAtlas('/static/images/toast.svg', {
   topLeft: [0, 0, 150, 16],
   topRight: [0, 16, 38, 8],
   bottomLeft: [0, 24, 30, 8],

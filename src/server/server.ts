@@ -109,6 +109,10 @@ export async function server (request: Request) {
 
     '/favicon.ico'(request) {request.send();},
 
+    '/config'(request) {
+      request.send(JSON.stringify({ startChat: config.startChat }), 'json');
+    },
+
     async '/'(request) {
       try {
         const userInfo = await getUserInfo(request);
