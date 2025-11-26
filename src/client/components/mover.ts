@@ -1,3 +1,4 @@
+import { isCast } from '../broadcaster';
 import { Splux } from '../lib-ref/splux';
 import { newComponent } from '../splux-host';
 import { urlState } from '../url-state';
@@ -151,7 +152,7 @@ export const Mover = newComponent('dialog', function (mover, { vars, component, 
   });
 
   mover.tuneIn(function (data) {
-    if (data.type === 'urlStateChange' && name in data.payload) {
+    if (isCast('hashStateChange', data) && name in data.payload) {
       currentVars = data.payload[name];
       iterateInputs(inputs, function (input, key) {
         input.value = currentVars?.[key] || '';

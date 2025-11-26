@@ -6,6 +6,7 @@ import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 import { urlState } from './url-state';
+import { createCast } from './broadcaster';
 
 const STYLES = {
   'html, body': {
@@ -19,6 +20,9 @@ Splux.start(function (body, head) {
   const host = this.host;
   head.dom(host.styles.target);
   host.styles.add('main', STYLES);
+  host.cast = function (type, payload) {
+    body.broadcast(createCast(type, payload));
+  }
 
   body.dom(ChatBox);
   body.dom(NotificationBox);
@@ -41,7 +45,7 @@ Splux.start(function (body, head) {
   });
 
   urlState.listen(function (data) {
-    body.broadcast({ type: 'urlStateChange', payload: data });
+    host.cast('hashStateChange', data);
   });
 }, host);
 

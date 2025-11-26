@@ -1,6 +1,7 @@
 import { Splux } from './lib-ref/splux';
 import { Styles } from './lib-ref/mbr-style';
 import type { EventPayloadData, NotificationToast } from './type';
+import { Broadcast } from './broadcaster';
 
 type Config = { startChat: boolean };
 
@@ -34,6 +35,9 @@ export const host = {
       console.error('Failed to fetch config', error)
     });
   }),
+  cast<T extends keyof Broadcast> (type: T, payload: Broadcast[T]) {
+    console.log(type, payload);
+  },
 };
 
 export type Host = typeof host;

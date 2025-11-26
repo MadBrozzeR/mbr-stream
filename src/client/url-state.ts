@@ -1,8 +1,19 @@
 export const urlState = {
   regExp: /[?&]([-\w]+)(?:=([^&]+))?/g,
 
+  getRaw() {
+    const result: Record<string, string> = {};
+    let regMatch: RegExpExecArray | null = null;
+
+    while (regMatch = this.regExp.exec(window.location.hash)) if (regMatch[1]) {
+      result[regMatch[1]] = regMatch[2] || '';
+    }
+
+    return result;
+  },
+
   get() {
-    const result: Record<string, object> = {};
+    const result: Record<string, Record<string, string>> = {};
     let regMatch: RegExpExecArray | null = null;
 
     while (regMatch = this.regExp.exec(window.location.hash)) if (regMatch[1]) {
@@ -12,22 +23,20 @@ export const urlState = {
     return result;
   },
 
-  set(name: string, value: object) {
+  set(name: string, value: Record<string, string>) {
     const values = {
-      ...this.get(),
-      [name]: value,
+      ...this.getRaw(),
+      [name]: encodeURIComponent(JSON.stringify(value)),
     };
 
     window.location.hash = Object.keys(values).reduce(function (result, key) {
-      const value = encodeURIComponent(JSON.stringify(values[key]));
-
-      result += (result ? '&' : '#?') + `${key}=${value}`;
+      result += (result ? '&' : '#?') + `${key}=${values[key]}`;
 
       return result;
     }, '');
   },
 
-  listen(callback: (state: Record<string, object>) => void) {
+  listen(callback: (state: Record<string, Record<string, string>>) => void) {
     callback(urlState.get());
 
     window.addEventListener('hashchange', function () {
