@@ -16,6 +16,7 @@ const STYLES = {
       right: 0,
       display: 'none',
       gap: '4px',
+      fontSize: '24px',
 
       '-top': {
         bottom: '100%',

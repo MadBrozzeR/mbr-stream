@@ -30,3 +30,7 @@ export function imageAtlas<K extends string> (url: string, parts: Record<K, [num
 
   return result;
 }
+
+export function isKeyOf<T extends {}> (key: string | number | symbol, source: T): key is keyof T {
+  return key in source;
+}

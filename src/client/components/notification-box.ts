@@ -2,6 +2,7 @@ import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
 import { imageAtlas } from '../utils';
+import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
 const toastAtlas = imageAtlas('/static/images/toast.svg', {
@@ -75,12 +76,6 @@ const STYLES = {
   },
 
   '.notification_box': {
-    position: 'absolute',
-    top: '20px',
-    right: 0,
-    width: '264px',
-    height: '264px',
-
     '--list': {
       width: '100%',
       height: '100%',
@@ -191,12 +186,23 @@ const Popup = newComponent('div.notification_popup', function (
 export const NotificationBox = newComponent('div.notification_box', function () {
   const host = this.host;
   host.styles.add('notifications', STYLES);
+  const mover = this.dom(Mover, {
+    component: this,
+    name: 'NotificationBox',
+    vars: {
+      top: '20px',
+      right: '0px',
+      width: '264px',
+      height: '264px',
+    },
+  });
 
   this.dom(Toolbox, {
     position: 'bottom',
     items: {
       test() { host.pushNotification(TEST_MODE.notification) },
-    }
+      move() { mover.show() },
+    },
   }).dom('div.notification_box--list', function (list) {
     const notificationList = {
       pending: [] as Array<NotificationToast>,

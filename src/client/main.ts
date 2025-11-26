@@ -5,6 +5,7 @@ import { ChatBox } from './components/chat-box';
 import { isEventType } from './utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
+import { urlState } from './url-state';
 
 const STYLES = {
   'html, body': {
@@ -37,6 +38,10 @@ Splux.start(function (body, head) {
         }
       });
     }
+  });
+
+  urlState.listen(function (data) {
+    body.broadcast({ type: 'urlStateChange', payload: data });
   });
 }, host);
 

@@ -1,5 +1,6 @@
 import { newComponent } from '../splux-host';
 import type { EventPayloadData } from '../type';
+import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
 const TIMEOUT = 20000;
@@ -31,12 +32,6 @@ const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.me
 
 const STYLES = {
   '.chatbox': {
-    position: 'absolute',
-    height: '20%',
-    width: '50%',
-    bottom: '20px',
-    left: '20px',
-
     '--wrapper': {
       position: 'relative',
       height: '100%',
@@ -95,9 +90,21 @@ export const ChatBox = newComponent('div.chatbox', function () {
 
   let clear = function () {};
 
+  const mover = this.dom(Mover, {
+    component: this,
+    name: 'ChatBox',
+    vars: {
+      width: '50%',
+      height: '20%',
+      bottom: '20px',
+      left: '20px',
+    },
+  });
+
   this.dom(Toolbox, { items: {
     test() { host.appendMessage(TEST_MODE.message) },
     clear() { clear() },
+    move() { mover.show() },
   } }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {
       clear = function () { log.clear() };
