@@ -6,7 +6,7 @@ const STYLES = {
   },
 };
 
-export const Audio = newComponent('audio', function () {
+export const Audio = newComponent('audio.audio', function () {
   const audio = this;
   audio.node.autoplay = true;
   this.host.styles.add('audio', STYLES);

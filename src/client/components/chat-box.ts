@@ -71,18 +71,11 @@ const STYLES = {
   },
 };
 
-const ChatEntry = newComponent('div', function (
+const ChatEntry = newComponent('div.chatbox--entry', function (
   entry,
   { messageEvent }: { messageEvent: EventPayloadData['channel.chat.message']}
 ) {
-  entry.setParams({
-    className: 'chatbox--entry',
-  });
-
-  const name = entry.dom('span').params({
-    innerText: messageEvent.chatter_user_name,
-    className: 'chatbox--entry_name',
-  });
+  const name = entry.dom('span.chatbox--entry_name').params({ innerText: messageEvent.chatter_user_name });
   entry.dom('span').params({ innerText: ': ' });
   entry.dom('span').params({ innerText: messageEvent.message.text });
 
@@ -95,26 +88,21 @@ const ChatEntry = newComponent('div', function (
   }, TIMEOUT);
 });
 
-export const ChatBox = newComponent('div', function () {
+export const ChatBox = newComponent('div.chatbox', function () {
   const host = this.host;
 
-  this.host.styles.add('chat', STYLES);
-  this.setParams({ className: 'chatbox' });
+  host.styles.add('chat', STYLES);
 
   let clear = function () {};
 
   this.dom(Toolbox, { items: {
     test() { host.appendMessage(TEST_MODE.message) },
     clear() { clear() },
-  } }).dom('div', function () {
-    this.params({ className: 'chatbox--wrapper' }).dom('div', function () {
-      const log = this.setParams({ className: 'chatbox--log' });
+  } }).dom('div.chatbox--wrapper', function () {
+    this.dom('div.chatbox--log', function (log) {
+      clear = function () { log.clear() };
 
-      clear = function () {
-        log.clear();
-      };
-
-      this.host.appendMessage = function (messageEvent) {
+      host.appendMessage = function (messageEvent) {
         log.dom(ChatEntry, { messageEvent });
       };
     });

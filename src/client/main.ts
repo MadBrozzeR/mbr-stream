@@ -13,22 +13,6 @@ const STYLES = {
     overflow: 'hidden',
   },
 };
-/*
-{
-        subscription: {
-          type: 'channel.follow',
-        },
-        event: {
-          user_id: '',
-          user_login: '',
-          user_name: '',
-          broadcaster_user_id: '',
-          broadcaster_user_login: '',
-          broadcaster_user_name: '',
-          followed_at: '',
-        }
-      }
-*/
 
 Splux.start(function (body, head) {
   const host = this.host;
