@@ -15,10 +15,8 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <style>
     svg {
-      --toast-base-color: {{baseColor}};
-      --toast-bg-color: {{bgColor}};
-      --base-color: var(--toast-base-color, #ff6636);
-      --bg-color: var(--toast-bg-color, #002200);
+      --base-color: {{baseColor|#ff6636}};
+      --bg-color: {{bgColor|#000022}};
     }
   </style>
   <sodipodi:namedview
