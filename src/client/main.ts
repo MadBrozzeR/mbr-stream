@@ -1,19 +1,24 @@
 import { Splux } from './lib-ref/splux';
 import { host } from './splux-host';
-import { wsConnect } from './ws';
+import { wsConnect } from './utils/ws';
 import { ChatBox } from './components/chat-box';
-import { isEventType } from './utils';
+import { isEventType } from './utils/utils';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
-import { urlState } from './url-state';
-import { createCast } from './broadcaster';
+import { urlState } from './utils/url-state';
+import { createCast } from './utils/broadcaster';
 import { firstMessage } from './utils/notification-utils';
 
 const STYLES = {
   'html, body': {
     margin: 0,
     height: '100%',
+  },
+  '.page_content': {
+    height: '100%',
+    width: '100%',
     overflow: 'hidden',
+    position: 'relative',
   },
 };
 
@@ -25,9 +30,11 @@ Splux.start(function (body, head) {
     body.broadcast(createCast(type, payload));
   }
 
-  body.dom(ChatBox);
-  body.dom(NotificationBox);
-  body.dom(Audio);
+  this.dom('div.page_content', function () {
+    this.dom(ChatBox);
+    this.dom(NotificationBox);
+    this.dom(Audio);
+  });
 
   host.getConfig().then(function (config) {
     if (config && config.startChat) {

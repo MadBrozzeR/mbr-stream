@@ -1,7 +1,7 @@
 import { Splux } from './lib-ref/splux';
 import { Styles } from './lib-ref/mbr-style';
 import type { EventPayloadData, NotificationToast } from './type';
-import { Broadcast } from './broadcaster';
+import { Broadcast } from './utils/broadcaster';
 
 type Config = { startChat: boolean };
 

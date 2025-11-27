@@ -1,4 +1,4 @@
-import type { Notification } from './type.js';
+import type { Notification } from '../type.js';
 
 const session = {
   id: '',

@@ -1,7 +1,7 @@
 import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
-import { imageAtlas } from '../utils';
+import { imageAtlas } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -80,8 +80,8 @@ const STYLES = {
       width: '100%',
       height: '100%',
       position: 'relative',
-      paddingRight: '20px',
-      overflow: 'hidden',
+      // paddingRight: '20px',
+      // overflow: 'hidden',
       boxSizing: 'border-box',
     },
   },
@@ -191,8 +191,8 @@ export const NotificationBox = newComponent('div.notification_box', function () 
     name: 'NotificationBox',
     vars: {
       top: '20px',
-      right: '0px',
-      width: '264px',
+      right: '20px',
+      width: '244px',
       height: '264px',
     },
   });

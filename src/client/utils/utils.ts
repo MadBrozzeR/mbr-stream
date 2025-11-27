@@ -1,4 +1,4 @@
-import type { EventType, Notification } from './type';
+import type { EventType, Notification } from '../type';
 
 export function isEventType<T extends EventType>(
   notification: Notification,

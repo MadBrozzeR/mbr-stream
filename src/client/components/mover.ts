@@ -1,8 +1,8 @@
-import { isCast } from '../broadcaster';
+import { isCast } from '../utils/broadcaster';
 import { Splux } from '../lib-ref/splux';
 import { newComponent } from '../splux-host';
-import { urlState } from '../url-state';
-import { isKeyOf } from '../utils';
+import { urlState } from '../utils/url-state';
+import { isKeyOf } from '../utils/utils';
 
 const PROPERTIES = ['top', 'right', 'bottom', 'left', 'width', 'height'] as const;
 
