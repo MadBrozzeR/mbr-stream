@@ -5,7 +5,7 @@ import { imageAtlas } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
-const toastAtlas = imageAtlas('/static/images/toast.svg', {
+const toastAtlas = imageAtlas(`/static/images/toast.svg?vars=${encodeURIComponent('{"baseColor":"#ff6636","bgColor":"#000022"}')}`, {
   topLeft: [0, 0, 150, 16],
   topRight: [0, 16, 38, 8],
   bottomLeft: [0, 24, 30, 8],
@@ -17,7 +17,11 @@ const TIMEOUT = 5000;
 
 const TEST_MODE = {
   isActive: true,
-  notification: { text: 'Hello, world! This is kind of long message to check how much notification can fit into it. I hope it can handle at least three lines of raw text.', audio: 'amethyst-break1.ogg' },
+  notification: {
+    text: 'Hello, world! This is kind of long message to check how much notification can fit into it. I hope it can handle at least three lines of raw text.',
+    audio: 'amethyst-break1.ogg',
+    // timeout: 60000,
+  },
 };
 
 const STYLES = {

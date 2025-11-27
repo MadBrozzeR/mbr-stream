@@ -2,7 +2,7 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { isDefined, isKeyOf, jsonToUrlEncoded } from './utils';
+import { getStringRecord, isDefined, isKeyOf, jsonToUrlEncoded } from './utils';
 import type { Scope, CreateEventSubSubscriptionRequest, EventSubType } from './types';
 import { api } from './api';
 
@@ -77,16 +77,16 @@ export async function server (request: Request) {
         throw '';
       }
 
-      await this.sendFile(regMatch[1], { root: STATIC_ROOT });
+      const { vars } = this.getUrl().getParams();
+      const putParams = typeof vars === 'string' ? { put: getStringRecord(vars) || {} } : {};
+
+      await this.sendFile(regMatch[1], { root: STATIC_ROOT, ...putParams });
     } catch (error) {
       request.status = 404;
       request.send();
     };
   })
   || request.route({
-    // '/lib/mbr-style.js': `${MODULES_ROOT}mbr-style/index.js`,
-    // '/lib/splux.js': `${MODULES_ROOT}splux/index.js`,
-
     '/chat': STATIC_ROOT + 'chat.html',
     '/connect'(request) {
       const scope: Scope[] = [

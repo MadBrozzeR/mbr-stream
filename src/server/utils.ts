@@ -116,3 +116,22 @@ export function log(message: string, type: string = 'log') {
 
 export const isKeyOf = <T extends {}>(key: string | number | symbol, source: T): key is keyof T => key in source;
 export const isDefined = <T>(value: T | undefined): value is T => !(value === undefined);
+
+export function getStringRecord (source?: string) {
+  if (!source) {
+    return null;
+  }
+
+  try {
+    const data = JSON.parse(source);
+    const result: Record<string, string> = {};
+
+    for (const key in data) if (data[key] && typeof data[key] === 'string') {
+      result[key] = data[key];
+    }
+
+    return result;
+  } catch (error) {
+    return null;
+  }
+}
