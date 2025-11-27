@@ -1,4 +1,7 @@
-import type { Notification } from '../type.js';
+import type { Host } from '../splux-host.js';
+import type { Notification } from '../type';
+import { firstMessage } from './notification-utils';
+import { isEventType } from './utils';
 
 const session = {
   id: '',
@@ -48,3 +51,37 @@ export function wsConnect (url: string, handler: (notification: Notification) =>
 
   return handler;
 }
+
+export const startWebSocket = (function () {
+  let status: 'idle' | 'running' | 'disabled' | 'connecting' = 'idle';
+
+  return function (host: Host) {
+    if (status !== 'idle') {
+      return;
+    }
+
+    status = 'connecting';
+
+    host.getConfig().then(function (config) {
+      if (config && config.startChat) {
+        wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
+          if (isEventType(message, 'channel.chat.message')) {
+            host.appendMessage(message.event);
+
+            if (firstMessage.check(message.event.chatter_user_id)) {
+              host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
+            }
+          } else if (isEventType(message, 'channel.follow')) {
+            host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
+          } else if (isEventType(message, 'channel.subscribe')) {
+            // host.pushNotification(message);
+            host.pushNotification({ text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`, audio: 'witch-ambient1.ogg' });
+          }
+        });
+        status = 'running';
+      } else {
+        status = 'disabled';
+      }
+    });
+  };
+})();

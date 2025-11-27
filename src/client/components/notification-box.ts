@@ -2,6 +2,7 @@ import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
 import { imageAtlas } from '../utils/utils';
+import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -189,7 +190,9 @@ const Popup = newComponent('div.notification_popup', function (
 
 export const NotificationBox = newComponent('div.notification_box', function () {
   const host = this.host;
+  startWebSocket(host);
   host.styles.add('notifications', STYLES);
+
   const mover = this.dom(Mover, {
     component: this,
     name: 'NotificationBox',
