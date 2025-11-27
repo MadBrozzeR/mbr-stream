@@ -7,6 +7,7 @@ import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 import { urlState } from './url-state';
 import { createCast } from './broadcaster';
+import { firstMessage } from './utils/notification-utils';
 
 const STYLES = {
   'html, body': {
@@ -33,7 +34,10 @@ Splux.start(function (body, head) {
       wsConnect('wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30', function (message) {
         if (isEventType(message, 'channel.chat.message')) {
           host.appendMessage(message.event);
-          host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
+
+          if (firstMessage.check(message.event.chatter_user_id)) {
+            host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
+          }
         } else if (isEventType(message, 'channel.follow')) {
           host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
         } else if (isEventType(message, 'channel.subscribe')) {

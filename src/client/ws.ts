@@ -45,4 +45,6 @@ export function wsConnect (url: string, handler: (notification: Notification) =>
       wsConnect(url, handler);
     }
   };
+
+  return handler;
 }
