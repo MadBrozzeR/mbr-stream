@@ -1,82 +1,30 @@
-import { isCast } from '../utils/broadcaster';
 import { Splux } from '../lib-ref/splux';
 import { newComponent } from '../splux-host';
+import { isCast } from '../utils/broadcaster';
 import { urlState } from '../utils/url-state';
-import { isKeyOf } from '../utils/utils';
-
-const PROPERTIES = ['top', 'right', 'bottom', 'left', 'width', 'height'] as const;
-
-type VarProperties = typeof PROPERTIES[number];
-
-type VarsProps = Partial<Record<VarProperties, string>>;
+import { ParamsDialog } from './params-dialog';
 
 type Props = {
   id: string;
   title?: string;
-  vars?: VarsProps;
+  vars?: Record<string, string>;
+  onSetupChange?: (values: Record<string, string>) => void;
   component: Splux<any, any>;
 };
 
 const STYLES = {
-  '.mover': {
-    '_props': {
-      position: 'absolute',
-      top: 'var(--mover-top, auto)',
-      right: 'var(--mover-right, auto)',
-      bottom: 'var(--mover-bottom, auto)',
-      left: 'var(--mover-left, auto)',
-      width: 'var(--mover-width, auto)',
-      height: 'var(--mover-height, auto)',
-    },
-
-    '--label': {
-      display: 'block',
-      marginBottom: '4px',
-    },
-
-    '--property_name': {
-      display: 'inline-block',
-      width: '100px',
-      fontSize: '24px',
-      lineHeight: '30px',
-    },
-
-    '--property_input': {
-      width: '300px',
-      height: '30px',
-      fontSize: '24px',
-      boxSizing: 'border-box',
-    },
-
-    '--apply': {
-      width: '400px',
-      boxSizing: 'border-box',
-      fontSize: '24px',
-      marginTop: '12px',
-    },
-
-    '--title': {
-      display: 'flex',
-      marginBottom: '12px',
-      fontSize: '24px',
-    },
-
-    '--title_name': {
-      flex: 1,
-    },
-
-    '--title_close': {
-      width: '30px',
-      height: '30px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-    },
+  '.mover_props': {
+    position: 'absolute',
+    top: 'var(--mover-top, auto)',
+    right: 'var(--mover-right, auto)',
+    bottom: 'var(--mover-bottom, auto)',
+    left: 'var(--mover-left, auto)',
+    width: 'var(--mover-width, auto)',
+    height: 'var(--mover-height, auto)',
   },
 };
 
-const MUTUALLY_EXCLUSIVE: Partial<Record<VarProperties, VarProperties>> = {
+const MUTUALLY_EXCLUSIVE: Record<string, string> = {
   top: 'bottom',
   bottom: 'top',
   right: 'left',
@@ -84,87 +32,60 @@ const MUTUALLY_EXCLUSIVE: Partial<Record<VarProperties, VarProperties>> = {
 };
 
 const CLASS_NAME = 'mover_props';
+const DEFAULT_VARS: Record<string, string> = {
+  top: '',
+  right: '',
+  bottom: '',
+  left: '',
+  width: '',
+  height: '',
+};
 
 function applyVars (vars: Record<string, string> | undefined, element: Splux<any, any>) {
   for (const key in vars) if (vars[key] !== undefined) {
-    element.node.style.setProperty(`--mover-${key}`, vars[key]);
+    const name = key in DEFAULT_VARS ? `--mover-${key}` : key;
+    element.node.style.setProperty(name, vars[key]);
   }
 }
 
-function iterateInputs (
-  inputs: Partial<Record<VarProperties, Splux<HTMLInputElement, any>>>,
-  callback: (input: HTMLInputElement, key: VarProperties) => void
-) {
-  Object.keys(inputs).forEach(function (key) {
-    if (isKeyOf(key, inputs) && inputs[key]) {
-      callback(inputs[key].node, key);
-    }
-  });
-}
-
-export const Mover = newComponent('dialog', function (mover, { vars: initialVars, component, id, title }: Props) {
+export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
+  id,
+  title,
+  component,
+  vars: initialVars,
+  onSetupChange,
+}: Props) {
   this.host.styles.add('mover', STYLES);
   component.node.classList.add(CLASS_NAME);
-  let currentVars = initialVars;
+  let currentVars = { ...DEFAULT_VARS, ...initialVars };
   applyVars(currentVars, component);
 
-  const inputs: Partial<Record<VarProperties, Splux<HTMLInputElement, any>>> = {}
-
-  this.dom('div.mover--title', function () {
-    this.dom('div.mover--title_name').params({ innerText: title || id });
-    this.dom('div.mover--title_close').params({ innerText: '✕', onclick() {
-      iterateInputs(inputs, function (input, key) {
-        input.value = currentVars?.[key] || '';
-      });
-      mover.node.close();
-    } });
-  });
-
-  this.dom('form', function (form) {
-    PROPERTIES.forEach(function (property) {
-      form.dom('label.mover--label', function () {
-        this.dom('span.mover--property_name').params({ innerText: property });
-        inputs[property] = this.dom('input.mover--property_input').params({
-          value: currentVars?.[property] || '',
-          oninput() {
-            const concurrentInput = MUTUALLY_EXCLUSIVE[property] && inputs[MUTUALLY_EXCLUSIVE[property]]?.node
-            if (concurrentInput && concurrentInput.value) {
-              concurrentInput.value = '';
-            }
-          },
-        });
-      });
-    });
-
-    form.dom('button.mover--apply').params({ innerText: 'Apply', onclick(event) {
-      event.preventDefault();
-      const values: VarsProps = {};
-
-      iterateInputs(inputs, function (input, key) {
-        values[key] = input.value;
-      });
-
+  const dialog = ParamsDialog.call(this, this, {
+    title: title || id,
+    values: currentVars,
+    onChange(value, name) {
+      const concurrent = MUTUALLY_EXCLUSIVE[name];
+      if (concurrent && value) {
+        dialog.set({ [concurrent]: '' });
+      }
+    },
+    onApply(values) {
+      onSetupChange?.(values);
       currentVars = values;
-      urlState.set(id, currentVars);
       applyVars(currentVars, component);
-
-      mover.node.close();
-    } });
+      urlState.set(id, values);
+    },
   });
 
-  mover.tuneIn(function (data) {
+  this.tuneIn(function (data) {
     if (isCast('hashStateChange', data) && id in data.payload) {
-      currentVars = data.payload[id] || initialVars;
-      iterateInputs(inputs, function (input, key) {
-        input.value = currentVars?.[key] || '';
-      });
+      currentVars = data.payload[id] || { ...DEFAULT_VARS, ...initialVars };
+      dialog.set(currentVars);
       applyVars(currentVars, component);
     }
   });
 
   return {
-    show() {
-      mover.node.showModal();
-    },
+    show: dialog.show,
   };
 });
