@@ -4,7 +4,7 @@ type Cast<T extends string, P extends {}> = {
 };
 
 export type Broadcast = {
-  'hashStateChange': Record<string, Record<string, string>>;
+  'hashStateChange': Record<string, Record<string, string> | null>;
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

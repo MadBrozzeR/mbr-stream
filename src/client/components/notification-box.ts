@@ -6,6 +6,10 @@ import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
+type Props = {
+  id: string;
+};
+
 const toastAtlas = imageAtlas(`/static/images/toast.svg?vars=${encodeURIComponent('{"baseColor":"#ff6636","bgColor":"#000022"}')}`, {
   topLeft: [0, 0, 150, 16],
   topRight: [0, 16, 38, 8],
@@ -188,14 +192,15 @@ const Popup = newComponent('div.notification_popup', function (
   }, timeout + 300);
 });
 
-export const NotificationBox = newComponent('div.notification_box', function () {
+export const NotificationBox = newComponent('div.notification_box', function (_box, { id }: Props) {
   const host = this.host;
   startWebSocket(host);
   host.styles.add('notifications', STYLES);
 
   const mover = this.dom(Mover, {
     component: this,
-    name: 'NotificationBox',
+    id,
+    title: 'Notifications',
     vars: {
       top: '20px',
       right: '20px',

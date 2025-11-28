@@ -5,6 +5,7 @@ import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
 import { urlState } from './utils/url-state';
 import { createCast } from './utils/broadcaster';
+import { useModuleManager } from './utils/utils';
 
 const STYLES = {
   'html, body': {
@@ -27,13 +28,17 @@ Splux.start(function (body, head) {
     body.broadcast(createCast(type, payload));
   }
 
-  this.dom('div.page_content', function () {
-    this.dom(ChatBox);
-    this.dom(NotificationBox);
+  const moduleManager = this.dom('div.page_content', function () {
     this.dom(Audio);
+
+    return useModuleManager(this, {
+      chat: ChatBox,
+      notifications: NotificationBox,
+    });
   });
 
   urlState.listen(function (data) {
+    moduleManager(data);
     host.cast('hashStateChange', data);
   });
 }, host);

@@ -13,11 +13,11 @@ export const urlState = {
   },
 
   get() {
-    const result: Record<string, Record<string, string>> = {};
+    const result: Record<string, Record<string, string> | null> = {};
     let regMatch: RegExpExecArray | null = null;
 
     while (regMatch = this.regExp.exec(window.location.hash)) if (regMatch[1]) {
-      result[regMatch[1]] = regMatch[2] && JSON.parse(decodeURIComponent(regMatch[2])) || '';
+      result[regMatch[1]] = regMatch[2] && JSON.parse(decodeURIComponent(regMatch[2])) || null;
     }
 
     return result;
@@ -36,7 +36,7 @@ export const urlState = {
     }, '');
   },
 
-  listen(callback: (state: Record<string, Record<string, string>>) => void) {
+  listen(callback: (state: Record<string, Record<string, string> | null>) => void) {
     callback(urlState.get());
 
     window.addEventListener('hashchange', function () {

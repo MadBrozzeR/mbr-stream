@@ -4,6 +4,10 @@ import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
+type Props = {
+  id: string;
+};
+
 const TIMEOUT = 20000;
 
 const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.message'] } = {
@@ -84,7 +88,7 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
   }, TIMEOUT);
 });
 
-export const ChatBox = newComponent('div.chatbox', function () {
+export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props) {
   const host = this.host;
   startWebSocket(host);
 
@@ -94,7 +98,8 @@ export const ChatBox = newComponent('div.chatbox', function () {
 
   const mover = this.dom(Mover, {
     component: this,
-    name: 'ChatBox',
+    id,
+    title: 'Chat',
     vars: {
       width: '50%',
       height: '20%',

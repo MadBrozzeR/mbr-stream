@@ -11,7 +11,8 @@ type VarProperties = typeof PROPERTIES[number];
 type VarsProps = Partial<Record<VarProperties, string>>;
 
 type Props = {
-  name: string;
+  id: string;
+  title?: string;
   vars?: VarsProps;
   component: Splux<any, any>;
 };
@@ -101,16 +102,16 @@ function iterateInputs (
   });
 }
 
-export const Mover = newComponent('dialog', function (mover, { vars, component, name }: Props) {
+export const Mover = newComponent('dialog', function (mover, { vars: initialVars, component, id, title }: Props) {
   this.host.styles.add('mover', STYLES);
   component.node.classList.add(CLASS_NAME);
-  let currentVars = vars;
+  let currentVars = initialVars;
   applyVars(currentVars, component);
 
   const inputs: Partial<Record<VarProperties, Splux<HTMLInputElement, any>>> = {}
 
   this.dom('div.mover--title', function () {
-    this.dom('div.mover--title_name').params({ innerText: name });
+    this.dom('div.mover--title_name').params({ innerText: title || id });
     this.dom('div.mover--title_close').params({ innerText: '✕', onclick() {
       iterateInputs(inputs, function (input, key) {
         input.value = currentVars?.[key] || '';
@@ -124,7 +125,7 @@ export const Mover = newComponent('dialog', function (mover, { vars, component, 
       form.dom('label.mover--label', function () {
         this.dom('span.mover--property_name').params({ innerText: property });
         inputs[property] = this.dom('input.mover--property_input').params({
-          value: vars?.[property] || '',
+          value: currentVars?.[property] || '',
           oninput() {
             const concurrentInput = MUTUALLY_EXCLUSIVE[property] && inputs[MUTUALLY_EXCLUSIVE[property]]?.node
             if (concurrentInput && concurrentInput.value) {
@@ -144,7 +145,7 @@ export const Mover = newComponent('dialog', function (mover, { vars, component, 
       });
 
       currentVars = values;
-      urlState.set(name, currentVars);
+      urlState.set(id, currentVars);
       applyVars(currentVars, component);
 
       mover.node.close();
@@ -152,8 +153,8 @@ export const Mover = newComponent('dialog', function (mover, { vars, component, 
   });
 
   mover.tuneIn(function (data) {
-    if (isCast('hashStateChange', data) && name in data.payload) {
-      currentVars = data.payload[name];
+    if (isCast('hashStateChange', data) && id in data.payload) {
+      currentVars = data.payload[id] || initialVars;
       iterateInputs(inputs, function (input, key) {
         input.value = currentVars?.[key] || '';
       });

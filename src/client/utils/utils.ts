@@ -1,3 +1,5 @@
+import { Component, Splux } from '../lib-ref/splux';
+import { Host } from '../splux-host';
 import type { EventType, Notification } from '../type';
 
 export function isEventType<T extends EventType>(
@@ -33,4 +35,25 @@ export function imageAtlas<K extends string> (url: string, parts: Record<K, [num
 
 export function isKeyOf<T extends {}> (key: string | number | symbol, source: T): key is keyof T {
   return key in source;
+}
+
+export function useModuleManager (
+  root: Splux<any, Host>,
+  components: Record<string, Component<any, Host, void, { id: string; }>>
+) {
+  const modules = Object.keys(components).reduce<Record<string, null | Splux<any, Host>>>(function (result, key) {
+    result[key] = null;
+    return result;
+  }, {});
+
+  return function (idSet: Record<string, unknown>) {
+    for (const id in modules) {
+      if (modules[id] && !(id in idSet)) {
+        modules[id].remove();
+        modules[id] = null;
+      } else if (!modules[id] && id in idSet && components[id]) {
+        modules[id] = root.dom(components[id], { id });
+      }
+    }
+  }
 }
