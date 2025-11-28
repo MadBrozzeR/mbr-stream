@@ -30,6 +30,7 @@ const STYLES = {
     '--button': {
       cursor: 'pointer',
       color: '#ddd',
+      userSelect: 'none',
 
       ':hover': {
         color: '#ccf',
