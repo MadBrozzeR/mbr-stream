@@ -80,6 +80,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   this.tuneIn(function (data) {
     if (isCast('hashStateChange', data) && id in data.payload) {
       currentVars = data.payload[id] || { ...DEFAULT_VARS, ...initialVars };
+      onSetupChange?.(currentVars);
       dialog.set(currentVars);
       applyVars(currentVars, component);
     }
