@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="300"
+   height="300"
+   viewBox="0 0 300px 300px"
+   version="1.1"
+   id="svg5"
+   sodipodi:docname="toast-1.svg"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   style=""
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <style
+     id="style2">.placeholder { 
+    fill:none;
+}
+.background { fill:#000022; }
+.glow { fill:yellow; }
+.wire { fill:white; }
+.light2 { fill:#ffffff;    opacity:0.35; }
+.dark2 { fill:#000000;    opacity:0.35; }
+.dark { opacity:0.2;    fill:#000000; }
+.light { opacity:0.2;    fill:#ffffff; }
+.frame { fill:#ff6633;    stroke:none; }
+</style>
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="1.4142136"
+     inkscape:cx="45.254834"
+     inkscape:cy="102.17693"
+     inkscape:window-width="1856"
+     inkscape:window-height="1016"
+     inkscape:window-x="64"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g13798"
+     inkscape:object-paths="true"
+     units="px"
+     inkscape:snap-bbox="true"
+     showguides="false" />
+  <defs
+     id="defs2">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter13550"
+       x="-0.0198"
+       y="-0.039599999"
+       width="1.0396"
+       height="1.0792">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.65"
+         id="feGaussianBlur13552" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g9496">
+      <path
+         d="M 0,16 V 0 h 150 l -8,8 H 8 v 8 z"
+         id="path3552"
+         class="frame"
+         style="fill:#ff6633" />
+      <path
+         d="m 142,8 8,-8 -2.4,1 -6,6 z"
+         id="path9050"
+         class="dark2" />
+      <path
+         d="M 8,8 H 142 L 141.6,7 H 7 Z"
+         id="path9048"
+         class="dark" />
+      <path
+         d="M 8,16 V 8 L 7,7 v 8 z"
+         id="path9046"
+         class="dark" />
+      <path
+         d="M 0,0 V 16 L 1,15 V 1 Z"
+         id="path9044"
+         class="light" />
+      <path
+         d="M 1,1 H 147.6 L 150,0 H 0 Z"
+         id="path9042"
+         class="light" />
+      <path
+         d="M 7,15 H 1 l -1,1 h 8 z"
+         id="path1312"
+         class="dark" />
+    </g>
+    <g
+       id="g10454"
+       transform="translate(0,16)">
+      <path
+         d="M 8,0 H 38 L 30,8 H 0 Z"
+         id="path18057"
+         class="frame" />
+      <path
+         d="M 2.4,7 8.4,1 8,0 0,8 Z"
+         id="path18059"
+         class="light2" />
+      <path
+         d="M 29.6,7 H 2.4 L 0,8 h 30 z"
+         id="path18061"
+         class="dark" />
+      <path
+         d="m 35.6,1 -6,6 0.4,1 8,-8 z"
+         id="path18063"
+         class="dark2" />
+      <path
+         d="M 8.4,1 H 35.6 L 38,0 H 8 Z"
+         id="path18065"
+         class="light" />
+    </g>
+    <g
+       id="g10741"
+       transform="translate(0,24)">
+      <path
+         id="path18069"
+         d="M 0,0 V 8 H 22 L 30,0 Z"
+         sodipodi:nodetypes="ccccc"
+         class="frame" />
+      <path
+         d="m 27.6,1 -6,6 0.4,1 8,-8 z"
+         id="path18071"
+         class="dark2" />
+      <path
+         d="M 30,0 H 0 l 1,1 h 26.6 z"
+         id="path18073"
+         sodipodi:nodetypes="ccccc"
+         class="light" />
+      <path
+         d="M 0,8 H 22 L 21.6,7 H 1 Z"
+         id="path18075"
+         sodipodi:nodetypes="ccccc"
+         class="dark" />
+      <path
+         d="M 0,0 V 8 L 1,7 V 1 Z"
+         id="path18077"
+         class="light" />
+    </g>
+    <g
+       id="g10894"
+       transform="translate(0,32)">
+      <path
+         id="path18083"
+         d="m 150,0 -8,8 H 8 l -8,8 h 150 z"
+         sodipodi:nodetypes="cccccc"
+         class="frame" />
+      <path
+         d="m 8.4,9 h 134 L 142,8 H 8 Z"
+         id="path18087"
+         sodipodi:nodetypes="ccccc"
+         class="light" />
+      <path
+         d="M 2.4,15 8.4,9 8,8 0,16 Z"
+         id="path18089"
+         class="light2" />
+      <path
+         d="M 149,2.4 V 15 l 1,1 V 0 Z"
+         id="path18091"
+         class="dark" />
+      <path
+         d="m 0,16 h 150 l -1,-1 H 2.4 Z"
+         id="path18093"
+         sodipodi:nodetypes="ccccc"
+         class="dark" />
+      <path
+         d="m 150,0 -8,8 0.4,1 6.6,-6.6 z"
+         id="path18095"
+         class="light2" />
+    </g>
+    <g
+       id="g13798"
+       transform="translate(0,48)">
+      <rect
+         id="rect13576"
+         width="208"
+         height="108"
+         x="0"
+         y="0"
+         class="placeholder" />
+      <path
+         d="m 6,6 h 192 l 4,4 v 92 H 6 Z"
+         id="path13833"
+         class="background" />
+      <path
+         id="path13548"
+         d="M 4,4 V 104 H 204 V 9 l -5,-5 z m 2,2 h 192 l 4,4 v 92 H 6 Z"
+         style="filter:url(#filter13550)"
+         class="glow" />
+      <path
+         id="path11317"
+         d="M 4,4 V 104 H 204 V 9 l -5,-5 z m 2,2 h 192 l 4,4 v 92 H 6 Z"
+         class="wire" />
+    </g>
+  </g>
+</svg>

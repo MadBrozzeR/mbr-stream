@@ -6,6 +6,7 @@ import { Audio } from './components/audio';
 import { urlState } from './utils/url-state';
 import { createCast } from './utils/broadcaster';
 import { useModuleManager } from './utils/utils';
+import { Frame } from './components/frame';
 
 const STYLES = {
   'html, body': {
@@ -34,6 +35,7 @@ Splux.start(function (body, head) {
     return useModuleManager(this, {
       chat: ChatBox,
       notifications: NotificationBox,
+      frame: Frame,
     });
   });
 
