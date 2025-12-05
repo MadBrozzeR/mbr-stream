@@ -72,10 +72,18 @@ export const startWebSocket = (function () {
               host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
             }
           } else if (isEventType(message, 'channel.follow')) {
-            host.pushNotification({ text: `${message.event.user_name} is now FOLLOWING my channel!!!`, audio: 'witch-ambient1.ogg' });
+            host.pushNotification({
+              text: `${message.event.user_name} is now FOLLOWING my channel!!!`,
+              audio: 'witch-ambient1.ogg',
+              timeout: 15000,
+            });
           } else if (isEventType(message, 'channel.subscribe')) {
             // host.pushNotification(message);
-            host.pushNotification({ text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`, audio: 'witch-ambient1.ogg' });
+            host.pushNotification({
+              text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`,
+              audio: 'witch-ambient1.ogg',
+              timeout: 15000,
+            });
           }
         });
         status = 'running';

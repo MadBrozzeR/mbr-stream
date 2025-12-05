@@ -3,7 +3,7 @@ import { Styles } from '../lib-ref/mbr-style';
 
 const STYLES = Styles.compile({
   '.placeholder': { fill: 'none' },
-  '.background': {fill: 'none'},
+  '.background': { fill: 'none', opacity: 0.8 },
   '.glow': { fill: 'yellow', filter: 'url(#wire-glow)' },
   '.wire': { fill: 'white' },
   '.frame': { fill: '#ff6633', stroke: 'none' },
