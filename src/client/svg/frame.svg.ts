@@ -2,40 +2,19 @@ import { SpluxSVG } from '../utils/svg';
 import { Styles } from '../lib-ref/mbr-style';
 
 const STYLES = Styles.compile({
-  '.placeholder': {
-    fill: 'none',
-  },
-  '.glow': {
-    fill: 'yellow',
-    filter: 'url(#wire-glow)',
-  },
-  '.wire': {
-    fill: 'white',
-  },
-  '.frame': {
-    fill: '#ff6633',
-    stroke: 'none',
-  },
-  '.dark': {
-    fill: '#000',
-    opacity: 0.2,
-  },
-  '.dark2': {
-    fill: '#000',
-    opacity: 0.35,
-  },
-  '.light': {
-    fill: '#fff',
-    opacity: 0.2,
-  },
-  '.light2': {
-    fill: '#fff',
-    opacity: 0.35,
-  },
+  '.placeholder': { fill: 'none' },
+  '.glow': { fill: 'yellow', filter: 'url(#wire-glow)' },
+  '.wire': { fill: 'white' },
+  '.frame': { fill: '#ff6633', stroke: 'none' },
+  '.dark': { fill: '#000', opacity: 0.2 },
+  '.dark2': { fill: '#000', opacity: 0.35 },
+  '.light': { fill: '#fff', opacity: 0.2 },
+  '.light2': { fill: '#fff', opacity: 0.35 },
 });
 
 const WIRE_OFFSET = 4;
 const WIRE_CORNER = 5;
+const FRAME_OFFSET = 1;
 
 export function FrameSvg (width: number, height: number) {
   return SpluxSVG.createSvg({ width, height }, function (svg) {
@@ -62,6 +41,8 @@ export function FrameSvg (width: number, height: number) {
       };
     });
     const frame1 = this.dom('g', function () {
+      this.params({ transform: `translate(${FRAME_OFFSET}, ${FRAME_OFFSET})` });
+
       const dom = {
         frame: this.dom('path.frame'),
         shade1: this.dom('path.dark2'),
@@ -97,7 +78,7 @@ export function FrameSvg (width: number, height: number) {
       return function (width: number) {
         const length = Math.ceil(width * 0.1) + 8;
 
-        dom.group.params({ transform: `translate(${width * 0.75},0)` });
+        dom.group.params({ transform: `translate(${width * 0.75},${FRAME_OFFSET})` });
         dom.frame.params({ d: `M 8,0 H ${length} L ${length - 8},8 H 0 Z` });
         dom.shade1.params({ d: 'M 2.4,7 8.4,1 8,0 0,8 Z' });
         dom.shade2.params({ d: `M ${length - 8.4},7 H 2.4 L 0,8 h ${length - 8} z` });
@@ -118,7 +99,7 @@ export function FrameSvg (width: number, height: number) {
       return function (width: number, height: number) {
         const length = Math.ceil(width * 0.1);
 
-        dom.group.params({ transform: `translate(0, ${height - 8})` });
+        dom.group.params({ transform: `translate(${FRAME_OFFSET}, ${height - 8 - FRAME_OFFSET})` });
         dom.frame.params({ d: `M 0,0 V 8 H ${length - 8} L ${length},0 Z` });
         dom.shade1.params({ d: `m ${length - 2.4},1 -6,6 0.4,1 8,-8 z` });
         dom.shade2.params({ d: `M ${length},0 H 0 l 1,1 h ${length - 3.4} z` });
@@ -140,7 +121,7 @@ export function FrameSvg (width: number, height: number) {
       return function (width: number, height: number) {
         const length = Math.ceil(width * 0.55);
 
-        dom.group.params({ transform: `translate(${width - length}, ${height - 16})` });
+        dom.group.params({ transform: `translate(${width - length - FRAME_OFFSET}, ${height - 16 - FRAME_OFFSET})` });
         dom.frame.params({ d: `m ${length},0 -8,8 H 8 l -8,8 h ${length} z` });
         dom.shade1.params({ d: `m 8.4,9 h ${length - 16} L ${length - 8},8 H 8 Z` });
         dom.shade2.params({ d: 'M 2.4,15 8.4,9 8,8 0,16 Z' });
@@ -151,7 +132,7 @@ export function FrameSvg (width: number, height: number) {
     });
 
     function set(width: number, height: number) {
-      svg.params({ width, height, viewBox: `0 0 ${width} ${height}` })
+      svg.params({ width, height, viewBox: `0 0 ${width} ${height}` });
       wire(width, height);
       frame1(width);
       frame2(width);
