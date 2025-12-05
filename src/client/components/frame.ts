@@ -12,7 +12,8 @@ export const Frame = newComponent('div.frame', function (_, { id }: Props) {
   function set(values: Record<string, string>) {
     const width = values['width'] && parseInt(values['width']) || 0;
     const height = values['height'] && parseInt(values['height']) || 0;
-    frameSvg.set(width, height);
+    const type = values['type'];
+    frameSvg.set({ width, height, type });
   }
 
   const mover = this.dom(Mover, {
@@ -24,6 +25,7 @@ export const Frame = newComponent('div.frame', function (_, { id }: Props) {
       height: '160px',
       bottom: '20px',
       right: '20px',
+      type: 'transparent_orange',
     },
     onSetupChange: set,
   });

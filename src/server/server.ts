@@ -87,7 +87,7 @@ export async function server (request: Request) {
     };
   })
   || request.route({
-    '/chat': STATIC_ROOT + 'chat.html',
+    '/dash': STATIC_ROOT + 'dashboard.html',
     '/connect'(request) {
       const scope: Scope[] = [
         'channel:read:subscriptions',

@@ -183,7 +183,7 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       this.node.appendChild(frameSvg.splux.node);
 
       resizeFrame = function (width: string, height: string) {
-        frameSvg.set(parseInt(width, 10), parseInt(height, 10));
+        frameSvg.set({ width: parseInt(width, 10), height: parseInt(height, 10) });
       };
     });
     const display = this.dom(TimerDisplay);

@@ -25,14 +25,23 @@ const WIRE_OFFSET = 4;
 const WIRE_CORNER = 5;
 const FRAME_OFFSET = 1;
 
-type FrameType = 'dark_blue_orange' | 'transparent_orange';
-type Props = { width: number, height: number, type?: FrameType };
+// type FrameType = 'dark_blue_orange' | 'transparent_orange';
+type Props = { width: number, height: number, type?: string };
 
 export function FrameSvg ({ width, height, type }: Props) {
   return SpluxSVG.createSvg({ width, height }, function (svg) {
-    if (type) {
-      svg.node.classList.add(`type_${type}`);
+    let currentType = type || 'transparent_orange';
+    svg.node.classList.add(`type_${currentType}`);
+
+    function setType (type: string) {
+      const newType = `type_${type}`;
+
+      if (type && currentType !== newType) {
+        svg.node.classList.replace(currentType, newType);
+        currentType = newType;
+      }
     }
+
     this.dom('style', function () {
       this.node.innerHTML = STYLES;
     });
@@ -148,8 +157,9 @@ export function FrameSvg ({ width, height, type }: Props) {
       };
     });
 
-    function set(width: number, height: number) {
+    function set({ width, height, type }: { width: number, height: number, type?: string | undefined}) {
       svg.params({ width, height, viewBox: `0 0 ${width} ${height}` });
+      type && setType(type);
       wire(width, height);
       frame1(width);
       frame2(width);
@@ -157,7 +167,7 @@ export function FrameSvg ({ width, height, type }: Props) {
       frame4(width, height);
     }
 
-    set(width, height);
+    set({ width, height, type: currentType });
 
     return {
       splux: this,
