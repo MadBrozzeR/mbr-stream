@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const Frame = newComponent('div.frame', function (_, { id }: Props) {
-  const frameSvg = FrameSvg(400, 300);
+  const frameSvg = FrameSvg({ width: 400, height: 300 });
   function set(values: Record<string, string>) {
     const width = values['width'] && parseInt(values['width']) || 0;
     const height = values['height'] && parseInt(values['height']) || 0;

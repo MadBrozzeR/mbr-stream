@@ -3,6 +3,7 @@ import { Styles } from '../lib-ref/mbr-style';
 
 const STYLES = Styles.compile({
   '.placeholder': { fill: 'none' },
+  '.background': {fill: 'none'},
   '.glow': { fill: 'yellow', filter: 'url(#wire-glow)' },
   '.wire': { fill: 'white' },
   '.frame': { fill: '#ff6633', stroke: 'none' },
@@ -10,14 +11,28 @@ const STYLES = Styles.compile({
   '.dark2': { fill: '#000', opacity: 0.35 },
   '.light': { fill: '#fff', opacity: 0.2 },
   '.light2': { fill: '#fff', opacity: 0.35 },
+
+  '.type_': {
+    'dark_blue_orange': {
+      ' .background': {
+        fill: '#000022',
+      },
+    },
+  },
 });
 
 const WIRE_OFFSET = 4;
 const WIRE_CORNER = 5;
 const FRAME_OFFSET = 1;
 
-export function FrameSvg (width: number, height: number) {
+type FrameType = 'dark_blue_orange' | 'transparent_orange';
+type Props = { width: number, height: number, type?: FrameType };
+
+export function FrameSvg ({ width, height, type }: Props) {
   return SpluxSVG.createSvg({ width, height }, function (svg) {
+    if (type) {
+      svg.node.classList.add(`type_${type}`);
+    }
     this.dom('style', function () {
       this.node.innerHTML = STYLES;
     });
@@ -30,12 +45,14 @@ export function FrameSvg (width: number, height: number) {
     const wire = this.dom('g', function () {
       const dom = {
         placeholder: this.dom('rect.placeholder'),
+        background: this.dom('path.background'),
         glow: this.dom('path.glow'),
         wire: this.dom('path.wire'),
       };
 
       return function (width: number, height: number) {
         dom.placeholder.params({ width, height, x: 0, y: 0 });
+        dom.background.params({ d: `M ${WIRE_OFFSET + 2},${WIRE_OFFSET + 2} H ${width - WIRE_OFFSET - WIRE_CORNER - 1} l ${WIRE_CORNER - 1},${WIRE_CORNER - 1} V ${height - WIRE_OFFSET - 2} H ${WIRE_OFFSET + 2} Z` })
         dom.glow.params({ d: `M ${WIRE_OFFSET},${WIRE_OFFSET} V ${height - 4} H ${width - 4} V ${WIRE_OFFSET + WIRE_CORNER} l -${WIRE_CORNER},-${WIRE_CORNER} z m 2,2 H ${width - WIRE_OFFSET - WIRE_CORNER - 1} l ${WIRE_CORNER - 1},${WIRE_CORNER - 1} V ${height - WIRE_OFFSET - 2} H ${WIRE_OFFSET + 2} Z` });
         dom.wire.params({ d: `M ${WIRE_OFFSET},${WIRE_OFFSET} V ${height - 4} H ${width - 4} V ${WIRE_OFFSET + WIRE_CORNER} l -${WIRE_CORNER},-${WIRE_CORNER} z m 2,2 H ${width - WIRE_OFFSET - WIRE_CORNER - 1} l ${WIRE_CORNER - 1},${WIRE_CORNER - 1} V ${height - WIRE_OFFSET - 2} H ${WIRE_OFFSET + 2} Z` });
       };

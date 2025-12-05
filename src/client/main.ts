@@ -7,6 +7,7 @@ import { urlState } from './utils/url-state';
 import { createCast } from './utils/broadcaster';
 import { useModuleManager } from './utils/utils';
 import { Frame } from './components/frame';
+import { Countdown } from './components/countdown';
 
 const STYLES = {
   'html, body': {
@@ -27,7 +28,7 @@ Splux.start(function (body, head) {
   host.styles.add('main', STYLES);
   host.cast = function (type, payload) {
     body.broadcast(createCast(type, payload));
-  }
+  };
 
   const moduleManager = this.dom('div.page_content', function () {
     this.dom(Audio);
@@ -36,6 +37,7 @@ Splux.start(function (body, head) {
       chat: ChatBox,
       notifications: NotificationBox,
       frame: Frame,
+      counter: Countdown,
     });
   });
 
