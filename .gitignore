@@ -3,3 +3,4 @@ build/
 .config.json
 .token.json
 log.txt
+eventsub.log

@@ -1,23 +1,59 @@
 import { Client } from 'madsocket';
+import { Logger } from 'mbr-logger';
 import { config } from './config';
+import { subscribe } from './api-wrappers';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 
-let sessionId = '';
+const logger = new Logger(config.eventSubLog, {
+  listeners: {
+    error: console.log,
+    fallback: console.log,
+  }
+});
 
-export const wsClient = config.startChat ? Client.connect(EVENTSUB_URL, {
-  message(data) {
-    try {
-      const message = JSON.parse(data.toString());
+function log(message: string) {
+  logger.put(`[${new Date().toJSON()}]${message}`)
+}
 
-      switch (message.metadata?.message_type) {
-        case 'session_welcome':
-          sessionId = message.payload?.session?.id || '';
-          sessionId;
-          break;
+
+export const startWSClient = function () {
+  let sessionId = '';
+  const history: any[] = [];
+
+  return config.startChat ? Client.connect(EVENTSUB_URL, {
+    connect() {
+      console.log('Connected to twitch Server');
+    },
+    async message(data) {
+      const dataString = data.toString();
+      log(dataString);
+
+      try {
+        const message = JSON.parse(dataString);
+
+        switch (message.metadata?.message_type) {
+          case 'session_welcome':
+            sessionId = message.payload?.session?.id || '';
+            subscribe(sessionId);
+            break;
+
+          case 'session_reconnect':
+            this.connect();
+            break;
+
+          case 'notification':
+            console.log(dataString);
+            history.push(message);
+            break;
+        }
+      } catch (error) {
+        console.log('WebSocket message parsing error', error);
       }
-    } catch (error) {
-      console.log('WebSocket message parsing error', error);
+    },
+
+    disconnect() {
+      this.connect();
     }
-  },
-}) : null;
+  }) : null;
+}
