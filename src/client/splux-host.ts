@@ -8,10 +8,10 @@ type Config = { startChat: boolean };
 export const host = {
   styles: Styles.create(),
   appendMessage(message: EventPayloadData['channel.chat.message']) {
-    console.log(message);
+    host.cast('chatMessage', message);
   },
   pushNotification(data: NotificationToast) {
-    console.log(data);
+    host.cast('notification', data);
   },
   play(src: string) {
     console.log(src);

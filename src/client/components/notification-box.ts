@@ -1,6 +1,7 @@
 import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
+import { isCast } from '../utils/broadcaster';
 import { imageAtlas } from '../utils/utils';
 import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
@@ -239,8 +240,10 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
       },
     };
 
-    host.pushNotification = function (data) {
-      notificationList.push(data);
-    };
+    this.tuneIn(function (data) {
+      if (isCast('notification', data)) {
+        notificationList.push(data.payload);
+      }
+    });
   });
 });

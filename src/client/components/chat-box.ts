@@ -1,5 +1,6 @@
 import { newComponent } from '../splux-host';
 import type { EventPayloadData } from '../type';
+import { isCast } from '../utils/broadcaster';
 import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
@@ -116,9 +117,11 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
     this.dom('div.chatbox--log', function (log) {
       clear = function () { log.clear() };
 
-      host.appendMessage = function (messageEvent) {
-        log.dom(ChatEntry, { messageEvent });
-      };
+      this.tuneIn(function (data) {
+        if (isCast('chatMessage', data)) {
+          log.dom(ChatEntry, { messageEvent: data.payload });
+        }
+      });
     });
   });
 });
