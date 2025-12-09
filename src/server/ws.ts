@@ -1,4 +1,4 @@
-import { Client } from 'madsocket';
+import { MadSocketClient } from 'madsocket';
 import { Logger } from 'mbr-logger';
 import { config } from './config';
 import { subscribe } from './api-wrappers';
@@ -16,15 +16,20 @@ function log(message: string) {
   logger.put(`[${new Date().toJSON()}]${message}`)
 }
 
-
 export const startWSClient = function () {
   let sessionId = '';
   const history: any[] = [];
 
-  return config.startChat ? Client.connect(EVENTSUB_URL, {
+  return config.startChat ? new MadSocketClient({
     connect() {
       console.log('Connected to twitch Server');
     },
+
+    disconnect() {
+      console.log('Connection is closed');
+      this.connect();
+    },
+
     async message(data) {
       const dataString = data.toString();
       log(dataString);
@@ -51,9 +56,16 @@ export const startWSClient = function () {
         console.log('WebSocket message parsing error', error);
       }
     },
+  }, {
+    url: EVENTSUB_URL,
+    debug(type, data) {
+      const info = data === undefined
+        ? ''
+        : data instanceof Buffer
+          ? { buffer: data, text: data.toString() }
+          : data;
 
-    disconnect() {
-      this.connect();
+      console.log(type, info);
     }
-  }) : null;
+  }).connect() : null;
 }
