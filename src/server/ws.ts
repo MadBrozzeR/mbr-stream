@@ -1,7 +1,8 @@
-import { MadSocketClient } from 'madsocket';
+import { MadSocket, MadSocketClient, ClientRequest } from 'madsocket';
 import { Logger } from 'mbr-logger';
 import { config } from './config';
 import { subscribe } from './api-wrappers';
+import { Request } from 'mbr-serv-request';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 
@@ -16,23 +17,46 @@ function log(message: string) {
   logger.put(`[${new Date().toJSON()}]${message}`)
 }
 
-export const startWSClient = function () {
+class Timer {
+  ref: ReturnType<typeof setTimeout> | null = null;
+  timeout = 0;
+  callback: () => void = function () {};
+
+  set(timeout?: number) {
+    if (timeout !== undefined) {
+      this.timeout = timeout;
+    }
+    this.stop();
+    if (this.timeout) {
+      this.ref = setTimeout(this.callback, this.timeout);
+    }
+  }
+
+  stop() {
+    this.ref && clearTimeout(this.ref);
+  }
+}
+
+export const startWSClient = function (callback: (message: string) => void) {
   let sessionId = '';
   const history: any[] = [];
+  const timer = new Timer();
 
-  return config.startChat ? new MadSocketClient({
+  const wsClient = config.startChat ? new MadSocketClient({
     connect() {
       console.log('Connected to twitch Server');
     },
 
     disconnect() {
       console.log('Connection is closed');
+      timer.stop();
       this.connect();
     },
 
     async message(data) {
       const dataString = data.toString();
       log(dataString);
+      timer.set();
 
       try {
         const message = JSON.parse(dataString);
@@ -40,16 +64,24 @@ export const startWSClient = function () {
         switch (message.metadata?.message_type) {
           case 'session_welcome':
             sessionId = message.payload?.session?.id || '';
+            if (message.payload?.session?.keepalive_timeout_seconds) {
+              timer.set(message.payload.session.keepalive_timeout_seconds * 1500);
+            }
             subscribe(sessionId);
             break;
 
           case 'session_reconnect':
-            this.connect();
+            this.connect(message.payload?.session?.reconnect_url);
             break;
 
           case 'notification':
-            console.log(dataString);
+            callback(dataString);
+            // console.log(dataString);
             history.push(message);
+            break;
+
+          case 'session_keepalive':
+            callback(dataString);
             break;
         }
       } catch (error) {
@@ -65,7 +97,40 @@ export const startWSClient = function () {
           ? { buffer: data, text: data.toString() }
           : data;
 
-      console.log(type, info);
+      console.log(type, this.status, info);
     }
   }).connect() : null;
+
+  timer.callback = function () {
+    console.log('Socket is idle for too long; reconnection attempt');
+    wsClient?.connect();
+  }
+
+  return wsClient;
+}
+
+export function startWSServer () {
+  const clients: ClientRequest[] = [];
+  const ws = new MadSocket({
+    connect() {
+      clients.push(this);
+    },
+    disconnect() {
+      const index = clients.indexOf(this);
+      if (index > -1) {
+        clients.splice(index, 1);
+      }
+    },
+  });
+
+  return {
+    attach(request: Request) {
+      ws.leech(request.request, request.response);
+    },
+    send(message: string) {
+      for (let index = 0 ; index < clients.length ; ++index) {
+        clients[index]?.send(message);
+      }
+    },
+  };
 }

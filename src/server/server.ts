@@ -5,7 +5,7 @@ import { config } from './config';
 import { getStringRecord, isDefined, isKeyOf, jsonToUrlEncoded } from './utils';
 import type { Scope, CreateEventSubSubscriptionRequest, EventSubType } from './types';
 import { api } from './api';
-import { startWSClient } from './ws';
+import { startWSClient, startWSServer } from './ws';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -54,8 +54,12 @@ async function getUserInfo(request: Request) {
   }
 }
 
+const wsServer = startWSServer();
+
 try {
-  startWSClient();
+  startWSClient(function (message) {
+    wsServer.send(message);
+  });
 } catch (error) {
   console.log(error);
 }
@@ -207,6 +211,10 @@ export async function server (request: Request) {
         request.status = 400;
         request.send('Failed to get user');
       }
+    },
+
+    '/ws'(request) {
+      wsServer.attach(request);
     },
   });
 }
