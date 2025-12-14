@@ -97,8 +97,18 @@ export async function server (request: Request) {
       request.send();
     };
   })
+  || request.match(/^\/dash(\/[-\w]*)?/, async function (regMatch) {
+    const dashId = regMatch[1] && regMatch[1].substring(1);
+
+    request.sendFile(STATIC_ROOT + 'dashboard.html', {
+      extension: 'html',
+      put: {
+        dashId: dashId ? `${dashId} - ` : '',
+      },
+    })
+  })
   || request.route({
-    '/dash': STATIC_ROOT + 'dashboard.html',
+    // '/dash': STATIC_ROOT + 'dashboard.html',
     '/connect'(request) {
       const scope: Scope[] = [
         'channel:read:subscriptions',

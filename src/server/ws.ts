@@ -1,4 +1,4 @@
-import { MadSocket, MadSocketClient, ClientRequest } from 'madsocket';
+import { MadSocket, MadSocketClient, ClientConnection } from 'madsocket';
 import { Logger } from 'mbr-logger';
 import { config } from './config';
 import { subscribe } from './api-wrappers';
@@ -110,7 +110,7 @@ export const startWSClient = function (callback: (message: string) => void) {
 }
 
 export function startWSServer () {
-  const clients: ClientRequest[] = [];
+  const clients: ClientConnection[] = [];
   const ws = new MadSocket({
     connect() {
       clients.push(this);

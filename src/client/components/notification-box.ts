@@ -167,7 +167,10 @@ const STYLES = {
 
 const Popup = newComponent('div.notification_popup', function (
   popup,
-  { text, timeout = TIMEOUT, audio, onEnd }: NotificationToast & { onEnd: (this: Splux<HTMLDivElement, Host>) => void }
+  { text, timeout = TIMEOUT, audio, onEnd, muted }: NotificationToast & {
+    onEnd: (this: Splux<HTMLDivElement, Host>) => void;
+    muted?: boolean;
+  }
 ) {
   this.dom('div.notification_popup--foreground', foreground => {
     foreground.dom('div.notification_popup--foreground_part1');
@@ -179,7 +182,7 @@ const Popup = newComponent('div.notification_popup', function (
     block.dom('div.notification_popup--info_text').params({ innerText: text });
   });
 
-  if (audio) {
+  if (audio && !muted) {
     this.host.play(audio);
   }
 
@@ -198,6 +201,10 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
   startWebSocket(host);
   host.styles.add('notifications', STYLES);
 
+  const mode = {
+    muted: false,
+  };
+
   const mover = this.dom(Mover, {
     component: this,
     id,
@@ -207,6 +214,10 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
       right: '20px',
       width: '244px',
       height: '264px',
+      mode: '',
+    },
+    onSetupChange(settings) {
+      mode.muted = settings['mode'] === 'muted';
     },
   });
 
@@ -232,7 +243,7 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
 
         if (popup) {
           ++notificationList.current;
-          list.dom(Popup, { ...popup, onEnd() {
+          list.dom(Popup, { ...popup, muted: mode.muted, onEnd() {
             --notificationList.current;
             notificationList.action();
           } });
