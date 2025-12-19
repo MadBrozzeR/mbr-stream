@@ -29,7 +29,7 @@ const STYLES = {
 
     '--button': {
       cursor: 'pointer',
-      color: '#ddd',
+      color: '#222',
       userSelect: 'none',
 
       ':hover': {
