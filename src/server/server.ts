@@ -2,38 +2,14 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, isDefined, isKeyOf, jsonToUrlEncoded } from './utils';
-import type { Scope, CreateEventSubSubscriptionRequest, EventSubType } from './types';
+import { getStringRecord, isDefined, jsonToUrlEncoded } from './utils';
+import type { Scope } from './types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
 const MODULES_ROOT = __dirname + '/../../node_modules/';
-
-const SUBSCRIPTIONS: {
-  [K in keyof EventSubType]?: (
-    condition: CreateEventSubSubscriptionRequest<K>['condition']) =>
-      Pick<CreateEventSubSubscriptionRequest<K>, 'type' | 'version' | 'condition'>
-  } = {
-  'channel.chat.message': (condition) => ({
-    type: 'channel.chat.message',
-    version: '1',
-    condition: { broadcaster_user_id: condition.broadcaster_user_id, user_id: condition.user_id },
-  }),
-  'channel.follow': (condition) => ({
-    type: 'channel.follow',
-    version: '2',
-    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.moderator_user_id },
-  }),
-  'channel.subscribe': (condition) => ({
-    type: 'channel.subscribe',
-    version: '1',
-    condition: { broadcaster_user_id: condition.broadcaster_user_id },
-  }),
-};
-
-type SubResult = [keyof EventSubType, boolean];
 
 async function getUserInfo(request: Request) {
   try {
@@ -82,6 +58,7 @@ export async function server (request: Request) {
         break;
     }
   })
+
   || request.match(/^\/static\/(.+)$/, async function (regMatch) {
     try {
       if (!regMatch[1]) {
@@ -97,6 +74,7 @@ export async function server (request: Request) {
       request.send();
     };
   })
+
   || request.match(/^\/dash(\/[-\w]*)?/, async function (regMatch) {
     const dashId = regMatch[1] && regMatch[1].substring(1);
 
@@ -107,8 +85,8 @@ export async function server (request: Request) {
       },
     })
   })
+
   || request.route({
-    // '/dash': STATIC_ROOT + 'dashboard.html',
     '/connect'(request) {
       const scope: Scope[] = [
         'channel:read:subscriptions',
@@ -129,10 +107,6 @@ export async function server (request: Request) {
     },
 
     '/favicon.ico'(request) {request.send();},
-
-    '/config'(request) {
-      request.send(JSON.stringify({ startChat: config.startChat }), 'json');
-    },
 
     async '/'(request) {
       try {
@@ -175,51 +149,6 @@ export async function server (request: Request) {
       } else {
         request.status = 500;
         request.send('No "error" or "code" fields are in parameters');
-      }
-    },
-
-    async '/subscribe'(request) {
-      try {
-        const userInfo = await getUserInfo(request);
-        const { session } = request.getUrl().getParams();
-        if (!userInfo) {
-          return;
-        }
-        if (typeof session !== 'string' || !session) {
-          request.status = 400;
-          request.send('Wrong session id');
-          return;
-        }
-        const condition = {
-          broadcaster_user_id: userInfo.id,
-          user_id: userInfo.id,
-          moderator_user_id: userInfo.id,
-        };
-
-        Promise.all(
-          Object.keys(SUBSCRIPTIONS).map(function (type) {
-            if (isKeyOf(type, SUBSCRIPTIONS) && isDefined(SUBSCRIPTIONS[type])) {
-              return api.EventSub.createEventSubSubscription({
-                ...SUBSCRIPTIONS[type](condition),
-                transport: { method: 'websocket', session_id: session },
-              })
-                .then((): SubResult => [type, true])
-                .catch((): SubResult => [type, false])
-            }
-
-            return undefined;
-          }).filter(isDefined)
-        ).then(function (results) {
-          request.send(JSON.stringify(results), 'json');
-        }).catch(function (error) {
-          console.log(error);
-          request.status = 500;
-          request.send('Error!');
-        });
-      } catch (error) {
-        console.log(error);
-        request.status = 400;
-        request.send('Failed to get user');
       }
     },
 

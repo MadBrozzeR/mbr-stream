@@ -30,7 +30,7 @@
     "madsocket": "^2.1.8",
     "mbr-config": "^1.1.1",
     "mbr-logger": "^0.0.1",
-    "mbr-serv-request": "^0.3.1",
+    "mbr-serv-request": "^0.3.2",
     "mbr-state": "^0.2.0",
     "mbr-style": "^1.1.3",
     "splux": "^1.7.1"
