@@ -1,5 +1,5 @@
 import { Splux } from './lib-ref/splux';
-import { host } from './splux-host';
+import { newHost } from './splux-host';
 import { ChatBox } from './components/chat-box';
 import { NotificationBox } from './components/notification-box';
 import { Audio } from './components/audio';
@@ -8,6 +8,7 @@ import { createCast } from './utils/broadcaster';
 import { useModuleManager } from './utils/utils';
 import { Frame } from './components/frame';
 import { Countdown } from './components/countdown';
+import { startWebSocket } from './utils/ws';
 
 const STYLES = {
   'html, body': {
@@ -29,6 +30,7 @@ Splux.start(function (body, head) {
   host.cast = function (type, payload) {
     body.broadcast(createCast(type, payload));
   };
+  startWebSocket(host);
 
   const moduleManager = this.dom('div.page_content', function () {
     this.dom(Audio);
@@ -45,5 +47,5 @@ Splux.start(function (body, head) {
     moduleManager(data);
     host.cast('hashStateChange', data);
   });
-}, host);
+}, newHost());
 

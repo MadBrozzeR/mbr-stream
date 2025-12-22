@@ -31,38 +31,27 @@ export function wsConnect (url: string, handler: (notification: Notification) =>
   return handler;
 }
 
-export const startWebSocket = (function () {
-  let status: 'idle' | 'running' | 'disabled' | 'connecting' = 'idle';
+export const startWebSocket = function (host: Host) {
+  wsConnect(WS_URL, function (message) {
+    if (isEventType(message, 'channel.chat.message')) {
+      host.appendMessage(message.event);
 
-  return function (host: Host) {
-    if (status !== 'idle') {
-      return;
-    }
-
-    status = 'connecting';
-
-    wsConnect(WS_URL, function (message) {
-      if (isEventType(message, 'channel.chat.message')) {
-        host.appendMessage(message.event);
-
-        if (firstMessage.check(message.event.chatter_user_id)) {
-          host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
-        }
-      } else if (isEventType(message, 'channel.follow')) {
-        host.pushNotification({
-          text: `${message.event.user_name} is now FOLLOWING my channel!!!`,
-          audio: 'witch-ambient1.ogg',
-          timeout: 15000,
-        });
-      } else if (isEventType(message, 'channel.subscribe')) {
-        // host.pushNotification(message);
-        host.pushNotification({
-          text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`,
-          audio: 'witch-ambient1.ogg',
-          timeout: 15000,
-        });
+      if (firstMessage.check(message.event.chatter_user_id)) {
+        host.pushNotification({ text: message.event.message.text, audio: 'amethyst-break1.ogg' });
       }
-    });
-    status = 'running';
-  };
-})();
+    } else if (isEventType(message, 'channel.follow')) {
+      host.pushNotification({
+        text: `${message.event.user_name} is now FOLLOWING my channel!!!`,
+        audio: 'witch-ambient1.ogg',
+        timeout: 15000,
+      });
+    } else if (isEventType(message, 'channel.subscribe')) {
+      // host.pushNotification(message);
+      host.pushNotification({
+        text: `${message.event.user_name} is now SUBSCRIBED to my channel!!!`,
+        audio: 'witch-ambient1.ogg',
+        timeout: 15000,
+      });
+    }
+  });
+};

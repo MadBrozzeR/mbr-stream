@@ -1,7 +1,6 @@
 import { newComponent } from '../splux-host';
 import type { EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
-import { startWebSocket } from '../utils/ws';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -91,8 +90,6 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
 
 export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props) {
   const host = this.host;
-  startWebSocket(host);
-
   host.styles.add('chat', STYLES);
 
   let clear = function () {};
