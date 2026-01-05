@@ -2,7 +2,8 @@ import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
 import { isCast } from '../utils/broadcaster';
-import { imageAtlas } from '../utils/utils';
+import { firstMessage } from '../utils/notification-utils';
+import { changeModes, imageAtlas, isDefined, isEventType } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -199,6 +200,8 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
   const host = this.host;
   host.styles.add('notifications', STYLES);
 
+  let push = function (params: NotificationToast) { console.log(params) };
+
   const mode = {
     muted: false,
   };
@@ -215,14 +218,16 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
       mode: '',
     },
     onSetupChange(settings) {
-      mode.muted = settings['mode'] === 'muted';
+      if (isDefined(settings['mode'])) {
+        changeModes(mode, settings['mode']);
+      }
     },
   });
 
   this.dom(Toolbox, {
     position: 'bottom',
     items: {
-      test() { host.pushNotification(TEST_MODE.notification) },
+      test() { push(TEST_MODE.notification) },
       move() { mover.show() },
     },
   }).dom('div.notification_box--list', function (list) {
@@ -249,10 +254,28 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
       },
     };
 
-    this.tuneIn(function (data) {
-      if (isCast('notification', data)) {
-        notificationList.push(data.payload);
+    push = function (params) { notificationList.push(params) };
+  });
+
+  this.tuneIn(function (data) {
+    if (isCast('eventSubEvent', data)) {
+      if (isEventType(data.payload, 'channel.chat.message')) {
+        if (firstMessage.check(data.payload.event.chatter_user_id)) {
+          push({ text: data.payload.event.message.text });
+        }
+      } else if (isEventType(data.payload, 'channel.follow')) {
+        push({
+          text: `${data.payload.event.user_name} is now FOLLOWING my channel!!!`,
+          audio: 'witch-ambient1.ogg',
+          timeout: 10000,
+        });
+      } else if (isEventType(data.payload, 'channel.subscribe')) {
+        push({
+          text: `${data.payload.event.user_name} is now SUBSCRIBED on my channel!!!`,
+          audio: 'witch-ambient1.ogg',
+          timeout: 10000,
+        });
       }
-    });
+    }
   });
 });

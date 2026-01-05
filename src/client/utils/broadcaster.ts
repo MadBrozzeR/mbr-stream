@@ -1,4 +1,4 @@
-import { EventPayloadData, NotificationToast } from '../type';
+import { Notification } from '../type';
 
 type Cast<T extends string, P extends {}> = {
   type: T;
@@ -6,9 +6,8 @@ type Cast<T extends string, P extends {}> = {
 };
 
 export type Broadcast = {
-  'hashStateChange': Record<string, Record<string, string> | null>;
-  'notification': NotificationToast;
-  'chatMessage': EventPayloadData['channel.chat.message'];
+  hashStateChange: Record<string, Record<string, string> | null>;
+  eventSubEvent: Notification;
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

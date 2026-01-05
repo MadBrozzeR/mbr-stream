@@ -1,6 +1,7 @@
 import { newComponent } from '../splux-host';
 import type { EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
+import { changeModes, isDefined, isEventType } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -71,21 +72,30 @@ const STYLES = {
   },
 };
 
+type ChatEntryParams = {
+  user: string;
+  message: string;
+  userColor?: string;
+  persistent?: boolean;
+};
+
 const ChatEntry = newComponent('div.chatbox--entry', function (
   entry,
-  { messageEvent }: { messageEvent: EventPayloadData['channel.chat.message']}
+  { user, message, userColor, persistent }: ChatEntryParams
 ) {
-  const name = entry.dom('span.chatbox--entry_name').params({ innerText: messageEvent.chatter_user_name });
+  const name = entry.dom('span.chatbox--entry_name').params({ innerText: user });
   entry.dom('span').params({ innerText: ': ' });
-  entry.dom('span').params({ innerText: messageEvent.message.text });
+  entry.dom('span').params({ innerText: message });
 
-  if (messageEvent.color) {
-    name.node.style.setProperty('--color', messageEvent.color);
+  if (userColor) {
+    name.node.style.setProperty('--color', userColor);
   }
 
-  setTimeout(function () {
-    entry.node.classList.add('chatbox--entry-dim');
-  }, TIMEOUT);
+  if (!persistent) {
+    setTimeout(function () {
+      entry.node.classList.add('chatbox--entry-dim');
+    }, TIMEOUT);
+  }
 });
 
 export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props) {
@@ -93,6 +103,14 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
   host.styles.add('chat', STYLES);
 
   let clear = function () {};
+  let append = function (params: Omit<ChatEntryParams, 'persistent'>) { console.log(params) };
+
+  const events = {
+    message: false,
+    follow: false,
+    subscribe: false,
+    persistent: false,
+  };
 
   const mover = this.dom(Mover, {
     component: this,
@@ -103,22 +121,49 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       height: '20%',
       bottom: '20px',
       left: '20px',
+      events: 'message',
+    },
+    onSetupChange(settings) {
+      if (isDefined(settings['events'])) {
+        changeModes(events, settings['events']);
+      }
     },
   });
 
   this.dom(Toolbox, { items: {
-    test() { host.appendMessage(TEST_MODE.message) },
+    test() { append({
+      user: TEST_MODE.message.chatter_user_name,
+      message: TEST_MODE.message.message.text,
+      userColor: TEST_MODE.message.color,
+    }) },
     clear() { clear() },
     move() { mover.show() },
   } }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {
       clear = function () { log.clear() };
-
-      this.tuneIn(function (data) {
-        if (isCast('chatMessage', data)) {
-          log.dom(ChatEntry, { messageEvent: data.payload });
-        }
-      });
+      append = function (params) { log.dom(ChatEntry, { ...params, persistent: events.persistent }) };
     });
+  });
+
+  this.tuneIn(function (data) {
+    if (isCast('eventSubEvent', data)) {
+      if (isEventType(data.payload, 'channel.chat.message') && events.message) {
+        append({
+          user: data.payload.event.chatter_user_name,
+          message: data.payload.event.message.text,
+          userColor: data.payload.event.color,
+        });
+      } else if (isEventType(data.payload, 'channel.follow') && events.follow) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.user_name} is now FOLLOWING!`,
+        });
+      } else if (isEventType(data.payload, 'channel.subscribe') && events.subscribe) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.user_name} is now SUBSCRIBED!`,
+        });
+      }
+    }
   });
 });

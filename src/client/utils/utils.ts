@@ -61,3 +61,20 @@ export function useModuleManager (
 export function zeroLead (value: number) {
   return value < 10 ? `0${value}` : value.toString();
 }
+
+export function changeModes (modes: Record<string, boolean>, newModes: string) {
+  const newValues = newModes.split('|').reduce<Record<string, null>>(function (result, value) {
+    result[value] = null;
+    return result;
+  }, {});
+
+  for (const key in modes) {
+    modes[key] = key in newValues;
+  }
+
+  return modes;
+}
+
+export function isDefined<T> (value: T | undefined | null): value is T {
+  return value !== undefined && value !== null;
+}
