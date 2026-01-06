@@ -200,6 +200,10 @@ export type EventSubType = {
   'channel.subscribe': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
   }>;
+  'channel.raid': EventSubTypeEntity<1, {
+    from_broadcaster_user_id: Condition<string, false>;
+    to_broadcaster_user_id: Condition<string, false>;
+  }>;
 };
 
 type EventTypeConditions<T extends keyof EventSubType> = Merge<OmitNever<{

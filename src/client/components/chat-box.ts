@@ -109,6 +109,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
     message: false,
     follow: false,
     subscribe: false,
+    raid: false,
     persistent: false,
   };
 
@@ -162,6 +163,12 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
         append({
           user: '[INFO]',
           message: `${data.payload.event.user_name} is now SUBSCRIBED!`,
+        });
+      } else if (isEventType(data.payload, 'channel.raid') && events.raid) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.from_broadcaster_user_name} RAIDED your stream!` +
+            ` (${data.payload.event.viewers} viewers)`,
         });
       }
     }

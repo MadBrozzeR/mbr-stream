@@ -40,6 +40,11 @@ const SUBSCRIPTIONS: {
     version: '1',
     condition: { broadcaster_user_id: condition.broadcaster_user_id },
   }),
+  'channel.raid': (condition) => ({
+    type: 'channel.raid',
+    version: '1',
+    condition: { to_broadcaster_user_id: condition.to_broadcaster_user_id || '' },
+  }),
 };
 
 export async function subscribe (sessionId: string) {
@@ -49,6 +54,7 @@ export async function subscribe (sessionId: string) {
       broadcaster_user_id: userInfo.id,
       user_id: userInfo.id,
       moderator_user_id: userInfo.id,
+      to_broadcaster_user_id: userInfo.id,
     };
 
     const result = (await Promise.all(

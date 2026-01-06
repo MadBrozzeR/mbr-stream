@@ -261,7 +261,10 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
     if (isCast('eventSubEvent', data)) {
       if (isEventType(data.payload, 'channel.chat.message')) {
         if (firstMessage.check(data.payload.event.chatter_user_id)) {
-          push({ text: data.payload.event.message.text });
+          push({
+            text: data.payload.event.message.text,
+            audio: 'amethyst-break1.ogg',
+          });
         }
       } else if (isEventType(data.payload, 'channel.follow')) {
         push({
@@ -274,6 +277,12 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
           text: `${data.payload.event.user_name} is now SUBSCRIBED on my channel!!!`,
           audio: 'witch-ambient1.ogg',
           timeout: 10000,
+        });
+      } else if (isEventType(data.payload, 'channel.raid')) {
+        push({
+          text: `${data.payload.event.from_broadcaster_user_name} is RAIDING my channel!!!`,
+          audio: 'raidhorn4.ogg',
+          timeout: 5000,
         });
       }
     }
