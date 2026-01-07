@@ -1,5 +1,6 @@
 import { api } from './api';
 import type * as Types from './types';
+import type * as ETypes from './eventsub-types';
 import { isDefined, isKeyOf } from './utils';
 
 let userInfo: Types.GetUsersResponse['data'][number] | null = null;
@@ -18,10 +19,10 @@ export async function getUserInfo () {
   return userInfo = users.data[0];
 }
 
-type SubResult = [keyof Types.EventSubType, boolean];
+type SubResult = [keyof ETypes.EventSubType, boolean];
 
 const SUBSCRIPTIONS: {
-  [K in keyof Types.EventSubType]?: (
+  [K in keyof ETypes.EventSubType]?: (
     condition: Types.CreateEventSubSubscriptionRequest<K>['condition']) =>
       Pick<Types.CreateEventSubSubscriptionRequest<K>, 'type' | 'version' | 'condition'>
   } = {

@@ -3,7 +3,7 @@ import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
 import { getStringRecord, isDefined, jsonToUrlEncoded } from './utils';
-import type { Scope } from './types';
+import type { Scope } from './eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 

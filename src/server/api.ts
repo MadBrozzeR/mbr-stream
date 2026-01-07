@@ -1,6 +1,7 @@
 import type { OutgoingHttpHeaders } from 'http';
 import { API } from './constants';
 import type * as Types from './types';
+import type * as ETypes from './eventsub-types';
 import { apiRequest } from './utils';
 import { getAppGrantToken, refreshUserToken, requestAppGrantToken } from './auth';
 import { config, tokenStorage } from './config';
@@ -74,7 +75,7 @@ export const api = {
     },
   },
   EventSub: {
-    createEventSubSubscription<K extends keyof Types.EventSubType>(params: Types.CreateEventSubSubscriptionRequest<K>) {
+    createEventSubSubscription<K extends keyof ETypes.EventSubType>(params: Types.CreateEventSubSubscriptionRequest<K>) {
       return userApiRequest<Types.CreateEventSubSubscriptionResponse<K>>(
         `${API.EVENTSUB}/subscriptions`,
         'POST',
