@@ -1,4 +1,4 @@
-import type { EventSubStatus, EventSubType, EventTypeConditions, Scope } from './eventsub-types';
+import type { EventSubStatus, EventSubType, EventSubTypeVersion, EventTypeConditions, Scope } from './common-types/eventsub-types';
 
 export type RequestParamValue = string | number | Array<string | number> | { [key: string]: RequestParamValue } | undefined;
 export type RequestParams = Record<string, RequestParamValue>;
@@ -88,7 +88,7 @@ export type GetStreamsResponse = {
 
 export type CreateEventSubSubscriptionRequest<T extends keyof EventSubType> = {
   type: T;
-  version: `${EventSubType[T]['version']}`;
+  version: EventSubTypeVersion<T>;
   condition: { [K in keyof EventTypeConditions<T>]: EventTypeConditions<T>[K] };
   transport: {
     method: 'webhook';

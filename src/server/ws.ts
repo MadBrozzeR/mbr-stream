@@ -3,6 +3,8 @@ import { Logger } from 'mbr-logger';
 import { config } from './config';
 import { subscribe } from './api-wrappers';
 import { Request } from 'mbr-serv-request';
+import { EventSubMessageMap } from './common-types/eventsub-types';
+import { isEventSubMessageType } from './utils';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 
@@ -37,7 +39,7 @@ class Timer {
   }
 }
 
-export const startWSClient = function (callback: (message: string) => void) {
+export const startWSClient = function (callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void) {
   let sessionId = '';
   const history: any[] = [];
   const timer = new Timer();
@@ -59,30 +61,27 @@ export const startWSClient = function (callback: (message: string) => void) {
       timer.set();
 
       try {
-        const message = JSON.parse(dataString);
+        const message: EventSubMessageMap[keyof EventSubMessageMap] = JSON.parse(dataString);
 
-        switch (message.metadata?.message_type) {
-          case 'session_welcome':
-            sessionId = message.payload?.session?.id || '';
-            if (message.payload?.session?.keepalive_timeout_seconds) {
-              timer.set(message.payload.session.keepalive_timeout_seconds * 1500);
-            }
-            subscribe(sessionId);
-            break;
+        if (isEventSubMessageType(message, 'session_welcome')) {
+          sessionId = message.payload.session.id;
+          if (message.payload.session.keepalive_timeout_seconds) {
+            timer.set(message.payload.session.keepalive_timeout_seconds * 1500);
+          }
+          subscribe(sessionId);
+        }
 
-          case 'session_reconnect':
-            this.connect(message.payload?.session?.reconnect_url);
-            break;
+        else if (isEventSubMessageType(message, 'session_reconnect')) {
+          this.connect(message.payload.session.reconnect_url);
+        }
 
-          case 'notification':
-            callback(dataString);
-            // console.log(dataString);
-            history.push(message);
-            break;
+        else if (isEventSubMessageType(message, 'notification')) {
+          callback(message);
+          history.push(message);
+        }
 
-          case 'session_keepalive':
-            callback(dataString);
-            break;
+        else if (isEventSubMessageType(message, 'session_keepalive')) {
+          callback(message);
         }
       } catch (error) {
         console.log('WebSocket message parsing error', error);
@@ -131,6 +130,9 @@ export function startWSServer () {
       for (let index = 0 ; index < clients.length ; ++index) {
         clients[index]?.send(message);
       }
+    },
+    sendData(data: object) {
+      this.send(JSON.stringify(data));
     },
   };
 }

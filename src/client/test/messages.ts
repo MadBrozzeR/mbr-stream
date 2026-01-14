@@ -1,3 +1,4 @@
+/*
 import type { Notification } from '../type';
 
 export const MESSAGE: Notification<'channel.chat.message'> = {
@@ -36,3 +37,4 @@ export function testMessage (handler: (message: Notification) => void) {
   }
   return handler;
 }
+*/

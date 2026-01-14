@@ -1,4 +1,4 @@
-import { Condition, Merge, OmitNever } from './type-helpers';
+import { Condition, Merge, OmitNever } from '../type-helpers';
 
 /*
  * From here https://dev.twitch.tv/docs/authentication/scopes/
@@ -109,7 +109,7 @@ export type EventSubType = {
 
   'channel.update': EventSubTypeEntity<2, {
     broadcaster_user_id: Condition;
-  }>;
+  }, {}>;
 
   'channel.chat.message': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
@@ -182,12 +182,12 @@ export type EventSubType = {
   'channel.chat.message_delete': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
     user_id: Condition;
-  }>;
+  }, {}>;
 
   'channel.chat.notification': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
     user_id: Condition;
-  }>;
+  }, {}>;
 
   'channel.subscribe': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
@@ -222,6 +222,8 @@ export type EventTypeConditions<T extends keyof EventSubType> = Merge<OmitNever<
   [K in keyof EventSubType[T]['conditions']]: EventSubType[T]['conditions'][K] extends Condition<infer T, false> ? T : never;
 }>>>;
 
+export type EventSubTypeVersion<K extends keyof EventSubType> = `${EventSubType[K]['version']}`;
+
 export type EventSubStatus = 'enabled'
   | 'webhook_callback_verification_pending'
   | 'webhook_callback_verification_failed'
@@ -240,3 +242,67 @@ export type EventSubStatus = 'enabled'
   | 'websocket_network_timeout'
   | 'websocket_network_error'
   | 'websocket_failed_to_reconnect';
+
+export type EventSubMessageTemplate<T extends string, P, S extends keyof EventSubType | void = void> = {
+  metadata: S extends keyof EventSubType ? {
+    message_id: string;
+    message_type: T;
+    message_timestamp: string;
+    subscription_type: S;
+    subscription_version: EventSubTypeVersion<S>;
+  } : {
+    message_id: string;
+    message_type: T;
+    message_timestamp: string;
+  };
+  payload: P;
+};
+
+type EventSubSubscriptionPayload<K extends keyof EventSubType> = {
+  id: string;
+  status: 'user_removed' | 'authorization_revoked' | 'version_removed' | 'enabled';
+  type: K;
+  version: EventSubTypeVersion<K>;
+  cost: number;
+  condition: EventTypeConditions<K>;
+  transport: {
+    method: 'websocket';
+    session_id: string;
+  };
+  created_at: string;
+};
+
+export type EventSubNotification<K extends keyof EventSubType> = EventSubMessageTemplate<'notification', {
+  subscription: EventSubSubscriptionPayload<K>;
+  event: EventSubType[K]['payload'];
+}, K>
+
+export type EventSubMessageMap = {
+  session_welcome: EventSubMessageTemplate<'session_welcome', {
+    session: {
+      id: string;
+      status: 'connected';
+      connected_at: string;
+      keepalive_timeout_seconds: number;
+      reconnect_url: null;
+    };
+  }>;
+  session_keepalive: EventSubMessageTemplate<'session_keepalive', {}>;
+  session_reconnect: EventSubMessageTemplate<'session_reconnect', {
+    session: {
+      id: string;
+      status: 'reconnecting';
+      connected_at: string;
+      keepalive_timeout_seconds: null;
+      reconnect_url: string;
+    };
+  }>;
+  revocation: {
+    [K in keyof EventSubType]: EventSubMessageTemplate<'revocation', {
+      subscription: EventSubSubscriptionPayload<K>;
+    }, K>;
+  }[keyof EventSubType];
+  notification: {
+    [K in keyof EventSubType]: EventSubNotification<K>;
+  }[keyof EventSubType]
+};

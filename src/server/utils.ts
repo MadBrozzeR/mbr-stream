@@ -4,6 +4,7 @@ import http from 'http';
 import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod } from './types';
 import { config } from './config';
+import { EventSubMessageMap } from './common-types/eventsub-types';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';
@@ -135,3 +136,10 @@ export function getStringRecord (source?: string) {
     return null;
   }
 }
+
+export function isEventSubMessageType<K extends keyof EventSubMessageMap> (
+  data: EventSubMessageMap[keyof EventSubMessageMap],
+  type: K
+): data is EventSubMessageMap[K] {
+  return data.metadata.message_type === type;
+};

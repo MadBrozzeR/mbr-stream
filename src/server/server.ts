@@ -2,8 +2,8 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, isDefined, jsonToUrlEncoded } from './utils';
-import type { Scope } from './eventsub-types';
+import { getStringRecord, isDefined, isEventSubMessageType, jsonToUrlEncoded } from './utils';
+import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 
@@ -34,7 +34,19 @@ const wsServer = startWSServer();
 
 try {
   startWSClient(function (message) {
-    wsServer.send(message);
+    if (isEventSubMessageType(message, 'session_keepalive')) {
+      wsServer.sendData({
+        type: 'keepalive',
+        payload: message.payload,
+      });
+    }
+
+    else if (isEventSubMessageType(message, 'notification')) {
+      wsServer.sendData({
+        type: 'notification',
+        payload: message.payload,
+      });
+    }
   });
 } catch (error) {
   console.log(error);

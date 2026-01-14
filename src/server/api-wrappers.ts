@@ -1,6 +1,6 @@
 import { api } from './api';
 import type * as Types from './types';
-import type * as ETypes from './eventsub-types';
+import type * as ETypes from './common-types/eventsub-types';
 import { isDefined, isKeyOf } from './utils';
 
 let userInfo: Types.GetUsersResponse['data'][number] | null = null;

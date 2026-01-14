@@ -1,7 +1,7 @@
 import type { OutgoingHttpHeaders } from 'http';
 import { API } from './constants';
 import type * as Types from './types';
-import type * as ETypes from './eventsub-types';
+import type * as ETypes from './common-types/eventsub-types';
 import { apiRequest } from './utils';
 import { getAppGrantToken, refreshUserToken, requestAppGrantToken } from './auth';
 import { config, tokenStorage } from './config';
