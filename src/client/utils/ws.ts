@@ -1,5 +1,4 @@
 import type { Host } from '../splux-host.js';
-import type { Notification } from '../type';
 import { WSEvents } from '@common-types/ws-events';
 
 // const WS_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
@@ -10,16 +9,12 @@ const session = {
   ws: null as WebSocket | null,
 };
 
-export function wsConnect (url: string, handler: (notification: Notification) => void) {
+export function wsConnect (url: string, handler: (wsEvent: WSEvents) => void) {
   const ws = new WebSocket(url);
   ws.onmessage = function (event) {
     const data: WSEvents = JSON.parse(event.data);
     // console.log(data);
-    switch (data.type) {
-      case 'notification':
-        handler(data.payload);
-        break;
-    }
+    handler(data);
   };
   ws.onclose = function () {
     if (session.ws === ws) {
@@ -32,6 +27,14 @@ export function wsConnect (url: string, handler: (notification: Notification) =>
 
 export const startWebSocket = function (host: Host) {
   wsConnect(WS_URL, function (message) {
-    host.cast('eventSubEvent', message);
+    switch (message.type) {
+      case 'notification':
+        host.cast('eventSubEvent', message.payload);
+        break;
+
+      case 'streamInfo':
+        host.cast('streamInfo', message.payload);
+        break;
+    }
   });
 };

@@ -1,4 +1,5 @@
-import { Notification } from '../type';
+import type { StreamInfo } from '@common-types/ws-events';
+import type { Notification } from '../type';
 
 type Cast<T extends string, P extends {}> = {
   type: T;
@@ -8,6 +9,7 @@ type Cast<T extends string, P extends {}> = {
 export type Broadcast = {
   hashStateChange: Record<string, Record<string, string> | null>;
   eventSubEvent: Notification;
+  streamInfo: StreamInfo;
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

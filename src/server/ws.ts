@@ -5,6 +5,7 @@ import { subscribe } from './api-wrappers';
 import { Request } from 'mbr-serv-request';
 import { EventSubMessageMap } from './common-types/eventsub-types';
 import { isEventSubMessageType } from './utils';
+import { WSEvents } from './common-types/ws-events';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 
@@ -131,7 +132,7 @@ export function startWSServer () {
         clients[index]?.send(message);
       }
     },
-    sendData(data: object) {
+    sendData(data: WSEvents) {
       this.send(JSON.stringify(data));
     },
   };

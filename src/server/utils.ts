@@ -143,3 +143,7 @@ export function isEventSubMessageType<K extends keyof EventSubMessageMap> (
 ): data is EventSubMessageMap[K] {
   return data.metadata.message_type === type;
 };
+
+export function areMatchedObjects (object1: object, object2: object) {
+  return JSON.stringify(object1) === JSON.stringify(object2);
+}

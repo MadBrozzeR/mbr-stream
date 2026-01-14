@@ -1,7 +1,8 @@
 import { api } from './api';
 import type * as Types from './types';
 import type * as ETypes from './common-types/eventsub-types';
-import { isDefined, isKeyOf } from './utils';
+import { areMatchedObjects, isDefined, isKeyOf } from './utils';
+import { StreamInfo } from './common-types/ws-events';
 
 let userInfo: Types.GetUsersResponse['data'][number] | null = null;
 
@@ -90,4 +91,72 @@ export async function subscribe (sessionId: string) {
 
     return null;
   }
+}
+
+export async function getStreamInfo () {
+  const result: StreamInfo = {
+    viewers: 0,
+    isOnline: false,
+    chatters: [],
+  };
+
+  try {
+
+    const userInfo = await getUserInfo();
+    const streams = await api.Streams.getStreams({ user_id: userInfo.id });
+    if (streams.data[0]) {
+      result.isOnline = true;
+      result.viewers = streams.data[0].viewer_count;
+    }
+    const chatters = await api.Chat.getChatters({ broadcaster_id: userInfo.id, moderator_id: userInfo.id });
+    result.chatters = chatters.data.map((chatter) => ({
+      id: chatter.user_id,
+      name: chatter.user_name,
+      login: chatter.user_login,
+    }));
+  } catch (error) {
+    console.log(error);
+  }
+
+  return result;
+}
+
+export function createPolling<R> (
+  interval: number, callback: () => Promise<R | null> | R | null,
+  apply: (value: R) => void
+) {
+  let result: R | null = null;
+
+  function action () {
+    let promise = callback();
+
+    if (!(promise instanceof Promise)) {
+      promise = Promise.resolve(promise);
+    }
+
+    promise.then(function (response) {
+      if (!response) {
+        return null;
+      }
+
+      if (!result || !areMatchedObjects(result, response)) {
+        result = response;
+
+        return result;
+      }
+
+      return null;
+    }).then(function (result) {
+      result && apply(result);
+    });
+  }
+
+  setInterval(action, interval);
+  action();
+
+  return {
+    get() {
+      return result;
+    },
+  };
 }

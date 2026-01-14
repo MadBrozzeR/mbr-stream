@@ -103,4 +103,24 @@ export const api = {
       return userApiRequest<Types.GetUsersResponse>([API.USERS, { id, login }]);
     },
   },
+  Chat: {
+    getChatters(params: Types.GetChattersRequest) {
+      return userApiRequest<Types.GetChattersResponse>([`${API.CHAT}/chatters`, params]);
+    },
+    sendChatAnnouncement({
+      broadcaster_id, moderator_id, message, color,
+    }: Types.SendChatAnnouncementRequestParams & Types.SendChatAnnouncementRequest) {
+      // moderator:manage:announcements is required
+      return userApiRequest<Types.SendChatAnnouncementResponse>(
+        [`${API.CHAT}/announcements`, { broadcaster_id, moderator_id }],
+        'POST',
+        { message, color },
+      );
+    },
+    sendChatMessage(params: Types.SendChatMessageRequest) {
+      // user:write:chat is required
+      // user:bot and/or channel:bot are required for App Access Token
+      return userApiRequest<Types.SendChatMessageResponse>(`${API.CHAT}/messages`, 'POST', params);
+    },
+  },
 };

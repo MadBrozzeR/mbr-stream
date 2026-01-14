@@ -1,8 +1,21 @@
 import type { EventSubMessageMap } from './eventsub-types';
 
+type Chatter = {
+  id: string;
+  name: string;
+  login: string;
+};
+
+export type StreamInfo = {
+  isOnline: boolean;
+  viewers: number;
+  chatters: Chatter[];
+};
+
 export type WSEventsMap = {
   keepalive: {};
   notification: EventSubMessageMap['notification']['payload'];
+  streamInfo: StreamInfo;
 };
 
 export type WSEvents = {

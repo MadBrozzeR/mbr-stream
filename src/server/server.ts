@@ -6,6 +6,7 @@ import { getStringRecord, isDefined, isEventSubMessageType, jsonToUrlEncoded } f
 import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
+import { createPolling, getStreamInfo } from './api-wrappers';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -48,6 +49,14 @@ try {
       });
     }
   });
+
+  createPolling(20000, getStreamInfo, function (streamInfo) {
+    // TODO Request previously received data from client
+    wsServer.sendData({
+      type: 'streamInfo',
+      payload: streamInfo,
+    });
+  })
 } catch (error) {
   console.log(error);
 }

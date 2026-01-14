@@ -1,6 +1,11 @@
 import type { EventSubStatus, EventSubType, EventSubTypeVersion, EventTypeConditions, Scope } from './common-types/eventsub-types';
 
-export type RequestParamValue = string | number | Array<string | number> | { [key: string]: RequestParamValue } | undefined;
+export type RequestParamValue<V = string | number | boolean> =
+  | V
+  | V[]
+  | { [key: string]: RequestParamValue<V> }
+  | undefined;
+
 export type RequestParams = Record<string, RequestParamValue>;
 export type RESTMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export type RequestUrl = string | [string, RequestParams];
@@ -177,5 +182,55 @@ export type GetUsersResponse = {
     view_count: number;
     email?: string;
     created_at: string;
+  }>;
+};
+
+export type GetChattersRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  first?: number;
+  after?: number;
+};
+
+export type GetChattersResponse = {
+  data: Array<{
+    user_id: string;
+    user_login: string;
+    user_name: string;
+  }>;
+  pagination: {
+    cursor: string;
+  };
+  total: number;
+};
+
+export type SendChatAnnouncementRequestParams = {
+  broadcaster_id: string;
+  moderator_id: string;
+};
+
+export type SendChatAnnouncementRequest = {
+  message: string;
+  color?: 'blue' | 'green' | 'orange' | 'purple' | 'primary';
+};
+
+export type SendChatAnnouncementResponse = void;
+
+export type SendChatMessageRequest = {
+  broadcaster_id: string;
+  sender_id: string;
+  message: string;
+  reply_parent_message_id?: string;
+  for_source_only?: boolean;
+};
+
+export type SendChatMessageResponse = {
+  data: Array<{
+    message_id: string;
+    is_sent: boolean;
+    drop_reason?: {
+      code: string;
+      message: string;
+    };
   }>;
 };

@@ -9,6 +9,7 @@ import { useModuleManager } from './utils/utils';
 import { Frame } from './components/frame';
 import { Countdown } from './components/countdown';
 import { startWebSocket } from './utils/ws';
+import { StreamInfo } from './components/stream-info';
 
 const STYLES = {
   'html, body': {
@@ -40,6 +41,7 @@ Splux.start(function (body, head) {
       notifications: NotificationBox,
       frame: Frame,
       counter: Countdown,
+      streamInfo: StreamInfo,
     });
   });
 
