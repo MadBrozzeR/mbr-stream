@@ -1,6 +1,7 @@
 import { Splux } from './lib-ref/splux';
 import { Styles } from './lib-ref/mbr-style';
 import { Broadcast } from './utils/broadcaster';
+import type { WSIncomeEvent } from '@common-types/ws-events';
 
 export function newHost () {
   const host = {
@@ -10,6 +11,9 @@ export function newHost () {
     },
     cast<T extends keyof Broadcast> (type: T, payload: Broadcast[T]) {
       console.log(type, payload);
+    },
+    wsSend(message: WSIncomeEvent) {
+      console.log(message);
     },
   };
 

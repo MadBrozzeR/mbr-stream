@@ -90,6 +90,8 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
     }
   });
 
+  host.wsSend({ action: 'get-stream-info' });
+
   this.tuneIn(function (data) {
     if (isCast('streamInfo', data)) {
       set(data.payload);

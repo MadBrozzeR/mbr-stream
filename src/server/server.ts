@@ -36,27 +36,26 @@ const wsServer = startWSServer();
 try {
   startWSClient(function (message) {
     if (isEventSubMessageType(message, 'session_keepalive')) {
-      wsServer.sendData({
-        type: 'keepalive',
-        payload: message.payload,
-      });
+      wsServer.sendData({ type: 'keepalive', payload: message.payload });
     }
 
     else if (isEventSubMessageType(message, 'notification')) {
-      wsServer.sendData({
-        type: 'notification',
-        payload: message.payload,
-      });
+      wsServer.sendData({ type: 'notification', payload: message.payload });
     }
   });
 
-  createPolling(20000, getStreamInfo, function (streamInfo) {
-    // TODO Request previously received data from client
-    wsServer.sendData({
-      type: 'streamInfo',
-      payload: streamInfo,
+  if (config.startChat) {
+    const polling = createPolling(120000, getStreamInfo, function (streamInfo) {
+      wsServer.sendData({ type: 'streamInfo', payload: streamInfo });
     });
-  })
+
+    wsServer.listen(function (message) {
+      if (message.action === 'get-stream-info') {
+        const info = polling.get();
+        info && wsServer.sendData({ type: 'streamInfo', payload: info });
+      }
+    });
+  }
 } catch (error) {
   console.log(error);
 }

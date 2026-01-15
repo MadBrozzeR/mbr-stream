@@ -4,7 +4,7 @@ import http from 'http';
 import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod } from './types';
 import { config } from './config';
-import { EventSubMessageMap } from './common-types/eventsub-types';
+import type { EventSubMessageMap } from './common-types/eventsub-types';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';

@@ -3,9 +3,10 @@ import { Logger } from 'mbr-logger';
 import { config } from './config';
 import { subscribe } from './api-wrappers';
 import { Request } from 'mbr-serv-request';
-import { EventSubMessageMap } from './common-types/eventsub-types';
+import type { EventSubMessageMap } from './common-types/eventsub-types';
 import { isEventSubMessageType } from './utils';
-import { WSEvents } from './common-types/ws-events';
+import type { WSEvents, WSIncomeEvent } from './common-types/ws-events';
+import { List } from './list';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 
@@ -110,7 +111,11 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
 }
 
 export function startWSServer () {
+  type Listener = (this: ReturnType<typeof startWSServer>, event: WSIncomeEvent) => void;
+
   const clients: ClientConnection[] = [];
+  const listeners = new List<Listener>();
+
   const ws = new MadSocket({
     connect() {
       clients.push(this);
@@ -121,9 +126,17 @@ export function startWSServer () {
         clients.splice(index, 1);
       }
     },
+    message(messageData) {
+      const message: WSIncomeEvent = JSON.parse(messageData.toString());
+      console.log('WS Client -> Server:', message);
+
+      listeners.iterate(function (listener) {
+        listener.call(ifc, message);
+      });
+    }
   });
 
-  return {
+  const ifc = {
     attach(request: Request) {
       ws.leech(request.request, request.response);
     },
@@ -133,7 +146,13 @@ export function startWSServer () {
       }
     },
     sendData(data: WSEvents) {
+      console.log('WS Server -> Client:', data);
       this.send(JSON.stringify(data));
     },
+    listen(listener: Listener) {
+      listeners.add(listener);
+    },
   };
+
+  return ifc;
 }

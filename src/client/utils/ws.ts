@@ -1,5 +1,5 @@
 import type { Host } from '../splux-host.js';
-import { WSEvents } from '@common-types/ws-events';
+import type { WSEvents, WSIncomeEvent } from '@common-types/ws-events';
 
 // const WS_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 const WS_URL = 'ws://localhost:8922/ws';
@@ -9,8 +9,23 @@ const session = {
   ws: null as WebSocket | null,
 };
 
-export function wsConnect (url: string, handler: (wsEvent: WSEvents) => void) {
+export function wsConnect (
+  url: string,
+  handler: (wsEvent: WSEvents) => void,
+  onCreate?: (ws: WebSocket, send: (message: WSIncomeEvent) => void) => void
+) {
   const ws = new WebSocket(url);
+  const pendingMessages: WSIncomeEvent[] = [];
+  let isConnected = false;
+
+  function send (message: WSIncomeEvent) {
+    if (isConnected) {
+      ws.send(JSON.stringify(message));
+    } else {
+      pendingMessages.push(message);
+    }
+  }
+
   ws.onmessage = function (event) {
     const data: WSEvents = JSON.parse(event.data);
     // console.log(data);
@@ -18,9 +33,20 @@ export function wsConnect (url: string, handler: (wsEvent: WSEvents) => void) {
   };
   ws.onclose = function () {
     if (session.ws === ws) {
-      wsConnect(url, handler);
+      wsConnect(url, handler, onCreate);
     }
   };
+  ws.onopen = function () {
+    isConnected = true;
+    for (let index = 0 ; index < pendingMessages.length ; ++index) {
+      const message = pendingMessages[index];
+      if (message) {
+        send(message);
+      }
+    }
+  }
+
+  onCreate && onCreate(ws, send);
 
   return handler;
 }
@@ -36,5 +62,9 @@ export const startWebSocket = function (host: Host) {
         host.cast('streamInfo', message.payload);
         break;
     }
+  }, function (_, send) {
+    host.wsSend = function (message) {
+      send(message);
+    };
   });
 };

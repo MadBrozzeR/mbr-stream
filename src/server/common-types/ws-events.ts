@@ -26,3 +26,7 @@ export type WSEvent<K extends keyof WSEventsMap = keyof WSEventsMap> = {
   type: K;
   payload: WSEventsMap[K];
 };
+
+export type WSIncomeEvent = {
+  action: 'get-stream-info';
+};
