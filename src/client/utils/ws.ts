@@ -61,6 +61,10 @@ export const startWebSocket = function (host: Host) {
       case 'streamInfo':
         host.cast('streamInfo', message.payload);
         break;
+
+      case 'interfaceAction':
+        host.cast('interfaceAction', message.payload);
+        break;
     }
   }, function (_, send) {
     host.wsSend = function (message) {

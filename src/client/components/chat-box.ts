@@ -137,7 +137,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       message: TEST_MODE.message.message.text,
       userColor: TEST_MODE.message.color,
     }) },
-    clear() { clear() },
+    clear() { clear(); host.wsSend({ action: 'clear-all-chats' }); },
     move() { mover.show() },
   } }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {
@@ -147,7 +147,11 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
   });
 
   this.tuneIn(function (data) {
-    if (isCast('eventSubEvent', data)) {
+    if (isCast('interfaceAction', data)) {
+      if (data.payload === 'chat-clear') {
+        clear();
+      }
+    } else if (isCast('eventSubEvent', data)) {
       if (isEventType(data.payload, 'channel.chat.message') && events.message) {
         append({
           user: data.payload.event.chatter_user_name,

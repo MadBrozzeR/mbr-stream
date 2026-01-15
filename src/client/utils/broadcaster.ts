@@ -10,6 +10,7 @@ export type Broadcast = {
   hashStateChange: Record<string, Record<string, string> | null>;
   eventSubEvent: Notification;
   streamInfo: StreamInfo;
+  interfaceAction: 'chat-clear';
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

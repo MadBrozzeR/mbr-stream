@@ -50,9 +50,14 @@ try {
     });
 
     wsServer.listen(function (message) {
-      if (message.action === 'get-stream-info') {
-        const info = polling.get();
-        info && wsServer.sendData({ type: 'streamInfo', payload: info });
+      switch (message.action) {
+        case 'get-stream-info':
+          const info = polling.get();
+          info && wsServer.sendData({ type: 'streamInfo', payload: info });
+          break;
+
+        case 'clear-all-chats':
+          wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
       }
     });
   }

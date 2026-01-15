@@ -16,6 +16,7 @@ export type WSEventsMap = {
   keepalive: {};
   notification: EventSubMessageMap['notification']['payload'];
   streamInfo: StreamInfo;
+  interfaceAction: 'chat-clear';
 };
 
 export type WSEvents = {
@@ -29,4 +30,6 @@ export type WSEvent<K extends keyof WSEventsMap = keyof WSEventsMap> = {
 
 export type WSIncomeEvent = {
   action: 'get-stream-info';
+} | {
+  action: 'clear-all-chats';
 };
