@@ -15,6 +15,12 @@ export function newHost () {
     wsSend(message: WSIncomeEvent) {
       console.log(message);
     },
+    send(message: WSIncomeEvent) {
+      return fetch('/action', {
+        method: 'POST',
+        body: JSON.stringify(message),
+      });
+    }
   };
 
   return host;

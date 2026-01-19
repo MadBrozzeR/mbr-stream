@@ -137,7 +137,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       message: TEST_MODE.message.message.text,
       userColor: TEST_MODE.message.color,
     }) },
-    clear() { clear(); host.wsSend({ action: 'clear-all-chats' }); },
+    clear() { clear(); host.send({ action: 'clear-all-chats' }); },
     move() { mover.show() },
   } }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {

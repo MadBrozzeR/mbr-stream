@@ -18,6 +18,7 @@ export function wsConnect (
   const pendingMessages: WSIncomeEvent[] = [];
   let isConnected = false;
 
+  /* Unused until I figured out how to make server not break the connection after receiving a message. */
   function send (message: WSIncomeEvent) {
     if (isConnected) {
       ws.send(JSON.stringify(message));

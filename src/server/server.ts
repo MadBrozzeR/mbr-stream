@@ -7,6 +7,7 @@ import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, getStreamInfo } from './api-wrappers';
+import { WSIncomeEvent } from './common-types/ws-events';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -33,6 +34,23 @@ async function getUserInfo(request: Request) {
 
 const wsServer = startWSServer();
 
+const streamInfoPolling = config.startChat ? createPolling(120000, getStreamInfo, function (streamInfo) {
+  wsServer.sendData({ type: 'streamInfo', payload: streamInfo });
+}) : null;
+
+function processIncomingMessage (message: WSIncomeEvent) {
+  switch (message.action) {
+    case 'get-stream-info':
+      const info = streamInfoPolling?.get();
+      info && wsServer.sendData({ type: 'streamInfo', payload: info });
+      break;
+
+    case 'clear-all-chats':
+      wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
+      break;
+  }
+}
+
 try {
   startWSClient(function (message) {
     if (isEventSubMessageType(message, 'session_keepalive')) {
@@ -44,23 +62,9 @@ try {
     }
   });
 
-  if (config.startChat) {
-    const polling = createPolling(120000, getStreamInfo, function (streamInfo) {
-      wsServer.sendData({ type: 'streamInfo', payload: streamInfo });
-    });
-
-    wsServer.listen(function (message) {
-      switch (message.action) {
-        case 'get-stream-info':
-          const info = polling.get();
-          info && wsServer.sendData({ type: 'streamInfo', payload: info });
-          break;
-
-        case 'clear-all-chats':
-          wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
-      }
-    });
-  }
+  wsServer.listen(function (message) {
+    processIncomingMessage(message);
+  });
 } catch (error) {
   console.log(error);
 }
@@ -180,5 +184,20 @@ export async function server (request: Request) {
     '/ws'(request) {
       wsServer.attach(request);
     },
+
+    async '/action'(request) {
+      if (request.request.method === 'POST') {
+        const response = await request.getData();
+        const data: WSIncomeEvent = JSON.parse(response.toString());
+
+        processIncomingMessage(data);
+
+        request.status = 204;
+        request.send();
+      } else {
+        request.status = 405;
+        request.send();
+      }
+    }
   });
 }
