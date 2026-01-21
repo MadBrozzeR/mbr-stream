@@ -43,12 +43,14 @@ function processIncomingMessage (message: WSIncomeEvent) {
     case 'get-stream-info':
       const info = streamInfoPolling?.get();
       info && wsServer.sendData({ type: 'streamInfo', payload: info });
-      break;
+      return info || null;
 
     case 'clear-all-chats':
       wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
-      break;
+      return null;
   }
+
+  return null;
 }
 
 try {
@@ -190,10 +192,14 @@ export async function server (request: Request) {
         const response = await request.getData();
         const data: WSIncomeEvent = JSON.parse(response.toString());
 
-        processIncomingMessage(data);
+        const result = processIncomingMessage(data);
 
-        request.status = 204;
-        request.send();
+        if (result) {
+          request.send(JSON.stringify(result));
+        } else {
+          request.status = 204;
+          request.send();
+        }
       } else {
         request.status = 405;
         request.send();
