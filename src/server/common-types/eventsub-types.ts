@@ -93,6 +93,8 @@ type EventSubTypeEntity<V extends number, C extends Record<string, Condition<any
   payload: P;
 };
 
+export type AnimationVariant = 'static' | 'animated';
+
 export type EventSubType = {
   'channel.follow': EventSubTypeEntity<2, {
     broadcaster_user_id: Condition;
@@ -136,7 +138,7 @@ export type EventSubType = {
           id: string;
           emote_set_id: string;
           owner_id: string;
-          format: Array<'static' | 'animated'>;
+          format: Array<AnimationVariant>;
         };
         mention?: null | {
           user_id: string;

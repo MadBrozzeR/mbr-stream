@@ -89,12 +89,17 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
   entry,
   { user, message, userColor, persistent }: ChatEntryParams
 ) {
+  let disableAnimation = function () {};
   const name = entry.dom('span.chatbox--entry_name').params({ innerText: user });
+
   entry.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
     entry.dom('span').params({ innerText: message });
   } else {
-    entry.dom(MessageRow, { message });
+    const messageRow = entry.dom(MessageRow, { message });
+    disableAnimation = function () {
+      messageRow.setAnimation('static');
+    };
   }
 
   if (userColor) {
@@ -104,6 +109,7 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
   if (!persistent) {
     setTimeout(function () {
       entry.node.classList.add('chatbox--entry-dim');
+      disableAnimation();
     }, TIMEOUT);
   }
 });

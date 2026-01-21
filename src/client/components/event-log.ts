@@ -18,18 +18,18 @@ const STYLES = {
     },
 
     '--entry_name': {
-      lineHeight: '2em',
+      lineHeight: '1em',
       verticalAlign: 'middle',
       color: 'var(--color, inherit)',
     },
 
     '--entry_separator': {
-      lineHeight: '2em',
+      lineHeight: '1em',
       verticalAlign: 'middle',
     },
 
     '--entry_text': {
-      lineHeight: '2em',
+      lineHeight: '1em',
       verticalAlign: 'middle',
     },
   },
