@@ -10,6 +10,7 @@ import { Frame } from './components/frame';
 import { Countdown } from './components/countdown';
 import { startWebSocket } from './utils/ws';
 import { StreamInfo } from './components/stream-info';
+import { EventLog } from './components/event-log';
 
 const STYLES = {
   'html, body': {
@@ -42,6 +43,7 @@ Splux.start(function (body, head) {
       frame: Frame,
       counter: Countdown,
       streamInfo: StreamInfo,
+      events: EventLog,
     });
   });
 

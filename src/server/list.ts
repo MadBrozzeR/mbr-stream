@@ -11,7 +11,7 @@ export class List<T> {
     const node = { value, next: null };
 
     if (this.last) {
-      this.last.next = node;
+      this.last = this.last.next = node;
     } else {
       this.root = this.last = node;
     }
@@ -19,10 +19,16 @@ export class List<T> {
     return value;
   }
 
-  remove(value: T) {
+  remove(check: (value: T) => boolean) {
+    const list = this;
+
     this.iterate(function (_, node) {
-      if (node.next && node.next.value === value) {
+      // TODO First element cannot be removed this way
+      if (node.next && check(node.next.value)) {
         node.next = node.next.next;
+        if (!node.next) {
+          list.last = node;
+        }
         return true;
       }
 

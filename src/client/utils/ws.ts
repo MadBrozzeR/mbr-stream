@@ -1,13 +1,9 @@
-import type { Host } from '../splux-host.js';
+import type { Host } from '../splux-host';
 import type { WSEvents, WSIncomeEvent } from '@common-types/ws-events';
+import { getDashName } from './utils';
 
 // const WS_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 const WS_URL = 'ws://localhost:8922/ws';
-
-const session = {
-  id: '',
-  ws: null as WebSocket | null,
-};
 
 export function wsConnect (
   url: string,
@@ -32,10 +28,9 @@ export function wsConnect (
     // console.log(data);
     handler(data);
   };
-  ws.onclose = function () {
-    if (session.ws === ws) {
-      wsConnect(url, handler, onCreate);
-    }
+  ws.onclose = function (event) {
+    console.log('close', event);
+    wsConnect(url, handler, onCreate);
   };
   ws.onopen = function () {
     isConnected = true;
@@ -46,6 +41,9 @@ export function wsConnect (
       }
     }
   }
+  ws.onerror = function (event) {
+    console.log(event);
+  }
 
   onCreate && onCreate(ws, send);
 
@@ -53,7 +51,7 @@ export function wsConnect (
 }
 
 export const startWebSocket = function (host: Host) {
-  wsConnect(WS_URL, function (message) {
+  wsConnect(WS_URL + `?dash=${getDashName()}`, function (message) {
     switch (message.type) {
       case 'notification':
         host.cast('eventSubEvent', message.payload);

@@ -78,3 +78,11 @@ export function changeModes (modes: Record<string, boolean>, newModes: string) {
 export function isDefined<T> (value: T | undefined | null): value is T {
   return value !== undefined && value !== null;
 }
+
+const DASH_NAME_RE = /^\/dash\/([^\/]+)/;
+
+export function getDashName () {
+  const dashIdMatch = DASH_NAME_RE.exec(window.location.pathname);
+
+  return dashIdMatch ? dashIdMatch[1] : 'unnamed';
+}

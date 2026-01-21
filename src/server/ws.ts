@@ -110,21 +110,69 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
   return wsClient;
 }
 
+type Client = {
+  info: {
+    name: string;
+  };
+  socket: ClientConnection;
+};
+
+/*
+function findClient (clients: List<Client>, socket: ClientConnection) {
+  return clients.iterate(function (client) { return client.socket === socket; });
+}
+*/
+
+function removeClient(clients: List<Client>, socket: ClientConnection) {
+  clients.remove(function (client) {
+    if (client.socket === socket) {
+      console.log(`Client ${client.info.name} disconnected`);
+      return true;
+    };
+
+    return false;
+  });
+}
+
+function getClientNames (clients: List<Client>) {
+  let names = '';
+
+  clients.iterate(function ({ info: { name } }) {
+    names += names ? `, ${name}` : name;
+  });
+
+  return names;
+}
+
+const DASH_NAME_RE = /dash=([^&]+)/;
+
 export function startWSServer () {
   type Listener = (this: ReturnType<typeof startWSServer>, event: WSIncomeEvent) => void;
 
-  const clients: ClientConnection[] = [];
+  const clients = new List<Client>();
   const listeners = new List<Listener>();
+
+  setInterval(function () {
+    ifc.sendData({ type: 'keepalive', payload: {} })
+  }, 45000);
 
   const ws = new MadSocket({
     connect() {
-      clients.push(this);
+      const client = this;
+
+      const dashNameMatch = DASH_NAME_RE.exec(client.request.url || '');
+      const name = dashNameMatch && dashNameMatch[1] || 'unknown';
+
+      clients.add({
+        info: { name },
+        socket: client,
+      });
+
+      console.log(`Client ${name} has connected`);
+      console.log(`Currently connected: ${getClientNames(clients)}`);
     },
     disconnect() {
-      const index = clients.indexOf(this);
-      if (index > -1) {
-        clients.splice(index, 1);
-      }
+      removeClient(clients, this)
     },
     message(messageData) {
       const message: WSIncomeEvent = JSON.parse(messageData.toString());
@@ -134,16 +182,18 @@ export function startWSServer () {
         listener.call(ifc, message);
       });
     }
-  });
+  }, { debug: console.log });
 
   const ifc = {
     attach(request: Request) {
       ws.leech(request.request, request.response);
     },
     send(message: string) {
-      for (let index = 0 ; index < clients.length ; ++index) {
-        clients[index]?.send(message);
-      }
+      clients.iterate(function (client) {
+        client.socket.send(message).catch(function () {
+          removeClient(clients, client.socket);
+        });
+      });
     },
     sendData(data: WSEvents) {
       console.log('WS Server -> Client:', data);

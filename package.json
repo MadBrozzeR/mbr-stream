@@ -27,7 +27,7 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "madsocket": "^2.1.8",
+    "madsocket": "^2.2.2",
     "mbr-config": "^1.1.1",
     "mbr-logger": "^0.0.1",
     "mbr-serv-request": "^0.3.2",
