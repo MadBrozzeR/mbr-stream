@@ -13,3 +13,5 @@ export type NotificationToast = {
   timeout?: number;
   audio?: string;
 };
+
+export type ChatMessageEvent = EventSubType['channel.chat.message']['payload'];

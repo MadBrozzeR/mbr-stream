@@ -86,3 +86,11 @@ export function getDashName () {
 
   return dashIdMatch ? dashIdMatch[1] : 'unnamed';
 }
+
+const TEMPLATE_KEY_RE = /\{\{(\w+)\}\}/g;
+
+export function useTemplate (template: string, substitutions: Record<string, string | number>) {
+  return template.replace(TEMPLATE_KEY_RE, function (source, key) {
+    return substitutions[key] ? substitutions[key].toString() : source;
+  });
+}

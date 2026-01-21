@@ -1,7 +1,8 @@
 import { newComponent } from '../splux-host';
-import type { EventPayloadData } from '../type';
+import type { ChatMessageEvent, EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { changeModes, isDefined, isEventType } from '../utils/utils';
+import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -24,7 +25,7 @@ const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.me
     message_type: 'text',
     message: {
       text: 'Message text, that is not too short, but still not too long',
-      fragments: [],
+      fragments: [{"type":"text","text":"3 emoji ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"PopNemo","cheermote":null,"emote":{"id":"emotesv2_5d523adb8bbb4786821cd7091e47da21","emote_set_id":"0","owner_id":"0","format":["static","animated"]},"mention":null},{"type":"text","text":" ya-ya ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"SirSword","cheermote":null,"emote":{"id":"301544922","emote_set_id":"300374282","owner_id":"139075904","format":["static"]},"mention":null}],
     },
     badges: [],
     source_broadcaster_user_id: '',
@@ -67,6 +68,11 @@ const STYLES = {
 
       '_name': {
         color: 'var(--color, white)',
+        verticalAlign: 'middle',
+      },
+
+      '_separator': {
+        verticalAlign: 'middle',
       },
     },
   },
@@ -74,7 +80,7 @@ const STYLES = {
 
 type ChatEntryParams = {
   user: string;
-  message: string;
+  message: string | ChatMessageEvent['message'];
   userColor?: string;
   persistent?: boolean;
 };
@@ -84,8 +90,12 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
   { user, message, userColor, persistent }: ChatEntryParams
 ) {
   const name = entry.dom('span.chatbox--entry_name').params({ innerText: user });
-  entry.dom('span').params({ innerText: ': ' });
-  entry.dom('span').params({ innerText: message });
+  entry.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
+  if (typeof message === 'string') {
+    entry.dom('span').params({ innerText: message });
+  } else {
+    entry.dom(MessageRow, { message });
+  }
 
   if (userColor) {
     name.node.style.setProperty('--color', userColor);
@@ -134,7 +144,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
   this.dom(Toolbox, { items: {
     test() { append({
       user: TEST_MODE.message.chatter_user_name,
-      message: TEST_MODE.message.message.text,
+      message: TEST_MODE.message.message,
       userColor: TEST_MODE.message.color,
     }) },
     clear() { clear(); host.send({ action: 'clear-all-chats' }); },
@@ -155,7 +165,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       if (isEventType(data.payload, 'channel.chat.message') && events.message) {
         append({
           user: data.payload.event.chatter_user_name,
-          message: data.payload.event.message.text,
+          message: data.payload.event.message,
           userColor: data.payload.event.color,
         });
       } else if (isEventType(data.payload, 'channel.follow') && events.follow) {

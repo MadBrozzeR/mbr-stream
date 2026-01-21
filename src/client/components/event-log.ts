@@ -1,6 +1,8 @@
 import { newComponent } from '../splux-host';
+import type { ChatMessageEvent } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { isEventType } from '../utils/utils';
+import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -14,12 +16,33 @@ const STYLES = {
       height: '100%',
       overflow: 'auto',
     },
+
+    '--entry_name': {
+      lineHeight: '2em',
+      verticalAlign: 'middle',
+      color: 'var(--color, inherit)',
+    },
+
+    '--entry_separator': {
+      lineHeight: '2em',
+      verticalAlign: 'middle',
+    },
+
+    '--entry_text': {
+      lineHeight: '2em',
+      verticalAlign: 'middle',
+    },
   },
+};
+
+const TEST_MESSAGE: ChatMessageEvent['message'] = {
+  text: 'Message text, that is not too short, but still not too long',
+  fragments: [{"type":"text","text":"3 emoji ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"PopNemo","cheermote":null,"emote":{"id":"emotesv2_5d523adb8bbb4786821cd7091e47da21","emote_set_id":"0","owner_id":"0","format":["static","animated"]},"mention":null},{"type":"text","text":" ya-ya ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"SirSword","cheermote":null,"emote":{"id":"301544922","emote_set_id":"300374282","owner_id":"139075904","format":["static"]},"mention":null}],
 };
 
 type LogEntryParams = {
   user: string;
-  message: string;
+  message: string | ChatMessageEvent['message'];
   userColor?: string;
 };
 
@@ -28,8 +51,12 @@ export const LogEntry = newComponent('div.event_log--entry', function (
   { user, message, userColor }: LogEntryParams
 ) {
   const name = entry.dom('span.event_log--entry_name').params({ innerText: user });
-  entry.dom('span').params({ innerText: ': ' });
-  entry.dom('span').params({ innerText: message });
+  entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
+  if (typeof message === 'string') {
+    entry.dom('span.event_log--entry_text').params({ innerText: message });
+  } else {
+    entry.dom(MessageRow, { message });
+  }
 
   if (userColor) {
     name.node.style.setProperty('--color', userColor);
@@ -56,7 +83,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   this.dom(Toolbox, { items: {
     test() {
-      append({ user: 'testMessage', message: 'Message text, that is not too short, but still not too long' });
+      append({ user: 'testMessage', message: TEST_MESSAGE});
     },
     move() { mover.show() },
   } }).dom('div.event_log--log', function (log) {
@@ -71,7 +98,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       if (isEventType(data.payload, 'channel.chat.message')) {
         append({
           user: data.payload.event.chatter_user_name,
-          message: data.payload.event.message.text,
+          message: data.payload.event.message,
           userColor: data.payload.event.color,
         });
       } else if (isEventType(data.payload, 'channel.follow')) {
