@@ -1,6 +1,7 @@
 type ListNode<T> = {
   value: T;
   next: ListNode<T> | null;
+  prev: ListNode<T> | null;
 };
 
 export class List<T> {
@@ -8,7 +9,7 @@ export class List<T> {
   last: ListNode<T> | null = null;
 
   add(value: T) {
-    const node = { value, next: null };
+    const node = { value, next: null, prev: this.last };
 
     if (this.last) {
       this.last = this.last.next = node;
@@ -22,13 +23,18 @@ export class List<T> {
   remove(check: (value: T) => boolean) {
     const list = this;
 
-    this.iterate(function (_, node) {
-      // TODO First element cannot be removed this way
-      if (node.next && check(node.next.value)) {
-        node.next = node.next.next;
-        if (!node.next) {
-          list.last = node;
+    return this.iterate(function (value, node) {
+      if (check(value)) {
+        if (list.root === node) {
+          list.root = node.next;
         }
+        if (list.last === node) {
+          list.last = node.prev;
+        }
+        if (node.prev) {
+          node.prev.next = node.next;
+        }
+
         return true;
       }
 

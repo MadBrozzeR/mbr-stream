@@ -111,9 +111,7 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
 }
 
 type Client = {
-  info: {
-    name: string;
-  };
+  info: { name: string };
   socket: ClientConnection;
 };
 
