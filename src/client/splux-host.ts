@@ -1,7 +1,7 @@
 import { Splux } from './lib-ref/splux';
 import { Styles } from './lib-ref/mbr-style';
 import type { Broadcast } from './utils/broadcaster';
-import type { WSIncomeEvent } from '@common-types/ws-events';
+import type { WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
 
 export function newHost () {
   const host = {
@@ -15,10 +15,16 @@ export function newHost () {
     wsSend(message: WSIncomeEvent) {
       console.log(message);
     },
-    send(message: WSIncomeEvent) {
+    send<T extends WSIncomeEventActions>(message: WSIncomeEvent<T>) {
       return fetch('/action', {
         method: 'POST',
         body: JSON.stringify(message),
+      }).then(function (response) {
+        if (!response.ok) {
+          throw response;
+        }
+
+        return response.json() as WSIncomeEventResponse<T>;
       });
     }
   };
