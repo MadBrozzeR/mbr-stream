@@ -1,4 +1,6 @@
 import { newComponent } from '../splux-host';
+import { isCast } from '../utils/broadcaster';
+import { isEventType } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -62,5 +64,33 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       log.dom(LogEntry, params);
       log.node.scrollTo(0, log.node.scrollHeight);
     };
+  });
+
+  this.tuneIn(function (data) {
+    if (isCast('eventSubEvent', data)) {
+      if (isEventType(data.payload, 'channel.chat.message')) {
+        append({
+          user: data.payload.event.chatter_user_name,
+          message: data.payload.event.message.text,
+          userColor: data.payload.event.color,
+        });
+      } else if (isEventType(data.payload, 'channel.follow')) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.user_name} is now FOLLOWING!`,
+        });
+      } else if (isEventType(data.payload, 'channel.subscribe')) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.user_name} is now SUBSCRIBED!`,
+        });
+      } else if (isEventType(data.payload, 'channel.raid')) {
+        append({
+          user: '[INFO]',
+          message: `${data.payload.event.from_broadcaster_user_name} RAIDED your stream!` +
+            ` (${data.payload.event.viewers} viewers)`,
+        });
+      }
+    }
   });
 });
