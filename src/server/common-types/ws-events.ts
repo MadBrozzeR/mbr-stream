@@ -28,8 +28,26 @@ export type WSEvent<K extends keyof WSEventsMap = keyof WSEventsMap> = {
   payload: WSEventsMap[K];
 };
 
-export type WSIncomeEvent = {
-  action: 'get-stream-info';
-} | {
-  action: 'clear-all-chats';
+export type WSIncomeEventParams = {
+  'get-stream-info': {
+    request: void;
+    response: StreamInfo;
+  };
+  'clear-all-chats': {
+    request: void;
+    response: void;
+  };
 };
+
+export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEventParams> = {
+  [K in T]: WSIncomeEventParams[K]['request'] extends void ? {
+    action: K;
+  } : {
+    action: K;
+    payload: WSIncomeEventParams;
+  }
+}[T];
+
+export type WSIncomeEventActions = keyof WSIncomeEventParams;
+
+export type WSIncomeEventResponse<T extends WSIncomeEventActions> = Promise<WSIncomeEventParams[T]['response']>;
