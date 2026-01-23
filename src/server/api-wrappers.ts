@@ -160,3 +160,74 @@ export function createPolling<R> (
     },
   };
 }
+
+export function dataStorage<R> (apiRequest: () => Promise<R | null>) {
+  let lastResult: R | null = null;
+
+  return function (force?: boolean) {
+    if (lastResult && !force) {
+      return Promise.resolve(lastResult);
+    }
+
+    return apiRequest().then(function (result) {
+      if (result === null) {
+        return result;
+      }
+
+      return lastResult = result;
+    });
+  };
+}
+
+export function dataStorageKeys<R> (apiRequest: (key: string) => Promise<R | null>) {
+  const results: Record<string, R> = {};
+
+  return function (key: string, force?: boolean) {
+    if (results[key] && !force) {
+      return results[key];
+    }
+
+    return apiRequest(key).then(function (response) {
+      if (response === null) {
+        return response;
+      }
+
+      return results[key] = response;
+    });
+  }
+}
+
+/*
+export function apiDataStorage<S extends Record<string, () => Promise<any>>>(apis: S) {
+  const result = {} as { [K in keyof S]: {
+    get: () => ReturnType<S[K]>;
+    getForced: () => ReturnType<S[K]>;
+  } };
+
+  for (const key in apis) {
+    const api = apis[key];
+    let resultData: any = null;
+
+    if (api) {
+      result[key] = {
+        get: function () {
+          if (resultData) {
+            return Promise.resolve(resultData);
+          }
+
+          return api().then(function (data) {
+            resultData = data;
+            return data;
+          });
+        },
+        getForced: function () {
+          return api().then(function (data) {
+            resultData = data;
+            return data;
+          });
+        }
+      };
+    }
+  }
+}
+*/

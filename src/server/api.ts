@@ -122,5 +122,11 @@ export const api = {
       // user:bot and/or channel:bot are required for App Access Token
       return userApiRequest<Types.SendChatMessageResponse>(`${API.CHAT}/messages`, 'POST', params);
     },
+    getGlobalChatBadges() {
+      return userApiRequest<Types.GetGlobalChatBadgesResponse>(`${API.CHAT}/badges/global`);
+    },
+    getChannelChatBadges(params: Types.GetChannelChatBadgesRequest) {
+      return userApiRequest<Types.GetChannelChatBadgesResponse>([`${API.CHAT}/badges/global`, params]);
+    },
   },
 };

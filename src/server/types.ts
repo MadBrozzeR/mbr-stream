@@ -234,3 +234,25 @@ export type SendChatMessageResponse = {
     };
   }>;
 };
+
+export type GetGlobalChatBadgesResponse = {
+  data: Array<{
+    set_id: string;
+    versions: Array<{
+      id: string;
+      image_url_1x: string;
+      image_url_2x: string;
+      image_url_4x: string;
+      title: string;
+      description: string;
+      click_action: string | null;
+      click_url: string | null;
+    }>;
+  }>;
+};
+
+export type GetChannelChatBadgesRequest = {
+  broadcaster_id: string;
+};
+
+export type GetChannelChatBadgesResponse = GetGlobalChatBadgesResponse;

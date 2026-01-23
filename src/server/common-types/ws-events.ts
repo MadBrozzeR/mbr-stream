@@ -12,9 +12,30 @@ export type StreamInfo = {
   chatters: Chatter[];
 };
 
+export type BadgeStore = {
+  [id: string]: {
+    [id: string]: {
+      url: string;
+      title: string;
+      description: string;
+      click: { url: string; text: string; } | null;
+    };
+  };
+};
+
+export type UserStore = {
+  name: string;
+  image: string;
+  description: string;
+};
+
 export type WSEventsMap = {
   keepalive: {};
-  notification: EventSubMessageMap['notification']['payload'];
+  notification: {
+    event: EventSubMessageMap['notification']['payload'];
+    user: UserStore | null,
+    badges: BadgeStore[string][string][],
+  };
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
 };

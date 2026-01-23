@@ -1,5 +1,4 @@
-import type { StreamInfo } from '@common-types/ws-events';
-import type { Notification } from '../type';
+import type { StreamInfo, WSEvent } from '@common-types/ws-events';
 
 type Cast<T extends string, P extends {}> = {
   type: T;
@@ -8,7 +7,7 @@ type Cast<T extends string, P extends {}> = {
 
 export type Broadcast = {
   hashStateChange: Record<string, Record<string, string> | null>;
-  eventSubEvent: Notification;
+  eventSubEvent: WSEvent<'notification'>['payload'];
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
 };

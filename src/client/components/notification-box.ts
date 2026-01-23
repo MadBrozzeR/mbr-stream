@@ -259,28 +259,28 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
 
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {
-      if (isEventType(data.payload, 'channel.chat.message')) {
-        if (firstMessage.check(data.payload.event.chatter_user_id)) {
+      if (isEventType(data.payload.event, 'channel.chat.message')) {
+        if (firstMessage.check(data.payload.event.event.chatter_user_id)) {
           push({
-            text: data.payload.event.message.text,
+            text: data.payload.event.event.message.text,
             audio: 'amethyst-break1.ogg',
           });
         }
-      } else if (isEventType(data.payload, 'channel.follow')) {
+      } else if (isEventType(data.payload.event, 'channel.follow')) {
         push({
-          text: `${data.payload.event.user_name} is now FOLLOWING my channel!!!`,
+          text: `${data.payload.event.event.user_name} is now FOLLOWING my channel!!!`,
           audio: 'witch-ambient1.ogg',
           timeout: 10000,
         });
-      } else if (isEventType(data.payload, 'channel.subscribe')) {
+      } else if (isEventType(data.payload.event, 'channel.subscribe')) {
         push({
-          text: `${data.payload.event.user_name} is now SUBSCRIBED on my channel!!!`,
+          text: `${data.payload.event.event.user_name} is now SUBSCRIBED on my channel!!!`,
           audio: 'witch-ambient1.ogg',
           timeout: 10000,
         });
-      } else if (isEventType(data.payload, 'channel.raid')) {
+      } else if (isEventType(data.payload.event, 'channel.raid')) {
         push({
-          text: `${data.payload.event.from_broadcaster_user_name} is RAIDING my channel!!!`,
+          text: `${data.payload.event.event.from_broadcaster_user_name} is RAIDING my channel!!!`,
           audio: 'raidhorn4.ogg',
           timeout: 5000,
         });

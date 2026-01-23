@@ -2,12 +2,12 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, isDefined, isEventSubMessageType, jsonToUrlEncoded } from './utils';
+import { getStringRecord, getUserBadges, isDefined, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
 import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
-import { createPolling, getStreamInfo } from './api-wrappers';
-import { WSIncomeEvent } from './common-types/ws-events';
+import { createPolling, dataStorage, dataStorageKeys, getStreamInfo } from './api-wrappers';
+import type { WSIncomeEvent, BadgeStore, WSEvent } from './common-types/ws-events';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -38,6 +38,38 @@ const streamInfoPolling = config.startChat ? createPolling(120000, getStreamInfo
   wsServer.sendData({ type: 'streamInfo', payload: streamInfo });
 }) : null;
 
+const apiStorage = {
+  getBadges: dataStorage(function () {
+    return api.Chat.getGlobalChatBadges().then(function (response) {
+      return response.data.reduce<BadgeStore>(function (result, badge) {
+        result[badge.set_id] = badge.versions.reduce<BadgeStore[string]>(function (result, version) {
+          result[version.id] = {
+            url: version.image_url_2x,
+            title: version.title,
+            description: version.description,
+            click: (version.click_url && version.click_action) ? {
+              url: version.click_url,
+              text: version.click_action
+            } : null,
+          };
+          return result;
+        }, {})
+        return result;
+      }, {});
+    });
+  }),
+
+  getUser: dataStorageKeys(function (id) {
+    return api.Users.getUsers({ id }).then(function (response) {
+      return response.data[0] ? {
+        name: response.data[0].display_name,
+        image: response.data[0].profile_image_url,
+        description: response.data[0].description,
+      } : null;
+    });
+  }),
+};
+
 function processIncomingMessage (message: WSIncomeEvent) {
   switch (message.action) {
     case 'get-stream-info':
@@ -55,12 +87,28 @@ function processIncomingMessage (message: WSIncomeEvent) {
 
 try {
   startWSClient(function (message) {
-    if (isEventSubMessageType(message, 'session_keepalive')) {
-      wsServer.sendData({ type: 'keepalive', payload: message.payload });
-    }
+    if (isEventSubMessageType(message, 'notification')) {
+      const payload: WSEvent<'notification'>['payload'] = {
+        event: message.payload,
+        user: null,
+        badges: [],
+      };
 
-    else if (isEventSubMessageType(message, 'notification')) {
-      wsServer.sendData({ type: 'notification', payload: message.payload });
+      const messagePayload = message.payload;
+      const promise = isEventType(messagePayload, 'channel.chat.message')
+        ? Promise.all([
+          apiStorage.getBadges(),
+          apiStorage.getUser(messagePayload.event.chatter_user_id),
+        ]).then(function ([badgeStore, user]) {
+          if (badgeStore) {
+            payload.badges = getUserBadges(messagePayload.event.badges, badgeStore);
+          }
+          payload.user = user;
+        })
+        : Promise.resolve(payload);
+      promise.then(function () {
+        wsServer.sendData({ type: 'notification', payload });
+      });
     }
   });
 

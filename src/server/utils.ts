@@ -4,7 +4,8 @@ import http from 'http';
 import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod } from './types';
 import { config } from './config';
-import type { EventSubMessageMap } from './common-types/eventsub-types';
+import type { BadgeInfo, EventSubMessageMap, EventSubNotification, EventSubType } from './common-types/eventsub-types';
+import type { BadgeStore } from './common-types/ws-events';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';
@@ -144,6 +145,34 @@ export function isEventSubMessageType<K extends keyof EventSubMessageMap> (
   return data.metadata.message_type === type;
 };
 
+export type Notification<T extends keyof EventSubType = keyof EventSubType> = EventSubNotification<T>['payload'];
+
+export function isEventType<T extends keyof EventSubType>(
+  notification: Notification,
+  ...types: T[]
+): notification is { [K in T]: Notification<K> }[T] {
+  for (let index = 0 ; index < types.length ; ++index) {
+    if (notification.subscription.type === types[index]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function areMatchedObjects (object1: object, object2: object) {
   return JSON.stringify(object1) === JSON.stringify(object2);
+}
+
+export function getUserBadges (badges: BadgeInfo[], badgeStore: BadgeStore) {
+  const result: BadgeStore[string][string][] = [];
+
+  badges.forEach(function (badgeInfo) {
+    const data = badgeStore[badgeInfo.set_id]?.[badgeInfo.id];
+    if (data) {
+      result.push(data);
+    }
+  });
+
+  return result;
 }

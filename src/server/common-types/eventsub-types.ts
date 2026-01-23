@@ -95,6 +95,12 @@ type EventSubTypeEntity<V extends number, C extends Record<string, Condition<any
 
 export type AnimationVariant = 'static' | 'animated';
 
+export type BadgeInfo = {
+  set_id: string;
+  id: string;
+  info: string;
+};
+
 export type EventSubType = {
   'channel.follow': EventSubTypeEntity<2, {
     broadcaster_user_id: Condition;
@@ -148,11 +154,7 @@ export type EventSubType = {
       }>;
     };
     message_type: 'text' | 'channel_points_highlighted' | 'channel_points_sub_only' | 'user_intro' | 'power_ups_message_effect' | 'power_ups_gigantified_emote';
-    badges: Array<{
-      set_id: string;
-      id: string;
-      info: string;
-    }>;
+    badges: BadgeInfo[];
     cheer?: null | {
       bits: number;
     };

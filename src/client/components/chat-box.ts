@@ -168,27 +168,27 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
         clear();
       }
     } else if (isCast('eventSubEvent', data)) {
-      if (isEventType(data.payload, 'channel.chat.message') && events.message) {
+      if (isEventType(data.payload.event, 'channel.chat.message') && events.message) {
         append({
-          user: data.payload.event.chatter_user_name,
-          message: data.payload.event.message,
-          userColor: data.payload.event.color,
+          user: data.payload.event.event.chatter_user_name,
+          message: data.payload.event.event.message,
+          userColor: data.payload.event.event.color,
         });
-      } else if (isEventType(data.payload, 'channel.follow') && events.follow) {
+      } else if (isEventType(data.payload.event, 'channel.follow') && events.follow) {
         append({
           user: '[INFO]',
-          message: `${data.payload.event.user_name} is now FOLLOWING!`,
+          message: `${data.payload.event.event.user_name} is now FOLLOWING!`,
         });
-      } else if (isEventType(data.payload, 'channel.subscribe') && events.subscribe) {
+      } else if (isEventType(data.payload.event, 'channel.subscribe') && events.subscribe) {
         append({
           user: '[INFO]',
-          message: `${data.payload.event.user_name} is now SUBSCRIBED!`,
+          message: `${data.payload.event.event.user_name} is now SUBSCRIBED!`,
         });
-      } else if (isEventType(data.payload, 'channel.raid') && events.raid) {
+      } else if (isEventType(data.payload.event, 'channel.raid') && events.raid) {
         append({
           user: '[INFO]',
-          message: `${data.payload.event.from_broadcaster_user_name} RAIDED your stream!` +
-            ` (${data.payload.event.viewers} viewers)`,
+          message: `${data.payload.event.event.from_broadcaster_user_name} RAIDED your stream!` +
+            ` (${data.payload.event.event.viewers} viewers)`,
         });
       }
     }
