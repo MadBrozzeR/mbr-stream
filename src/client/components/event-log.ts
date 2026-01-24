@@ -6,7 +6,7 @@ import { isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
-import { Badges } from './badges';
+import { UserName } from './user-name';
 
 type Params = {
   id: string;
@@ -17,12 +17,6 @@ const STYLES = {
     '--log': {
       height: '100%',
       overflow: 'auto',
-    },
-
-    '--entry_name': {
-      lineHeight: '1em',
-      verticalAlign: 'middle',
-      color: 'var(--color, inherit)',
     },
 
     '--entry_separator': {
@@ -53,17 +47,12 @@ export const LogEntry = newComponent('div.event_log--entry', function (
   entry,
   { user, message, userColor, badges }: LogEntryParams
 ) {
-  entry.dom(Badges, { badges });
-  const name = entry.dom('span.event_log--entry_name').params({ innerText: user });
+  entry.dom(UserName, { name: user, badges, color: userColor });
   entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
     entry.dom('span.event_log--entry_text').params({ innerText: message });
   } else {
     entry.dom(MessageRow, { message });
-  }
-
-  if (userColor) {
-    name.node.style.setProperty('--color', userColor);
   }
 });
 

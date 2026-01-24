@@ -3,10 +3,10 @@ import { newComponent } from '../splux-host';
 import type { ChatMessageEvent, EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { changeModes, isDefined, isEventType } from '../utils/utils';
-import { Badges } from './badges';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
+import { UserName } from './user-name';
 
 type Props = {
   id: string;
@@ -68,11 +68,6 @@ const STYLES = {
         transition: '.5s opacity ease-in-out',
       },
 
-      '_name': {
-        color: 'var(--color, white)',
-        verticalAlign: 'middle',
-      },
-
       '_separator': {
         verticalAlign: 'middle',
       },
@@ -94,8 +89,7 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
 ) {
   let disableAnimation = function () {};
 
-  entry.dom(Badges, { badges });
-  const name = entry.dom('span.chatbox--entry_name').params({ innerText: user });
+  this.dom(UserName, { name: user, badges, color: userColor });
 
   entry.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
@@ -105,10 +99,6 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
     disableAnimation = function () {
       messageRow.setAnimation('static');
     };
-  }
-
-  if (userColor) {
-    name.node.style.setProperty('--color', userColor);
   }
 
   if (!persistent) {
