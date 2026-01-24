@@ -1,11 +1,10 @@
 import { AnimationVariant } from '@common-types/eventsub-types';
 import { newComponent } from '../splux-host';
 import type { ChatMessageEvent } from '../type';
-import { useTemplate } from '../utils/utils';
+import { Emote } from './emote';
 
 type Params = {
   message: ChatMessageEvent['message'];
-  animation?: AnimationVariant | 'default';
 };
 
 const STYLES = {
@@ -24,38 +23,36 @@ const STYLES = {
   },
 };
 
-const EMOTE_URL = 'https://static-cdn.jtvnw.net/emoticons/v2/{{id}}/{{animation}}/dark/2.0';
-
-export const MessageRow = newComponent('div.message_row', function (row, { message, animation = 'default' }: Params) {
+export const MessageRow = newComponent('div.message_row', function (row, { message }: Params) {
   this.host.styles.add('message-row', STYLES);
+  const emotes: Array<ReturnType<typeof Emote>> = [];
 
-  function draw (message: ChatMessageEvent['message'], animation: AnimationVariant | 'default') {
-    row.clear();
+  for (let index = 0 ; index < message.fragments.length ; ++index) {
+    const fragment = message.fragments[index];
 
-    for (let index = 0 ; index < message.fragments.length ; ++index) {
-      const fragment = message.fragments[index];
-
-      switch (fragment?.type) {
-        case 'text':
-        case 'cheermote':
-        case 'mention':
-          row.dom('span.message_row--text').params({ innerText: fragment.text });
-          break;
-        case 'emote':
-          fragment.emote && row.dom('img.message_row--emote').params({
+    switch (fragment?.type) {
+      case 'text':
+      case 'cheermote':
+      case 'mention':
+        row.dom('span.message_row--text').params({ innerText: fragment.text });
+        break;
+      case 'emote':
+        if (fragment.emote) {
+          emotes.push(row.dom(Emote, {
+            id: fragment.emote.id,
             alt: fragment.text,
-            src: useTemplate(EMOTE_URL, { id: fragment.emote.id, animation }),
-          });
-          break;
-      }
+            className: 'message_row--emote',
+          }));
+        }
+        break;
     }
   }
 
-  draw(message, animation);
-
   return {
     setAnimation(animation: AnimationVariant | 'default') {
-      draw(message, animation);
+      emotes.forEach(function (emote) {
+        emote.setAnimation(animation);
+      });
     },
   };
 });

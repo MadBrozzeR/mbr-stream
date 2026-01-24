@@ -4,6 +4,7 @@ import type { NotificationToast } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { firstMessage } from '../utils/notification-utils';
 import { changeModes, imageAtlas, isDefined, isEventType } from '../utils/utils';
+import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -179,7 +180,13 @@ const Popup = newComponent('div.notification_popup', function (
     foreground.dom('div.notification_popup--foreground_part4');
   });
   this.dom('div.notification_popup--info', block => {
-    block.dom('div.notification_popup--info_text').params({ innerText: text });
+    block.dom('div.notification_popup--info_text', function () {
+      if (typeof text === 'string') {
+        this.params({ innerText: text });
+      } else {
+        this.dom(MessageRow, { message: text });
+      }
+    });
   });
 
   if (audio && !muted) {
@@ -262,7 +269,7 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
       if (isEventType(data.payload.event, 'channel.chat.message')) {
         if (firstMessage.check(data.payload.event.event.chatter_user_id)) {
           push({
-            text: data.payload.event.event.message.text,
+            text: data.payload.event.event.message,
             audio: 'amethyst-break1.ogg',
           });
         }

@@ -101,6 +101,30 @@ export type BadgeInfo = {
   info: string;
 };
 
+export type Message = {
+  text: string;
+  fragments: Array<{
+    type: 'text' | 'cheermote' | 'emote' | 'mention';
+    text: string;
+    cheermote?: null | {
+      prefix: string;
+      bits: number;
+      tier: number;
+    };
+    emote?: null | {
+      id: string;
+      emote_set_id: string;
+      owner_id: string;
+      format: Array<AnimationVariant>;
+    };
+    mention?: null | {
+      user_id: string;
+      user_name: string;
+      user_login: string;
+    };
+  }>;
+};
+
 export type EventSubType = {
   'channel.follow': EventSubTypeEntity<2, {
     broadcaster_user_id: Condition;
@@ -130,29 +154,7 @@ export type EventSubType = {
     chatter_user_name: string;
     chatter_user_login: string;
     message_id: string;
-    message: {
-      text: string;
-      fragments: Array<{
-        type: 'text' | 'cheermote' | 'emote' | 'mention';
-        text: string;
-        cheermote?: null | {
-          prefix: string;
-          bits: number;
-          tier: number;
-        };
-        emote?: null | {
-          id: string;
-          emote_set_id: string;
-          owner_id: string;
-          format: Array<AnimationVariant>;
-        };
-        mention?: null | {
-          user_id: string;
-          user_name: string;
-          user_login: string;
-        };
-      }>;
-    };
+    message: Message;
     message_type: 'text' | 'channel_points_highlighted' | 'channel_points_sub_only' | 'user_intro' | 'power_ups_message_effect' | 'power_ups_gigantified_emote';
     badges: BadgeInfo[];
     cheer?: null | {
