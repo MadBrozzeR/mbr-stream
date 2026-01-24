@@ -12,14 +12,16 @@ export type StreamInfo = {
   chatters: Chatter[];
 };
 
+export type BadgeData = {
+  url: string;
+  title: string;
+  description: string;
+  click: { url: string; text: string; } | null;
+};
+
 export type BadgeStore = {
   [id: string]: {
-    [id: string]: {
-      url: string;
-      title: string;
-      description: string;
-      click: { url: string; text: string; } | null;
-    };
+    [id: string]: BadgeData;
   };
 };
 
@@ -34,7 +36,7 @@ export type WSEventsMap = {
   notification: {
     event: EventSubMessageMap['notification']['payload'];
     user: UserStore | null,
-    badges: BadgeStore[string][string][],
+    badges: BadgeData[],
   };
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';

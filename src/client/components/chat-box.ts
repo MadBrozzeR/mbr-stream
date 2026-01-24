@@ -1,7 +1,9 @@
+import type { BadgeData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
 import type { ChatMessageEvent, EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { changeModes, isDefined, isEventType } from '../utils/utils';
+import { Badges } from './badges';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
@@ -80,6 +82,7 @@ const STYLES = {
 
 type ChatEntryParams = {
   user: string;
+  badges: BadgeData[];
   message: string | ChatMessageEvent['message'];
   userColor?: string;
   persistent?: boolean;
@@ -87,9 +90,11 @@ type ChatEntryParams = {
 
 const ChatEntry = newComponent('div.chatbox--entry', function (
   entry,
-  { user, message, userColor, persistent }: ChatEntryParams
+  { user, message, userColor, badges, persistent }: ChatEntryParams
 ) {
   let disableAnimation = function () {};
+
+  entry.dom(Badges, { badges });
   const name = entry.dom('span.chatbox--entry_name').params({ innerText: user });
 
   entry.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
@@ -150,6 +155,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
   this.dom(Toolbox, { items: {
     test() { append({
       user: TEST_MODE.message.chatter_user_name,
+      badges: [],
       message: TEST_MODE.message.message,
       userColor: TEST_MODE.message.color,
     }) },
@@ -171,22 +177,26 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       if (isEventType(data.payload.event, 'channel.chat.message') && events.message) {
         append({
           user: data.payload.event.event.chatter_user_name,
+          badges: data.payload.badges,
           message: data.payload.event.event.message,
           userColor: data.payload.event.event.color,
         });
       } else if (isEventType(data.payload.event, 'channel.follow') && events.follow) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.user_name} is now FOLLOWING!`,
         });
       } else if (isEventType(data.payload.event, 'channel.subscribe') && events.subscribe) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.user_name} is now SUBSCRIBED!`,
         });
       } else if (isEventType(data.payload.event, 'channel.raid') && events.raid) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.from_broadcaster_user_name} RAIDED your stream!` +
             ` (${data.payload.event.event.viewers} viewers)`,
         });

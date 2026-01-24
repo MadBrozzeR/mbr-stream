@@ -1,3 +1,4 @@
+import type { BadgeData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
 import type { ChatMessageEvent } from '../type';
 import { isCast } from '../utils/broadcaster';
@@ -5,6 +6,7 @@ import { isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
+import { Badges } from './badges';
 
 type Params = {
   id: string;
@@ -42,14 +44,16 @@ const TEST_MESSAGE: ChatMessageEvent['message'] = {
 
 type LogEntryParams = {
   user: string;
+  badges: BadgeData[];
   message: string | ChatMessageEvent['message'];
   userColor?: string;
 };
 
 export const LogEntry = newComponent('div.event_log--entry', function (
   entry,
-  { user, message, userColor }: LogEntryParams
+  { user, message, userColor, badges }: LogEntryParams
 ) {
+  entry.dom(Badges, { badges });
   const name = entry.dom('span.event_log--entry_name').params({ innerText: user });
   entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
@@ -83,7 +87,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   this.dom(Toolbox, { items: {
     test() {
-      append({ user: 'testMessage', message: TEST_MESSAGE});
+      append({ user: 'testMessage', message: TEST_MESSAGE, badges: []});
     },
     move() { mover.show() },
   } }).dom('div.event_log--log', function (log) {
@@ -98,22 +102,26 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       if (isEventType(data.payload.event, 'channel.chat.message')) {
         append({
           user: data.payload.event.event.chatter_user_name,
+          badges: data.payload.badges,
           message: data.payload.event.event.message,
           userColor: data.payload.event.event.color,
         });
       } else if (isEventType(data.payload.event, 'channel.follow')) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.user_name} is now FOLLOWING!`,
         });
       } else if (isEventType(data.payload.event, 'channel.subscribe')) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.user_name} is now SUBSCRIBED!`,
         });
       } else if (isEventType(data.payload.event, 'channel.raid')) {
         append({
           user: '[INFO]',
+          badges: [],
           message: `${data.payload.event.event.from_broadcaster_user_name} RAIDED your stream!` +
             ` (${data.payload.event.event.viewers} viewers)`,
         });

@@ -5,7 +5,7 @@ import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod } from './types';
 import { config } from './config';
 import type { BadgeInfo, EventSubMessageMap, EventSubNotification, EventSubType } from './common-types/eventsub-types';
-import type { BadgeStore } from './common-types/ws-events';
+import type { BadgeData, BadgeStore } from './common-types/ws-events';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';
@@ -165,7 +165,7 @@ export function areMatchedObjects (object1: object, object2: object) {
 }
 
 export function getUserBadges (badges: BadgeInfo[], badgeStore: BadgeStore) {
-  const result: BadgeStore[string][string][] = [];
+  const result: BadgeData[] = [];
 
   badges.forEach(function (badgeInfo) {
     const data = badgeStore[badgeInfo.set_id]?.[badgeInfo.id];
