@@ -80,7 +80,7 @@ const STYLES = {
 
 type ChatEntryParams = {
   user: string;
-  message: string | ChatMessageEvent['message'];
+  message: string | ChatMessageEvent;
   userColor?: string;
   persistent?: boolean;
 };

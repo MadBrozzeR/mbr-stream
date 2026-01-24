@@ -35,14 +35,14 @@ const STYLES = {
   },
 };
 
-const TEST_MESSAGE: ChatMessageEvent['message'] = {
+const TEST_MESSAGE: ChatMessageEvent = {
   text: 'Message text, that is not too short, but still not too long',
   fragments: [{"type":"text","text":"3 emoji ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"PopNemo","cheermote":null,"emote":{"id":"emotesv2_5d523adb8bbb4786821cd7091e47da21","emote_set_id":"0","owner_id":"0","format":["static","animated"]},"mention":null},{"type":"text","text":" ya-ya ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"SirSword","cheermote":null,"emote":{"id":"301544922","emote_set_id":"300374282","owner_id":"139075904","format":["static"]},"mention":null}],
 };
 
 type LogEntryParams = {
   user: string;
-  message: string | ChatMessageEvent['message'];
+  message: string | ChatMessageEvent;
   userColor?: string;
 };
 
