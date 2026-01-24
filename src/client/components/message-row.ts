@@ -4,7 +4,7 @@ import type { ChatMessageEvent } from '../type';
 import { Emote } from './emote';
 
 type Params = {
-  message: ChatMessageEvent['message'];
+  message: ChatMessageEvent;
 };
 
 const STYLES = {

@@ -78,7 +78,7 @@ const STYLES = {
 type ChatEntryParams = {
   user: string;
   badges: BadgeData[];
-  message: string | ChatMessageEvent['message'];
+  message: string | ChatMessageEvent;
   userColor?: string;
   persistent?: boolean;
 };
