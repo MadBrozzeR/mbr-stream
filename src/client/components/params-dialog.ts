@@ -9,6 +9,7 @@ type Props = {
   onClose?: () => void | boolean;
   onChange?: (value: string, name: string) => void;
   onApply?: (values: Values) => void | boolean;
+  onDelete?: () => void;
 };
 
 const STYLES = {
@@ -32,11 +33,29 @@ const STYLES = {
       boxSizing: 'border-box',
     },
 
+    '--buttons': {
+      marginTop: '12px',
+      display: 'flex',
+      gap: '8px',
+    },
+
     '--apply': {
-      width: '400px',
+      flex: '1',
       boxSizing: 'border-box',
       fontSize: '24px',
-      marginTop: '12px',
+      height: '1.5em',
+      border: '1px solid black',
+      borderRadius: '4px',
+    },
+
+    '--delete': {
+      height: '1.5em',
+      width: '1.5em',
+      boxSizing: 'border-box',
+      fontSize: '24px',
+      backgroundColor: '#faa',
+      border: '1px solid black',
+      borderRadius: '4px',
     },
   },
 };
@@ -58,6 +77,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
   onClose,
   onChange,
   onApply,
+  onDelete,
 }: Props) {
   const { host } = this;
   host.styles.add('params_dialog', STYLES);
@@ -92,19 +112,32 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
       });
     }
 
-    form.dom('button.params_dialog--apply').params({ innerText: 'Apply', onclick(event) {
-      event.preventDefault();
-      const values: Values = {};
+    form.dom('div.params_dialog--buttons', function () {
+      this.dom('button.params_dialog--apply').params({
+        innerText: 'Apply',
+        onclick(event) {
+          event.preventDefault();
+          const values: Values = {};
 
-      iterateInputs(inputs, function (input, key) {
-        values[key] = input.value;
+          iterateInputs(inputs, function (input, key) {
+            values[key] = input.value;
+          });
+
+          if (!onApply || onApply(values) !== false) {
+            currentValues = values;
+            modal.close();
+          }
+        }
       });
 
-      if (!onApply || onApply(values) !== false) {
-        currentValues = values;
-        modal.close();
-      }
-    } });
+      onDelete && this.dom('button.params_dialog--delete').params({
+        innerHTML: '&#x1F5D1',
+        onclick(event) {
+          event.preventDefault();
+          onDelete();
+        }
+      });
+    });
   });
 
   return {

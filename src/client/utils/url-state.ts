@@ -4,7 +4,7 @@ type State = {
   parsed: Record<string, UrlStateItemData>;
 };
 
-const RE = /[?&]([-\w]+)(?:=([^&]+))?/g;
+const RE = /[?&]([-\w+]+)(?:=([^&]+))?/g;
 const EMPTY_STATE: State = { raw: {}, parsed: {} };
 
 function parseUrl (current: State = EMPTY_STATE) {

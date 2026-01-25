@@ -2,6 +2,7 @@ import { Splux } from '../lib-ref/splux';
 import { newComponent } from '../splux-host';
 import { isCast } from '../utils/broadcaster';
 import { urlState } from '../utils/url-state';
+import { splitByFirst } from '../utils/utils';
 import { ParamsDialog } from './params-dialog';
 
 type Props = {
@@ -59,9 +60,10 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   component.node.classList.add(CLASS_NAME);
   let currentVars = { ...DEFAULT_VARS, ...initialVars };
   applyVars(currentVars, component);
+  const [, elementName] = splitByFirst(id, '+');
 
   const dialog = ParamsDialog.call(this, this, {
-    title: title || id,
+    title: (title || id) + (elementName ? ` (${elementName})` : ''),
     values: currentVars,
     onChange(value, name) {
       const concurrent = MUTUALLY_EXCLUSIVE[name];
@@ -74,6 +76,9 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       currentVars = values;
       applyVars(currentVars, component);
       urlState.set(id, values);
+    },
+    onDelete() {
+      urlState.remove(id);
     },
   });
 

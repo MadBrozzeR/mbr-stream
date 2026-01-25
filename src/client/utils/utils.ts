@@ -37,22 +37,36 @@ export function isKeyOf<T extends {}> (key: string | number | symbol, source: T)
   return key in source;
 }
 
+export function splitByFirst (name: string, glue: string): [string, string] {
+  const position = name.indexOf(glue);
+
+  return position > -1 ? [name.substring(0, position), name.substring(position + glue.length)] : [name, ''];
+}
+
 export function useModuleManager (
   root: Splux<any, Host>,
   components: Record<string, Component<any, Host, void, { id: string; }>>
 ) {
-  const modules = Object.keys(components).reduce<Record<string, null | Splux<any, Host>>>(function (result, key) {
-    result[key] = null;
-    return result;
-  }, {});
+  const modules: Record<string, null | Splux<any, Host>> = {};
 
   return function (idSet: Record<string, unknown>) {
+    const mentioned: Record<string, true> = {};
+
+    for (const id in idSet) {
+      const [componentId] = splitByFirst(id, '+');
+
+      if (components[componentId]) {
+        mentioned[id] = true;
+        if (!modules[id]) {
+          modules[id] = root.dom(components[componentId], { id });
+        }
+      }
+    }
+
     for (const id in modules) {
-      if (modules[id] && !(id in idSet)) {
+      if (modules[id] && !mentioned[id]) {
         modules[id].remove();
-        modules[id] = null;
-      } else if (!modules[id] && id in idSet && components[id]) {
-        modules[id] = root.dom(components[id], { id });
+        delete modules[id];
       }
     }
   }
