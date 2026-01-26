@@ -144,6 +144,10 @@ function getClientNames (clients: List<Client>) {
 
 const DASH_NAME_RE = /dash=([^&]+)/;
 
+type SendConditions = {
+  name?: string;
+};
+
 export function startWSServer () {
   type Listener = (this: ReturnType<typeof startWSServer>, event: WSIncomeEvent) => void;
 
@@ -186,16 +190,20 @@ export function startWSServer () {
     attach(request: Request) {
       ws.leech(request.request, request.response);
     },
-    send(message: string) {
+    send(message: string, conditions?: SendConditions) {
       clients.iterate(function (client) {
+        if (conditions && conditions.name && conditions.name !== client.info.name) {
+          return;
+        }
+
         client.socket.send(message).catch(function () {
           removeClient(clients, client.socket);
         });
       });
     },
-    sendData(data: WSEvents) {
+    sendData(data: WSEvents, conditions?: SendConditions) {
       console.log('WS Server -> Client:', data);
-      this.send(JSON.stringify(data));
+      this.send(JSON.stringify(data), conditions);
     },
     listen(listener: Listener) {
       listeners.add(listener);

@@ -1,6 +1,7 @@
 import type { Host } from '../splux-host';
 import type { WSEvents, WSIncomeEvent } from '@common-types/ws-events';
 import { getDashName } from './utils';
+import { urlState } from './url-state';
 
 // const WS_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 const WS_URL = 'ws://localhost:8922/ws';
@@ -63,6 +64,10 @@ export const startWebSocket = function (host: Host) {
 
       case 'interfaceAction':
         host.cast('interfaceAction', message.payload);
+        break;
+
+      case 'moduleSetup':
+        urlState.set(message.payload.module, message.payload.setup);
         break;
     }
   }, function (_, send) {

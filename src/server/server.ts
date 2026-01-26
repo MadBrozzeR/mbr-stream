@@ -80,6 +80,11 @@ function processIncomingMessage (message: WSIncomeEvent) {
     case 'clear-all-chats':
       wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
       return null;
+
+    case 'module-setup':
+      const payload = { module: message.payload.module, setup: message.payload.setup };
+      wsServer.sendData({ type: 'moduleSetup', payload }, { name: message.payload.view });
+      return null;
   }
 
   return null;

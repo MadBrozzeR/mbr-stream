@@ -40,6 +40,7 @@ export type WSEventsMap = {
   };
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
+  moduleSetup: { module: string; setup: Record<string, string> | null; }
 };
 
 export type WSEvents = {
@@ -60,6 +61,10 @@ export type WSIncomeEventParams = {
     request: void;
     response: void;
   };
+  'module-setup': {
+    request: { view: string; module: string; setup: Record<string, string> | null; }
+    response: void;
+  };
 };
 
 export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEventParams> = {
@@ -67,7 +72,7 @@ export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEv
     action: K;
   } : {
     action: K;
-    payload: WSIncomeEventParams;
+    payload: WSIncomeEventParams[K]['request'];
   }
 }[T];
 
