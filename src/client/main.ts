@@ -11,6 +11,7 @@ import { Countdown } from './components/countdown';
 import { startWebSocket } from './utils/ws';
 import { StreamInfo } from './components/stream-info';
 import { EventLog } from './components/event-log';
+import { ChatBot } from './components/chat-bot';
 
 const STYLES = {
   'html, body': {
@@ -44,8 +45,13 @@ Splux.start(function (body, head) {
       counter: Countdown,
       streamInfo: StreamInfo,
       events: EventLog,
+      chatBot: ChatBot,
     });
   });
+
+  host.send({ action: 'get-stream-info' }).then(function (data) {
+    host.state.streamInfo.set(data);
+  }).catch(console.log);
 
   urlState.listen(function (data) {
     moduleManager(data);

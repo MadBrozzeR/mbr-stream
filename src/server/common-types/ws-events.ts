@@ -10,6 +10,8 @@ export type StreamInfo = {
   isOnline: boolean;
   viewers: number;
   chatters: Chatter[];
+  title: string;
+  userId: string;
 };
 
 export type BadgeData = {
@@ -63,6 +65,10 @@ export type WSIncomeEventParams = {
   };
   'module-setup': {
     request: { view: string; module: string; setup: Record<string, string> | null; }
+    response: void;
+  };
+  'bot-say': {
+    request: string;
     response: void;
   };
 };

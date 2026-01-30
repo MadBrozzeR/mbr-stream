@@ -2,7 +2,6 @@ import type { StreamInfo as StreamInfoData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
-import { isCast } from '../utils/broadcaster';
 
 const STYLES = {
   '.stream_info': {
@@ -65,7 +64,7 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
     },
   });
 
-  const set = this.dom(Toolbox, {
+  this.dom(Toolbox, {
     items: {
       move() { mover.show() },
     },
@@ -77,7 +76,11 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
 
     status.node.classList.add(STATUS.OFFLINE);
 
-    return function (streamInfo: StreamInfoData) {
+    function set (streamInfo: StreamInfoData | null) {
+      if (!streamInfo) {
+        return;
+      }
+
       if (streamInfo.isOnline && status.node.classList.contains(STATUS.OFFLINE)) {
         status.node.classList.replace(STATUS.OFFLINE, STATUS.ONLINE);
       } else if (!streamInfo.isOnline && status.node.classList.contains(STATUS.ONLINE)) {
@@ -88,15 +91,14 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
 
       chatters.node.innerText = streamInfo.chatters.length.toString();
     }
+
+    host.state.streamInfo.listen(set);
+
+    this.on({
+      remove() {
+        host.state.streamInfo.unlisten(set);
+      },
+    })
   });
 
-  host.send({ action: 'get-stream-info' }).then(function (data) {
-    set(data);
-  }).catch(console.log);
-
-  this.tuneIn(function (data) {
-    if (isCast('streamInfo', data)) {
-      set(data.payload);
-    }
-  });
 });

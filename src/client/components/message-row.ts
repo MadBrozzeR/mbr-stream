@@ -1,4 +1,3 @@
-import { AnimationVariant } from '@common-types/eventsub-types';
 import { newComponent } from '../splux-host';
 import type { ChatMessageEvent } from '../type';
 import { Emote } from './emote';
@@ -49,7 +48,7 @@ export const MessageRow = newComponent('div.message_row', function (row, { messa
   }
 
   return {
-    setAnimation(animation: AnimationVariant | 'default') {
+    setAnimation(animation: 'static' | 'default') {
       emotes.forEach(function (emote) {
         emote.setAnimation(animation);
       });

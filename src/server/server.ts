@@ -13,15 +13,19 @@ const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
 const MODULES_ROOT = __dirname + '/../../node_modules/';
 
+async function justGetUserInfo () {
+  const user = (await api.Users.getUsers()).data[0];
+
+  if (!isDefined(user)) {
+    throw new Error('User not found');
+  }
+
+  return user;
+}
+
 async function getUserInfo(request: Request) {
   try {
-    const user = (await api.Users.getUsers()).data[0];
-
-    if (!isDefined(user)) {
-      throw new Error('User not found');
-    }
-
-    return user;
+    return justGetUserInfo();
   } catch (error) {
     if (error instanceof Object && 'status' in error && error.status === 401) {
       request.redirect('/connect');
@@ -72,10 +76,11 @@ const apiStorage = {
 
 function processIncomingMessage (message: WSIncomeEvent) {
   switch (message.action) {
-    case 'get-stream-info':
+    case 'get-stream-info': {
       const info = streamInfoPolling?.get();
       info && wsServer.sendData({ type: 'streamInfo', payload: info });
       return info || null;
+    }
 
     case 'clear-all-chats':
       wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
@@ -85,6 +90,32 @@ function processIncomingMessage (message: WSIncomeEvent) {
       const payload = { module: message.payload.module, setup: message.payload.setup };
       wsServer.sendData({ type: 'moduleSetup', payload }, { name: message.payload.view });
       return null;
+
+    case 'bot-say': {
+      const messageText = message.payload;
+      justGetUserInfo().then(function (info) {
+        console.log(info, messageText);
+        if (info && messageText) {
+          api.Chat.sendChatMessage({
+            sender_id: info.id,
+            broadcaster_id: info.id,
+            message: '[AUTO] ' + messageText,
+          }).then(function (response) {
+            response.data.forEach(function (data) {
+              if (!data.is_sent) {
+                console.log(
+                  'Message has not been sent. ' +
+                  `Reason: [${data.drop_reason?.code || 'no-code'}] ${data.drop_reason?.message || 'No reason'}`
+                );
+              }
+            });
+          }).catch(function (error) {
+            console.log(error);
+          });
+        }
+      });
+      return null;
+    }
   }
 
   return null;
@@ -130,6 +161,9 @@ export async function server (request: Request) {
     switch (regMatch[1]) {
       case 'lib-ref/splux':
         this.sendFile(`${MODULES_ROOT}splux/index.js`)
+        break;
+      case 'lib-ref/mbr-state':
+        this.sendFile(`${MODULES_ROOT}mbr-state/index.js`)
         break;
       case 'lib-ref/mbr-style':
         this.sendFile(`${MODULES_ROOT}mbr-style/index.js`)

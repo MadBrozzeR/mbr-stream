@@ -98,17 +98,22 @@ export async function getStreamInfo () {
     viewers: 0,
     isOnline: false,
     chatters: [],
+    userId: '',
+    title: '',
   };
 
   try {
-
     const userInfo = await getUserInfo();
-    const streams = await api.Streams.getStreams({ user_id: userInfo.id });
+    result.userId = userInfo.id;
+    const [streams, chatters] = await Promise.all([
+      api.Streams.getStreams({ user_id: userInfo.id }),
+      api.Chat.getChatters({ broadcaster_id: userInfo.id, moderator_id: userInfo.id }),
+    ]);
     if (streams.data[0]) {
       result.isOnline = true;
       result.viewers = streams.data[0].viewer_count;
+      result.title = streams.data[0].title;
     }
-    const chatters = await api.Chat.getChatters({ broadcaster_id: userInfo.id, moderator_id: userInfo.id });
     result.chatters = chatters.data.map((chatter) => ({
       id: chatter.user_id,
       name: chatter.user_name,

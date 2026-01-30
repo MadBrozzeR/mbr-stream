@@ -2,7 +2,7 @@ import type { BadgeData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
 import type { ChatMessageEvent, EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
-import { changeModes, isDefined, isEventType } from '../utils/utils';
+import { changeModes, checkForAutoMessage, isDefined, isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
@@ -165,12 +165,15 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
       }
     } else if (isCast('eventSubEvent', data)) {
       if (isEventType(data.payload.event, 'channel.chat.message') && events.message) {
-        append({
-          user: data.payload.event.event.chatter_user_name,
-          badges: data.payload.badges,
-          message: data.payload.event.event.message,
-          userColor: data.payload.event.event.color,
-        });
+        const isAutoMessage = checkForAutoMessage(data.payload.event.event, host.state.streamInfo.state);
+        if (!isAutoMessage) {
+          append({
+            user: data.payload.event.event.chatter_user_name,
+            badges: data.payload.badges,
+            message: data.payload.event.event.message,
+            userColor: data.payload.event.event.color,
+          });
+        }
       } else if (isEventType(data.payload.event, 'channel.follow') && events.follow) {
         append({
           user: '[INFO]',

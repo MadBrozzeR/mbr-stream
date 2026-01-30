@@ -1,11 +1,15 @@
 import { Splux } from './lib-ref/splux';
+import { State } from './lib-ref/mbr-state';
 import { Styles } from './lib-ref/mbr-style';
 import type { Broadcast } from './utils/broadcaster';
-import type { WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
+import type { StreamInfo, WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
 
 export function newHost () {
   const host = {
     styles: Styles.create(),
+    state: {
+      streamInfo: new State<StreamInfo | null>(null),
+    },
     play(src: string) {
       console.log(src);
     },

@@ -1,5 +1,7 @@
-import { Component, Splux } from '../lib-ref/splux';
-import { Host } from '../splux-host';
+import type { EventSubType } from '@common-types/eventsub-types';
+import type { StreamInfo } from '@common-types/ws-events';
+import type { Component, Splux } from '../lib-ref/splux';
+import type { Host } from '../splux-host';
 import type { EventType, Notification } from '../type';
 
 export function isEventType<T extends EventType>(
@@ -107,4 +109,10 @@ export function useTemplate (template: string, substitutions: Record<string, str
   return template.replace(TEMPLATE_KEY_RE, function (source, key) {
     return substitutions[key] ? substitutions[key].toString() : source;
   });
+}
+
+export function checkForAutoMessage (event: EventSubType['channel.chat.message']['payload'], streamInfo: StreamInfo | null) {
+  return streamInfo
+    && streamInfo.userId === event.chatter_user_id
+    && event.message.text.substring(0, 6) === '[AUTO]';
 }

@@ -3,7 +3,7 @@ import { Host, newComponent } from '../splux-host';
 import type { NotificationToast } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { firstMessage } from '../utils/notification-utils';
-import { changeModes, imageAtlas, isDefined, isEventType } from '../utils/utils';
+import { changeModes, checkForAutoMessage, imageAtlas, isDefined, isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
@@ -267,7 +267,10 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {
       if (isEventType(data.payload.event, 'channel.chat.message')) {
-        if (firstMessage.check(data.payload.event.event.chatter_user_id)) {
+        const streamInfo = host.state.streamInfo.state;
+        const isAutoMessage = checkForAutoMessage(data.payload.event.event, streamInfo);
+
+        if (!isAutoMessage && firstMessage.check(data.payload.event.event.chatter_user_id)) {
           push({
             text: data.payload.event.event.message,
             audio: 'amethyst-break1.ogg',
