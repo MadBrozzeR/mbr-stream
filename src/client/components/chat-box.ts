@@ -40,12 +40,23 @@ const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.me
 };
 
 const STYLES = {
+  '@keyframes fly-in': {
+    from: {
+      opacity: 0,
+      transform: 'translateX(-100%)',
+    },
+    to: {
+      opacity: 1,
+      transform: 'translateX(0)',
+    },
+  },
+
   '.chatbox': {
     '--wrapper': {
       position: 'relative',
       height: '100%',
       width: '100%',
-      overflow: 'hidden',
+      overflowY: 'clip',
     },
 
     '--log': {
@@ -71,6 +82,10 @@ const STYLES = {
       '_separator': {
         verticalAlign: 'middle',
       },
+
+      '_content': {
+        animation: '0.5s fly-in ease-in-out',
+      },
     },
   },
 };
@@ -89,17 +104,19 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
 ) {
   let disableAnimation = function () {};
 
-  this.dom(UserName, { name: user, badges, color: userColor });
+  this.dom('div.chatbox--entry_content', function () {
+    this.dom(UserName, { name: user, badges, color: userColor });
 
-  entry.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
-  if (typeof message === 'string') {
-    entry.dom('span').params({ innerText: message });
-  } else {
-    const messageRow = entry.dom(MessageRow, { message });
-    disableAnimation = function () {
-      messageRow.setAnimation('static');
-    };
-  }
+    this.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
+    if (typeof message === 'string') {
+      this.dom('span').params({ innerText: message });
+    } else {
+      const messageRow = this.dom(MessageRow, { message });
+      disableAnimation = function () {
+        messageRow.setAnimation('static');
+      };
+    }
+  });
 
   if (!persistent) {
     setTimeout(function () {
