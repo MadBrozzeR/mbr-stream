@@ -8,7 +8,7 @@ type Props = {
   values: Values;
   onClose?: () => void | boolean;
   onChange?: (value: string, name: string) => void;
-  onApply?: (values: Values) => void | boolean;
+  onApply?: (values: Values) => void | boolean | Values;
   onDelete?: () => void;
 };
 
@@ -123,10 +123,14 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
             values[key] = input.value;
           });
 
-          if (!onApply || onApply(values) !== false) {
-            currentValues = values;
-            modal.close();
+          const applyResult = onApply && onApply(values);
+
+          if (applyResult === false) {
+            return;
           }
+
+          currentValues = applyResult instanceof Object ? Object.assign({}, values, applyResult) : values;
+          modal.close();
         }
       });
 

@@ -1,7 +1,8 @@
 import { newComponent } from '../splux-host';
 import { FrameSvg } from '../svg/frame.svg';
+import { animation } from '../utils/animation';
 import { Timer } from '../utils/timer';
-import { zeroLead } from '../utils/utils';
+import { getDateFromString, getTimeString, zeroLead } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -10,6 +11,11 @@ type Props = {
 };
 
 const FINISH_TEXT = 'I\'m about to start!';
+const ANIMATION_PARAMS = {
+  threshold: 3000,
+  duration: 400,
+  step: 10,
+};
 
 const STYLES = {
   '.countdown': {
@@ -82,10 +88,25 @@ const TimerDisplay = newComponent('div.countdown--display', function () {
     const minutesDisplay = this.dom(DisplayDigits, { text: '00' });
     this.dom(DisplayDigits, { text: ':' });
     const secondsDisplay = this.dom(DisplayDigits, { text: '00' });
+    let lastTime = 0;
 
-    return {
+    const ifc = {
+      setAnimated(timeLeft: number) {
+        const prevLastTime = lastTime;
+        lastTime = timeLeft;
+        const step = timeLeft - prevLastTime;
+
+        if (Math.abs(step) > ANIMATION_PARAMS.threshold) {
+          animation(function (value) {
+            const current = (step * value) + prevLastTime;
+            ifc.set(~~current);
+          }, { duration: ANIMATION_PARAMS.duration, step: ANIMATION_PARAMS.step });
+        } else {
+          ifc.set(timeLeft);
+        }
+      },
       set(timeLeft: number) {
-        let rest = ~~(timeLeft / 1000);
+        let rest = Math.round(timeLeft / 1000);
         const seconds = rest % 60;
         rest = ~~(rest / 60);
         const minutes = rest % 60;
@@ -106,6 +127,8 @@ const TimerDisplay = newComponent('div.countdown--display', function () {
         }
       }
     };
+
+    return ifc;
   });
 
   const textDisplay = this.dom('div.countdown--display_text', function (display) {
@@ -127,7 +150,7 @@ const TimerDisplay = newComponent('div.countdown--display', function () {
   return {
     splux: this,
     set(timeLeft: number) {
-      timeDisplay.set(timeLeft);
+      timeDisplay.setAnimated(timeLeft);
       textDisplay.setState(false);
     },
     text(value: string) {
@@ -155,14 +178,20 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       time: '2025-12-05T21:00:00.000+03:00',
     },
     onSetupChange(values) {
-      const date = new Date(values['time'] || '').valueOf();
+      const date = getDateFromString(values['time'] || '', timer.finishTime);
       if (values['width'] && values['height']) {
         resizeFrame(values['width'], values['height']);
       }
 
-      if (!isNaN(date) && date !== timer.finishTime) {
+      if (date && date !== timer.finishTime) {
         timer.set(date);
+
+        return {
+          time: getTimeString(date),
+        };
       }
+
+      return;
     },
   });
 

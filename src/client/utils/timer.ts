@@ -37,6 +37,7 @@ export class Timer {
     this.status = 'complete';
     this.ref && clearInterval(this.ref);
     this.callback.call(this, this.finishTime, this.status);
+    this.finishTime = 0;
   }
 
   stop() {

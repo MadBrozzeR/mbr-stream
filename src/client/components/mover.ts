@@ -9,7 +9,7 @@ type Props = {
   id: string;
   title?: string;
   vars?: Record<string, string>;
-  onSetupChange?: (values: Record<string, string>) => void;
+  onSetupChange?: (values: Record<string, string>) => void | Record<string, string>;
   component: Splux<any, any>;
 };
 
@@ -74,13 +74,19 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       }
     },
     onApply(values) {
-      onSetupChange?.(values);
-      currentVars = values;
+      const valueChange = onSetupChange?.(values);
+      currentVars = valueChange ? Object.assign({}, values, valueChange) : values;
       applyVars(currentVars, component);
-      urlState.set(id, values);
+      urlState.set(id, currentVars);
       if (dashName) {
-        host.send({ action: 'module-setup', payload: { view: dashName, module: id, setup: values } });
+        host.send({ action: 'module-setup', payload: { view: dashName, module: id, setup: currentVars } });
       }
+
+      if (valueChange) {
+        return valueChange;
+      }
+
+      return;
     },
     onDelete() {
       urlState.remove(id);

@@ -74,8 +74,11 @@ export function useModuleManager (
   }
 }
 
-export function zeroLead (value: number) {
-  return value < 10 ? `0${value}` : value.toString();
+export function zeroLead (value: number, filler = '00') {
+  let result = value.toString();
+  return result.length < filler.length
+    ? (filler.substring(0, filler.length - result.length) + result)
+    : result;
 }
 
 export function changeModes (modes: Record<string, boolean>, newModes: string) {
@@ -115,4 +118,37 @@ export function checkForAutoMessage (event: EventSubType['channel.chat.message']
   return streamInfo
     && streamInfo.userId === event.chatter_user_id
     && event.message.text.substring(0, 6) === '[AUTO]';
+}
+
+const ADD_TIME_RE = /^([+\-])(\d+)([ms])$/;
+const TIME_MULTIPLIER = {
+  m: 60 * 1000,
+  s: 1000,
+};
+
+export function getDateFromString (time: string, base?: number) {
+  const addTimeMatch = ADD_TIME_RE.exec(time);
+  let result = 0;
+
+  if (addTimeMatch && addTimeMatch[2] && addTimeMatch[3] && isKeyOf(addTimeMatch[3], TIME_MULTIPLIER)) {
+    result = base || Date.now();
+    const increment = parseInt(addTimeMatch[2], 10) * TIME_MULTIPLIER[addTimeMatch[3] || 's'];
+
+    if (addTimeMatch[1] === '-') {
+      result -= increment;
+    } else {
+      result += increment;
+    }
+  } else {
+    result = Date.parse(time);
+  };
+
+  return isNaN(result) ? 0 : result;
+}
+
+export function getTimeString (time: number) {
+  const date = new Date(time);
+  return date.getFullYear() + '-' + zeroLead(date.getMonth() + 1) + '-' + zeroLead(date.getDate()) + 'T' +
+    zeroLead(date.getHours()) + ':' + zeroLead(date.getMinutes()) + ':' + zeroLead(date.getSeconds()) + '.' +
+    zeroLead(date.getMilliseconds(), '000') + '+03:00';
 }
