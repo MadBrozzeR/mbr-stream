@@ -28,7 +28,15 @@ export function newHost () {
           throw response;
         }
 
-        return response.json() as WSIncomeEventResponse<T>;
+        let result: any;
+
+        try {
+          result = response.json();
+        } catch (error) {
+          result = undefined;
+        }
+
+        return result as WSIncomeEventResponse<T>;
       });
     }
   };
