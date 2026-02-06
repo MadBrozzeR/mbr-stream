@@ -51,14 +51,13 @@ function urlWithParams (url: string, params: RequestParams = {}) {
   return requestParams ? `${url}?${requestParams}` : url;
 }
 
-export function apiRequest<R> (
+export function doRequest (
   url: RequestUrl,
   method: RESTMethod = 'GET',
-  params: RequestParams = {},
-  headers: OutgoingHttpHeaders = {},
-): Promise<R> {
-  return new Promise(function (resolve, reject) {
-    const data = headers['content-type'] === 'application/json' ? JSON.stringify(params) : jsonToUrlEncoded(params);
+  data: string = '',
+  headers: OutgoingHttpHeaders = {}
+) {
+  return new Promise<IncomingMessage>(function (resolve, reject) {
     const requestUrl = typeof url === 'string' ? url : urlWithParams(url[0], url[1]);
     log(`Request ${method} ${requestUrl}`);
     const isTls = requestUrl.substring(0, 5) === 'https';
@@ -67,21 +66,17 @@ export function apiRequest<R> (
     (isTls ? https : http)
       .request(requestUrl, {
         method,
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          ...headers,
-        },
+        headers,
       })
       .on('response', async function (response) {
         log(`Request ${method} ${requestUrl} returned status ${response.statusCode}`);
 
         try {
           if (response.statusCode && response.statusCode < 400) {
-            resolve(await getResponseJson(response));
+            resolve(response);
           } else {
             const status = response.statusCode;
-            const data = await getResponseJson(response);
-            log(`Error ${status}: ${JSON.stringify(data)}`)
+            const data = response;
             reject({ status, data });
           }
         } catch (error) {
@@ -93,6 +88,28 @@ export function apiRequest<R> (
       })
       .end(data);
   });
+}
+
+export function apiRequest<R> (
+  url: RequestUrl,
+  method: RESTMethod = 'GET',
+  params: RequestParams = {},
+  headers: OutgoingHttpHeaders = {},
+): Promise<R> {
+  const data = headers['content-type'] === 'application/json' ? JSON.stringify(params) : jsonToUrlEncoded(params);
+  return doRequest(url, method, data, { 'content-type': 'application/x-www-form-urlencoded', ...headers, })
+    .then(function (response) {
+      return getResponseJson(response);
+    }).catch(async function (error) {
+      const errorData = error.data;
+      if (errorData instanceof IncomingMessage) {
+        const data = await getResponseJson(errorData);
+        log(`Error ${error.status}: ${JSON.stringify(data)}`)
+        throw { status: error.status, data };
+      } else {
+        throw error;
+      }
+    });
 }
 
 export async function parseError (error: any) {

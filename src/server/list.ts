@@ -4,6 +4,18 @@ type ListNode<T> = {
   prev: ListNode<T> | null;
 };
 
+function remove (node: ListNode<unknown>, list: List<unknown>) {
+  if (list.root === node) {
+    list.root = node.next;
+  }
+  if (list.last === node) {
+    list.last = node.prev;
+  }
+  if (node.prev) {
+    node.prev.next = node.next;
+  }
+}
+
 export class List<T> {
   root: ListNode<T> | null = null;
   last: ListNode<T> | null = null;
@@ -25,15 +37,7 @@ export class List<T> {
 
     return this.iterate(function (value, node) {
       if (check(value)) {
-        if (list.root === node) {
-          list.root = node.next;
-        }
-        if (list.last === node) {
-          list.last = node.prev;
-        }
-        if (node.prev) {
-          node.prev.next = node.next;
-        }
+        remove(node, list);
 
         return true;
       }

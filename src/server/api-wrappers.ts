@@ -1,3 +1,4 @@
+import { Request } from 'mbr-serv-request';
 import { api } from './api';
 import type * as Types from './types';
 import type * as ETypes from './common-types/eventsub-types';
@@ -6,8 +7,10 @@ import { StreamInfo } from './common-types/ws-events';
 
 let userInfo: Types.GetUsersResponse['data'][number] | null = null;
 
-export async function getUserInfo () {
-  if (userInfo) {
+type SubResult = [keyof ETypes.EventSubType, boolean];
+
+export async function getUserInfo (force = false) {
+  if (userInfo && !force) {
     return userInfo;
   }
 
@@ -20,7 +23,18 @@ export async function getUserInfo () {
   return userInfo = users.data[0];
 }
 
-type SubResult = [keyof ETypes.EventSubType, boolean];
+export async function getUserInfoWithReconnect(request: Request) {
+  try {
+    return getUserInfo();
+  } catch (error) {
+    if (error instanceof Object && 'status' in error && error.status === 401) {
+      request.redirect('/connect');
+      return null;
+    } else {
+      throw error;
+    }
+  }
+}
 
 const SUBSCRIPTIONS: {
   [K in keyof ETypes.EventSubType]?: (

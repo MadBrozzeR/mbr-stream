@@ -2,39 +2,17 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, getUserBadges, isDefined, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
+import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
 import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
-import { createPolling, dataStorage, dataStorageKeys, getStreamInfo } from './api-wrappers';
+import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
 import type { WSIncomeEvent, BadgeStore, WSEvent } from './common-types/ws-events';
+import { downloadResources } from './resource-downloader';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
 const MODULES_ROOT = __dirname + '/../../node_modules/';
-
-async function justGetUserInfo () {
-  const user = (await api.Users.getUsers()).data[0];
-
-  if (!isDefined(user)) {
-    throw new Error('User not found');
-  }
-
-  return user;
-}
-
-async function getUserInfo(request: Request) {
-  try {
-    return justGetUserInfo();
-  } catch (error) {
-    if (error instanceof Object && 'status' in error && error.status === 401) {
-      request.redirect('/connect');
-      return null;
-    } else {
-      throw error;
-    }
-  }
-}
 
 const wsServer = startWSServer();
 
@@ -74,6 +52,10 @@ const apiStorage = {
   }),
 };
 
+downloadResources().then(function (result) {
+  console.log('Resources statuses:', result);
+});
+
 function processIncomingMessage (message: WSIncomeEvent) {
   switch (message.action) {
     case 'get-stream-info': {
@@ -93,7 +75,7 @@ function processIncomingMessage (message: WSIncomeEvent) {
 
     case 'bot-say': {
       const messageText = message.payload;
-      justGetUserInfo().then(function (info) {
+      getUserInfo().then(function (info) {
         console.log(info, messageText);
         if (info && messageText) {
           api.Chat.sendChatMessage({
@@ -228,7 +210,7 @@ export async function server (request: Request) {
 
     async '/'(request) {
       try {
-        const userInfo = await getUserInfo(request);
+        const userInfo = await getUserInfoWithReconnect(request);
 
         if (!userInfo) {
           return;
