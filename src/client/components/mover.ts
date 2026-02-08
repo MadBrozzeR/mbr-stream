@@ -90,7 +90,8 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   const host = this.host;
   host.styles.add('mover', STYLES);
   component.node.classList.add(CLASS_NAME);
-  let currentVars = { ...DEFAULT_VARS, ...initialVars };
+  const initialValues = { ...DEFAULT_VARS, ...initialVars };
+  let currentVars = initialValues;
   applyVars(currentVars, component);
   const [, elementName] = splitByFirst(id, '+');
   const dashName = getDashName();
@@ -126,8 +127,8 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
 
   this.tuneIn(function (data) {
     if (isCast('hashStateChange', data) && id in data.payload) {
-      const prevValues = currentVars;
-      currentVars = data.payload[id] || { ...DEFAULT_VARS, ...initialVars };
+      const prevValues = currentVars === initialValues ? undefined : currentVars;
+      currentVars = data.payload[id] || initialValues;
       onSetupChange?.(currentVars);
       dialog.set(currentVars);
       applyVars(currentVars, component, prevValues);

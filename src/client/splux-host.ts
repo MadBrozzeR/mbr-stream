@@ -33,7 +33,9 @@ export function newHost () {
         let result: any;
 
         try {
-          result = response.json();
+          result = response.text().then(function (text) {
+            return text ? JSON.parse(text) : undefined;
+          });
         } catch (error) {
           result = undefined;
         }
