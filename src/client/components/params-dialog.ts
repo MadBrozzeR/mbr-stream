@@ -8,7 +8,7 @@ type Props = {
   values: Values;
   onClose?: () => void | boolean;
   onChange?: (value: string, name: string) => void;
-  onApply?: (values: Values) => void | boolean | Values;
+  onApply?: (values: Values, prevValues: Values) => void | boolean | Values;
   onDelete?: () => void;
 };
 
@@ -123,7 +123,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
             values[key] = input.value;
           });
 
-          const applyResult = onApply && onApply(values);
+          const applyResult = onApply && onApply(values, currentValues);
 
           if (applyResult === false) {
             return;

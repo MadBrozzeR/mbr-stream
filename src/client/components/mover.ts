@@ -1,8 +1,8 @@
 import { Splux } from '../lib-ref/splux';
-import { newComponent } from '../splux-host';
+import { Host, newComponent } from '../splux-host';
 import { isCast } from '../utils/broadcaster';
 import { urlState } from '../utils/url-state';
-import { getDashName, splitByFirst } from '../utils/utils';
+import { getDashName, isKeyOf, splitByFirst } from '../utils/utils';
 import { ParamsDialog } from './params-dialog';
 
 type Props = {
@@ -22,6 +22,15 @@ const STYLES = {
     left: 'var(--mover-left, auto)',
     width: 'var(--mover-width, auto)',
     height: 'var(--mover-height, auto)',
+
+    transition: [
+      '0.2s top ease-in-out',
+      '0.2s bottom ease-in-out',
+      '0.2s right ease-in-out',
+      '0.2s left ease-in-out',
+      '0.2s width ease-in-out',
+      '0.2s height ease-in-out',
+    ].join(','),
   },
 };
 
@@ -42,10 +51,32 @@ const DEFAULT_VARS: Record<string, string> = {
   height: '',
 };
 
-function applyVars (vars: Record<string, string> | undefined, element: Splux<any, any>) {
-  for (const key in vars) if (vars[key] !== undefined) {
+type Values = Record<string, string>;
+
+function adoptPosition (oldValues: Values, newValues: Values, element: Splux<HTMLElement, Host>) {
+  let result = newValues;
+  let elementBox: ReturnType<typeof element.host.getModulePosition> | null = null;
+  for (const key in newValues) {
+    if (MUTUALLY_EXCLUSIVE[key] && MUTUALLY_EXCLUSIVE[key] in oldValues) {
+      (result === newValues) && (result = Object.assign({}, result));
+      elementBox || (elementBox = element.host.getModulePosition(element));
+      isKeyOf(key, elementBox) && (result[key] = elementBox[key] + 'px');
+
+    }
+  }
+  return result;
+}
+
+function applyVars (vars: Values | undefined, element: Splux<HTMLElement, Host>, prevVars?: Values) {
+  const newPosition = (prevVars && vars) ? adoptPosition(prevVars, vars, element) : vars;
+  for (const key in newPosition) if (newPosition[key] !== undefined) {
     const name = key in DEFAULT_VARS ? `--mover-${key}` : key;
-    element.node.style.setProperty(name, vars[key]);
+    element.node.style.setProperty(name, newPosition[key]);
+  }
+  if (newPosition !== vars) {
+    window.requestAnimationFrame(function () {
+      applyVars(vars, element);
+    });
   }
 }
 
@@ -73,10 +104,10 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
         dialog.set({ [concurrent]: '' });
       }
     },
-    onApply(values) {
+    onApply(values, prevValues) {
       const valueChange = onSetupChange?.(values);
       currentVars = valueChange ? Object.assign({}, values, valueChange) : values;
-      applyVars(currentVars, component);
+      applyVars(currentVars, component, prevValues);
       urlState.set(id, currentVars);
       if (dashName) {
         host.send({ action: 'module-setup', payload: { view: dashName, module: id, setup: currentVars } });
@@ -95,10 +126,11 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
 
   this.tuneIn(function (data) {
     if (isCast('hashStateChange', data) && id in data.payload) {
+      const prevValues = currentVars;
       currentVars = data.payload[id] || { ...DEFAULT_VARS, ...initialVars };
       onSetupChange?.(currentVars);
       dialog.set(currentVars);
-      applyVars(currentVars, component);
+      applyVars(currentVars, component, prevValues);
     }
   });
 
@@ -106,3 +138,5 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
     show: dialog.show,
   };
 });
+
+export const MoverControls = newComponent('div', function () {});

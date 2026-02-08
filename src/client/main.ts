@@ -35,8 +35,20 @@ Splux.start(function (body, head) {
   };
   startWebSocket(host);
 
-  const moduleManager = this.dom('div.page_content', function () {
+  const moduleManager = this.dom('div.page_content', function (manager) {
     this.dom(Audio);
+
+    host.getModulePosition = function (module) {
+      const pageRect = manager.node.getBoundingClientRect();
+      const moduleRect = module.node.getBoundingClientRect();
+
+      return {
+        top: moduleRect.top,
+        left: moduleRect.left,
+        bottom: pageRect.bottom - moduleRect.bottom,
+        right: pageRect.right - moduleRect.right,
+      };
+    }
 
     return useModuleManager(this, {
       chat: ChatBox,

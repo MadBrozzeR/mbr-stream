@@ -4,6 +4,8 @@ import { Styles } from './lib-ref/mbr-style';
 import type { Broadcast } from './utils/broadcaster';
 import type { StreamInfo, WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
 
+const DEFAULT_RECT = { top: 0, right: 0, bottom: 0, left: 0 };
+
 export function newHost () {
   const host = {
     styles: Styles.create(),
@@ -38,7 +40,11 @@ export function newHost () {
 
         return result as WSIncomeEventResponse<T>;
       });
-    }
+    },
+    getModulePosition(module: Splux<Element, any>) {
+      console.log(module);
+      return DEFAULT_RECT;
+    },
   };
 
   return host;
