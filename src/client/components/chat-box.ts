@@ -4,9 +4,8 @@ import type { ChatMessageEvent, EventPayloadData } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { changeModes, checkForAutoMessage, isDefined, isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
 import { UserName } from './user-name';
+import { ModuleBox } from './module-box';
 
 type Props = {
   id: string;
@@ -141,7 +140,7 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
     persistent: false,
   };
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Chat',
@@ -157,18 +156,16 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
         changeModes(events, settings['events']);
       }
     },
-  });
-
-  this.dom(Toolbox, { items: {
-    test() { append({
-      user: TEST_MODE.message.chatter_user_name,
-      badges: [],
-      message: TEST_MODE.message.message,
-      userColor: TEST_MODE.message.color,
-    }) },
-    clear() { clear(); host.send({ action: 'clear-all-chats' }); },
-    move() { mover.show() },
-  } }).dom('div.chatbox--wrapper', function () {
+    toolbarItems: {
+      test() { append({
+        user: TEST_MODE.message.chatter_user_name,
+        badges: [],
+        message: TEST_MODE.message.message,
+        userColor: TEST_MODE.message.color,
+      }) },
+      clear() { clear(); host.send({ action: 'clear-all-chats' }); },
+    }
+  }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {
       clear = function () { log.clear() };
       append = function (params) { log.dom(ChatEntry, { ...params, persistent: events.persistent }) };

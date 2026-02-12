@@ -1,8 +1,9 @@
-import { Splux } from './lib-ref/splux';
+import { Splux, Component } from './lib-ref/splux';
 import { State } from './lib-ref/mbr-state';
 import { Styles } from './lib-ref/mbr-style';
 import type { Broadcast } from './utils/broadcaster';
 import type { StreamInfo, WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
+import type { DraggerListeners } from './utils/dragger';
 
 const DEFAULT_RECT = { top: 0, right: 0, bottom: 0, left: 0 };
 
@@ -47,6 +48,9 @@ export function newHost () {
       console.log(module);
       return DEFAULT_RECT;
     },
+    dragger(listeners: DraggerListeners) {
+      console.log(listeners);
+    },
   };
 
   return host;
@@ -55,3 +59,5 @@ export function newHost () {
 export type Host = ReturnType<typeof newHost>;
 
 export const newComponent = Splux.createComponent<Host>();
+
+export type ComponentParams<T> = T extends Component<any, unknown, unknown, infer P> ? P : never;

@@ -1,5 +1,6 @@
 import { Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
+import { MoverControlSvg } from '../svg/mover-controls.svg';
 import { isCast } from '../utils/broadcaster';
 import { urlState } from '../utils/url-state';
 import { getDashName, isKeyOf, splitByFirst } from '../utils/utils';
@@ -7,9 +8,9 @@ import { ParamsDialog } from './params-dialog';
 
 type Props = {
   id: string;
-  title?: string;
-  vars?: Record<string, string>;
-  onSetupChange?: (values: Record<string, string>) => void | Record<string, string>;
+  title?: string | undefined;
+  vars?: Record<string, string> | undefined;
+  onSetupChange?: ((values: Record<string, string>) => void | Record<string, string>) | undefined;
   component: Splux<any, any>;
 };
 
@@ -23,6 +24,7 @@ const STYLES = {
     width: 'var(--mover-width, auto)',
     height: 'var(--mover-height, auto)',
 
+/*
     transition: [
       '0.2s top ease-in-out',
       '0.2s bottom ease-in-out',
@@ -31,6 +33,15 @@ const STYLES = {
       '0.2s width ease-in-out',
       '0.2s height ease-in-out',
     ].join(','),
+    */
+  },
+
+  '.mover_controls': {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: '100%',
+    height: '100%',
   },
 };
 
@@ -137,7 +148,99 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
 
   return {
     show: dialog.show,
+    apply(values: Values) {
+      dialog.apply(values);
+    },
   };
 });
 
-export const MoverControls = newComponent('div', function () {});
+type MoverChangeParams = {
+  top?: string;
+  right?: string;
+  bottom?: string;
+  left?: string;
+  width?: string;
+  height?: string;
+};
+
+type MoverControlsProps = {
+  onChange?: (params: MoverChangeParams) => void;
+};
+
+export const MoverControls = newComponent('div.mover_controls', function (moverControlsSpl, {
+  onChange
+}: MoverControlsProps) {
+  const host = this.host;
+  const controls = MoverControlSvg({
+    onAction(handle) {
+      switch (handle) {
+        case 'move-top-left': {
+          const box = host.getModulePosition(moverControlsSpl);
+          host.dragger({
+            move(x, y) {
+              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+            },
+            apply(x, y) {
+              onChange && onChange({ top: box.top + y + 'px', left: box.left + x + 'px', bottom: '', right: '' });
+              moverControlsSpl.node.style.transform = '';
+            },
+          });
+          break;
+        }
+        case 'move-top-right': {
+          const box = host.getModulePosition(moverControlsSpl);
+          host.dragger({
+            move(x, y) {
+              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+            },
+            apply(x, y) {
+              onChange && onChange({ top: box.top + y + 'px', right: box.right - x + 'px', bottom: '', left: '' });
+              moverControlsSpl.node.style.transform = '';
+            },
+          });
+          break;
+        }
+        case 'move-bottom-left': {
+          const box = host.getModulePosition(moverControlsSpl);
+          host.dragger({
+            move(x, y) {
+              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+            },
+            apply(x, y) {
+              onChange && onChange({ bottom: box.bottom - y + 'px', left: box.left + x + 'px', top: '', right: '' });
+              moverControlsSpl.node.style.transform = '';
+            },
+          });
+          break;
+        }
+        case 'move-bottom-right': {
+          const box = host.getModulePosition(moverControlsSpl);
+          host.dragger({
+            move(x, y) {
+              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+            },
+            apply(x, y) {
+              onChange && onChange({ bottom: box.bottom - y + 'px', right: box.right - x + 'px', top: '', left: '' });
+              moverControlsSpl.node.style.transform = '';
+            },
+          });
+          break;
+        }
+      }
+    },
+  });
+  this.node.appendChild(controls.splux.node);
+  let lastSizeKey = '';
+
+  return function set(values: Record<string, string>) {
+    const currentSizeKey = (values['width'] || '') + (values['height'] || '');
+    if (currentSizeKey === lastSizeKey) {
+      return;
+    }
+
+    lastSizeKey = currentSizeKey;
+    const width = values['width'] && parseInt(values['width'], 10) || 0;
+    const height = values['height'] && parseInt(values['height'], 10) || 0;
+    controls.set({ width, height });
+  };
+});

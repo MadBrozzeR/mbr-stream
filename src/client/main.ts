@@ -12,6 +12,7 @@ import { startWebSocket } from './utils/ws';
 import { StreamInfo } from './components/stream-info';
 import { EventLog } from './components/event-log';
 import { ChatBot } from './components/chat-bot';
+import { setDragger } from './utils/dragger';
 
 const STYLES = {
   'html, body': {
@@ -34,6 +35,7 @@ Splux.start(function (body, head) {
     body.broadcast(createCast(type, payload));
   };
   startWebSocket(host);
+  host.dragger = setDragger(this);
 
   const moduleManager = this.dom('div.page_content', function (manager) {
     this.dom(Audio);

@@ -2,7 +2,7 @@ import { newComponent } from '../splux-host';
 
 type Params = {
   items: Record<string, () => void>;
-  position?: 'top' | 'bottom';
+  position?: 'top' | 'bottom' | undefined;
 };
 
 const STYLES = {

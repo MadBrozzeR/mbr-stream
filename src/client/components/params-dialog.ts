@@ -84,6 +84,24 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
   let currentValues = defaultValues;
   const inputs: Record<string, HTMLInputElement> = {}
 
+  function apply(event?: Event) {
+    event && event.preventDefault();
+    const values: Values = {};
+
+    iterateInputs(inputs, function (input, key) {
+      values[key] = input.value;
+    });
+
+    const applyResult = onApply && onApply(values, currentValues);
+
+    if (applyResult === false) {
+      return;
+    }
+
+    currentValues = applyResult instanceof Object ? Object.assign({}, values, applyResult) : values;
+    modal.close();
+  }
+
   const modal = Modal.call(this, this, { title, onClose() {
     if (!onClose || onClose() !== false) {
       iterateInputs(inputs, function (input, name) {
@@ -115,23 +133,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
     form.dom('div.params_dialog--buttons', function () {
       this.dom('button.params_dialog--apply').params({
         innerText: 'Apply',
-        onclick(event) {
-          event.preventDefault();
-          const values: Values = {};
-
-          iterateInputs(inputs, function (input, key) {
-            values[key] = input.value;
-          });
-
-          const applyResult = onApply && onApply(values, currentValues);
-
-          if (applyResult === false) {
-            return;
-          }
-
-          currentValues = applyResult instanceof Object ? Object.assign({}, values, applyResult) : values;
-          modal.close();
-        }
+        onclick: apply,
       });
 
       onDelete && this.dom('button.params_dialog--delete').params({
@@ -149,6 +151,10 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
       for (const name in values) {
         inputs[name] && (inputs[name].value = values[name] || '');
       }
+    },
+    apply(values: Values) {
+      this.set(values);
+      apply();
     },
     block: this,
     show: modal.show,
