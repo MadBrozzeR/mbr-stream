@@ -12,6 +12,7 @@ import { startWebSocket } from './utils/ws';
 import { StreamInfo } from './components/stream-info';
 import { EventLog } from './components/event-log';
 import { ChatBot } from './components/chat-bot';
+import { ChatterList } from './components/chatter-list';
 
 const STYLES = {
   'html, body': {
@@ -58,6 +59,7 @@ Splux.start(function (body, head) {
       streamInfo: StreamInfo,
       events: EventLog,
       chatBot: ChatBot,
+      chatters: ChatterList,
     });
   });
 
