@@ -1,7 +1,9 @@
 import { StreamInfo } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
+import { Host, newComponent } from '../splux-host';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
+import { compareKeys, keyMapper } from '../utils/utils';
+import { Splux } from '../lib-ref/splux';
 
 const STYLES = {};
 
@@ -25,6 +27,7 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
   let updateFromStreamInfo = function update (streamInfo: StreamInfo | null) {
     streamInfo;
   }
+  const list: Record<string, Splux<HTMLDivElement, Host>> = {};
 
   const mover = this.dom(Mover, {
     id,
@@ -42,10 +45,14 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
     setup() { mover.show(); },
   } }).dom('div.chatters--wrapper', function (wrapper) {
     updateFromStreamInfo = function (streamInfo) {
-      wrapper.clear();
       if (streamInfo) {
-        streamInfo.chatters.forEach(function (info) {
-          wrapper.dom(Chatter, { info });
+        const currentChatters = keyMapper(streamInfo?.chatters);
+        compareKeys(list, streamInfo, function (key, status) {
+          if (status === 'removed') {
+            list[key]?.remove();
+          } else if (status === 'new' && currentChatters[key]) {
+            list[key] = wrapper.dom(Chatter, { info: currentChatters[key] });
+          }
         });
       }
     }

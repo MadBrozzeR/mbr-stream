@@ -152,3 +152,38 @@ export function getTimeString (time: number) {
     zeroLead(date.getHours()) + ':' + zeroLead(date.getMinutes()) + ':' + zeroLead(date.getSeconds()) + '.' +
     zeroLead(date.getMilliseconds(), '000') + '+03:00';
 }
+
+type CompareKeyStatus = 'removed' | 'stay' | 'new';
+export function compareKeys (source: Record<string, any>, updated: Record<string, any>, callback: (key: string, status: CompareKeyStatus) => void) {
+  const status: Record<string, CompareKeyStatus> = {};
+  let changedItemsCount = 0;
+  for (const key in source) {
+    status[key] = 'removed';
+    ++changedItemsCount;
+  }
+  for (const key in updated) {
+    if (key in status) {
+      status[key] = 'stay';
+      --changedItemsCount;
+    } else {
+      status[key] = 'new';
+    }
+  }
+
+  if (changedItemsCount) for (const key in status) if (status[key]) {
+    callback(key, status[key]);
+  }
+}
+
+export function keyMapper<T extends Record<string, any>> (array: T[], useAsKey: string = 'id') {
+  const result: Record<string, T> = {};
+
+  for (let index = 0 ; index < array.length ; ++index) {
+    const item = array[index];
+    if (item && useAsKey in item) {
+      result[item[useAsKey]] = item;
+    }
+  }
+
+  return result;
+}
