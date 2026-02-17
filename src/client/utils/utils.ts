@@ -156,21 +156,18 @@ export function getTimeString (time: number) {
 type CompareKeyStatus = 'removed' | 'stay' | 'new';
 export function compareKeys (source: Record<string, any>, updated: Record<string, any>, callback: (key: string, status: CompareKeyStatus) => void) {
   const status: Record<string, CompareKeyStatus> = {};
-  let changedItemsCount = 0;
   for (const key in source) {
     status[key] = 'removed';
-    ++changedItemsCount;
   }
   for (const key in updated) {
     if (key in status) {
       status[key] = 'stay';
-      --changedItemsCount;
     } else {
       status[key] = 'new';
     }
   }
 
-  if (changedItemsCount) for (const key in status) if (status[key]) {
+  for (const key in status) if (status[key]) {
     callback(key, status[key]);
   }
 }

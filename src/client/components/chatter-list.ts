@@ -47,7 +47,7 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
     updateFromStreamInfo = function (streamInfo) {
       if (streamInfo) {
         const currentChatters = keyMapper(streamInfo?.chatters);
-        compareKeys(list, streamInfo, function (key, status) {
+        compareKeys(list, currentChatters, function (key, status) {
           if (status === 'removed') {
             list[key]?.remove();
           } else if (status === 'new' && currentChatters[key]) {
