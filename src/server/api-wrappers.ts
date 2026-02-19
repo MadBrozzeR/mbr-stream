@@ -198,20 +198,34 @@ export function dataStorage<R> (apiRequest: () => Promise<R | null>) {
   };
 }
 
-export function dataStorageKeys<R> (apiRequest: (key: string) => Promise<R | null>) {
-  const results: Record<string, R> = {};
+export function dataStorageKeys<R> (apiRequest: (key: string[]) => Promise<Record<string, R>>) {
+  const cache: Record<string, R> = {};
 
-  return function (key: string, force?: boolean) {
-    if (results[key] && !force) {
-      return results[key];
+  return function (keys: string[], force?: boolean) {
+    const currentResults: Record<string, R> = {};
+    let toBeRequested: string[];
+
+    if (force) {
+      toBeRequested = keys;
+    } else {
+      toBeRequested = [];
+      for (let index = 0 ; index < keys.length ; ++index) {
+        const key = keys[index];
+        if (key && cache[key]) {
+          currentResults[key] = cache[key];
+        } else {
+          key && toBeRequested.push(key);
+        }
+      }
+    }
+    if (toBeRequested.length === 0) {
+      return Promise.resolve(currentResults);
     }
 
-    return apiRequest(key).then(function (response) {
-      if (response === null) {
-        return response;
-      }
+    return apiRequest(toBeRequested).then(function (response) {
+      Object.assign(cache, response);
 
-      return results[key] = response;
+      return Object.assign(currentResults, response);
     });
   }
 }

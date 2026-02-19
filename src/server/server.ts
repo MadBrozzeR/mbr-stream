@@ -41,13 +41,19 @@ const apiStorage = {
     });
   }),
 
-  getUser: dataStorageKeys(function (id) {
-    return api.Users.getUsers({ id }).then(function (response) {
-      return response.data[0] ? {
-        name: response.data[0].display_name,
-        image: response.data[0].profile_image_url,
-        description: response.data[0].description,
-      } : null;
+  getUser: dataStorageKeys(function (ids) {
+    return api.Users.getUsers({ id: ids }).then(function (response) {
+      const result: Record<string, { name: string; description: string; image: string }> = {};
+
+      return response.data.reduce(function (result, item) {
+        result[item.id] = {
+          name: item.display_name,
+          description: item.description,
+          image: item.profile_image_url,
+        };
+
+        return result;
+      }, result);
     });
   }),
 };
@@ -116,12 +122,12 @@ try {
       const promise = isEventType(messagePayload, 'channel.chat.message')
         ? Promise.all([
           apiStorage.getBadges(),
-          apiStorage.getUser(messagePayload.event.chatter_user_id),
+          apiStorage.getUser([messagePayload.event.chatter_user_id]),
         ]).then(function ([badgeStore, user]) {
           if (badgeStore) {
             payload.badges = getUserBadges(messagePayload.event.badges, badgeStore);
           }
-          payload.user = user;
+          payload.user = user[messagePayload.event.chatter_user_id] || null;
         })
         : Promise.resolve(payload);
       promise.then(function () {

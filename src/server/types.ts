@@ -167,7 +167,7 @@ export type GetEventSubSubscriptionResponse<T extends keyof EventSubType = keyof
   };
 };
 
-export type GetUsersRequest = { id?: string, login?: string };
+export type GetUsersRequest = { id?: string[], login?: string };
 
 export type GetUsersResponse = {
   data: Array<{
