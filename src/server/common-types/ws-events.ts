@@ -1,4 +1,4 @@
-import type { EventSubMessageMap, EventSubType } from './eventsub-types';
+import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
 
 type Chatter = {
   id: string;
@@ -33,11 +33,9 @@ export type UserStore = {
   description: string;
 };
 
-type Fragment = EventSubType['channel.chat.message']['payload']['message']['fragments'][number];
-
 export type ChatCommand = {
   cmd: string;
-  params: Fragment[];
+  params: MessageFragment[];
 };
 
 export type WSEventsMap = {

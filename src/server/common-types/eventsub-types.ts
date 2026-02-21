@@ -101,28 +101,30 @@ export type BadgeInfo = {
   info: string;
 };
 
+export type MessageFragment = {
+  type: 'text' | 'cheermote' | 'emote' | 'mention';
+  text: string;
+  cheermote?: null | {
+    prefix: string;
+    bits: number;
+    tier: number;
+  };
+  emote?: null | {
+    id: string;
+    emote_set_id: string;
+    owner_id: string;
+    format: Array<AnimationVariant>;
+  };
+  mention?: null | {
+    user_id: string;
+    user_name: string;
+    user_login: string;
+  };
+};
+
 export type Message = {
   text: string;
-  fragments: Array<{
-    type: 'text' | 'cheermote' | 'emote' | 'mention';
-    text: string;
-    cheermote?: null | {
-      prefix: string;
-      bits: number;
-      tier: number;
-    };
-    emote?: null | {
-      id: string;
-      emote_set_id: string;
-      owner_id: string;
-      format: Array<AnimationVariant>;
-    };
-    mention?: null | {
-      user_id: string;
-      user_name: string;
-      user_login: string;
-    };
-  }>;
+  fragments: MessageFragment[];
 };
 
 export type EventSubType = {

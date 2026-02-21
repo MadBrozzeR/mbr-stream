@@ -82,7 +82,6 @@ function processIncomingMessage (message: WSIncomeEvent) {
     case 'bot-say': {
       const messageText = message.payload;
       getUserInfo().then(function (info) {
-        console.log(info, messageText);
         if (info && messageText) {
           api.Chat.sendChatMessage({
             sender_id: info.id,

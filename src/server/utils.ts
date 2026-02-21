@@ -200,9 +200,9 @@ export function getCommand (message: Notification<'channel.chat.message'>) {
   if (firstFragment && firstFragment.type === 'text' && firstFragment.text[0] === '!') {
     const result: ChatCommand = {
       cmd: '',
-      params: [] as typeof firstFragment[],
+      params: [],
     };
-    const splitted = firstFragment.text.split(' ');
+    const splitted = firstFragment.text.trim().split(' ');
     result.cmd = splitted[0] || '';
     for (let index = 1 ; index < splitted.length ; ++index) {
       result.params.push({ type: 'text', text: splitted[index] || '' });
