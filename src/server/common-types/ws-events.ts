@@ -1,4 +1,4 @@
-import type { EventSubMessageMap } from './eventsub-types';
+import type { EventSubMessageMap, EventSubType } from './eventsub-types';
 
 type Chatter = {
   id: string;
@@ -33,16 +33,24 @@ export type UserStore = {
   description: string;
 };
 
+type Fragment = EventSubType['channel.chat.message']['payload']['message']['fragments'][number];
+
+export type ChatCommand = {
+  cmd: string;
+  params: Fragment[];
+};
+
 export type WSEventsMap = {
   keepalive: {};
   notification: {
     event: EventSubMessageMap['notification']['payload'];
-    user: UserStore | null,
-    badges: BadgeData[],
+    user: UserStore | null;
+    badges: BadgeData[];
+    command: ChatCommand | null;
   };
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
-  moduleSetup: { module: string; setup: Record<string, string> | null; }
+  moduleSetup: { module: string; setup: Record<string, string> | null; };
 };
 
 export type WSEvents = {

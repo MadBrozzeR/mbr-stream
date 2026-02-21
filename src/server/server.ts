@@ -2,7 +2,7 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
+import { getCommand, getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
 import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
@@ -116,6 +116,7 @@ try {
         event: message.payload,
         user: null,
         badges: [],
+        command: null,
       };
 
       const messagePayload = message.payload;
@@ -128,6 +129,7 @@ try {
             payload.badges = getUserBadges(messagePayload.event.badges, badgeStore);
           }
           payload.user = user[messagePayload.event.chatter_user_id] || null;
+          payload.command = getCommand(messagePayload);
         })
         : Promise.resolve(payload);
       promise.then(function () {
