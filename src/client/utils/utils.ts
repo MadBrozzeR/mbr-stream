@@ -184,3 +184,12 @@ export function keyMapper<T extends Record<string, any>> (array: T[], useAsKey: 
 
   return result;
 }
+
+const NOT_LETTER_RE = /\W/;
+
+export function getExtension (file: string) {
+  const dotPosition = file.lastIndexOf('.');
+  const result = dotPosition > -1 ? file.substring(dotPosition + 1) : '';
+
+  return (!result || NOT_LETTER_RE.test(result)) ? '' : result;
+}
