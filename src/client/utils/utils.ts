@@ -193,3 +193,9 @@ export function getExtension (file: string) {
 
   return (!result || NOT_LETTER_RE.test(result)) ? '' : result;
 }
+
+export function classNameToggler (node: HTMLElement, className: string) {
+  return function (toggle: boolean) {
+    toggle ? node.classList.add(className) : node.classList.remove(className);
+  }
+};

@@ -1,5 +1,5 @@
 import { newComponent } from '../../splux-host';
-import { isCast } from '../../utils/broadcaster';
+import { classNameToggler } from '../../utils/utils';
 import { Clip } from '../clip';
 import { Fade } from '../fade';
 
@@ -7,10 +7,14 @@ const STYLES = {
   '.lurk_clip': {
     height: '100%',
     width: '140px',
-    display: 'flex',
     justifyContent: 'center',
     filter: 'url(#chromakey-green1)',
     position: 'relative',
+    display: 'none',
+
+    '--visible': {
+      display: 'flex',
+    },
 
     '--name_line': {
       position: 'absolute',
@@ -24,9 +28,10 @@ const STYLES = {
     },
 
     '--name_text': {
-      backgroundColor: 'rgba(20, 20, 20, 0.8)',
+      backgroundColor: 'rgba(20 20 20 / 80%)',
       color: 'white',
       fontWeight: '900',
+      padding: '1px 8px',
     },
   },
 };
@@ -34,6 +39,7 @@ const STYLES = {
 export const LurkClip = newComponent('div.lurk_clip', function () {
   const host = this.host;
   host.styles.add('lurk-clip', STYLES);
+  const toggleVisibility = classNameToggler(this.node, 'lurk_clip--visible') ;
 
   const fader = this.dom(Fade);
 
@@ -50,22 +56,20 @@ export const LurkClip = newComponent('div.lurk_clip', function () {
   });
 
   function play (name: string) {
-    setName(name);
-    fader.show().then(function () {
-      clip.play().then(function () {
-        fader.hide().then(function () {
-          clip.rewind();
+    return new Promise<void>(function (resolve) {
+      setName(name);
+      toggleVisibility(true);
+      fader.show().then(function () {
+        clip.play().then(function () {
+          fader.hide().then(function () {
+            clip.rewind();
+            toggleVisibility(false);
+            resolve();
+          });
         });
       });
     });
   }
 
-  this.tuneIn(function (data) {
-    if (isCast('eventSubEvent', data)) {
-      const command = data.payload.command;
-      if (command && command.cmd === '!lurk') {
-        play(data.payload.user?.name || '');
-      }
-    }
-  });
+  return { play };
 });

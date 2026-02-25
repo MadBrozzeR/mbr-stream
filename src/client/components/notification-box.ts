@@ -277,11 +277,13 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
           });
         }
       } else if (isEventType(data.payload.event, 'channel.follow')) {
+        /*
         push({
           text: `${data.payload.event.event.user_name} is now FOLLOWING my channel!!!`,
           audio: 'witch-ambient1.ogg',
           timeout: 10000,
         });
+        */
       } else if (isEventType(data.payload.event, 'channel.subscribe')) {
         push({
           text: `${data.payload.event.event.user_name} is now SUBSCRIBED on my channel!!!`,
