@@ -24,43 +24,75 @@ function log(message: string) {
 class Timer {
   ref: ReturnType<typeof setTimeout> | null = null;
   timeout = 0;
-  callback: () => void = function () {};
+  callback: () => void;
+
+  constructor(callback: () => void = function () {}) {
+    this.callback = callback;
+  }
 
   set(timeout?: number) {
+    const timer = this;
+
     if (timeout !== undefined) {
       this.timeout = timeout;
     }
+
     this.stop();
     if (this.timeout) {
-      this.ref = setTimeout(this.callback, this.timeout);
+      this.ref = setTimeout(function () {
+        timer.stop();
+        timer.callback();
+      }, this.timeout);
     }
   }
 
   stop() {
     this.ref && clearTimeout(this.ref);
+    this.ref = null;
+  }
+
+  isActive() {
+    return !!this.ref;
   }
 }
+
+const RECONNECT_ON_ERROR_DELAY = 60000;
 
 export const startWSClient = function (callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void) {
   let sessionId = '';
   const history: any[] = [];
-  const timer = new Timer();
+  const idleTimer = new Timer(function () {
+    console.log('Socket is idle for too long; reconnection attempt');
+    wsClient?.connect();
+  });
+  const reconnectionTimer = new Timer(function () {
+    wsClient?.connect();
+  });
 
   const wsClient = config.startChat ? new MadSocketClient({
     connect() {
       console.log('Connected to twitch Server');
     },
 
+    error(error) {
+      if (error.message.indexOf('429') > -1) {
+        console.log(`Connected ended with status 429. Recconnecting in ${RECONNECT_ON_ERROR_DELAY / 1000}s`);
+        reconnectionTimer.set(RECONNECT_ON_ERROR_DELAY);
+      }
+    },
+
     disconnect() {
       console.log('Connection is closed');
-      timer.stop();
-      this.connect();
+      idleTimer.stop();
+      if (!reconnectionTimer.isActive()) {
+        this.connect();
+      }
     },
 
     async message(data) {
       const dataString = data.toString();
       log(dataString);
-      timer.set();
+      idleTimer.set();
 
       try {
         const message: EventSubMessageMap[keyof EventSubMessageMap] = JSON.parse(dataString);
@@ -68,7 +100,7 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
         if (isEventSubMessageType(message, 'session_welcome')) {
           sessionId = message.payload.session.id;
           if (message.payload.session.keepalive_timeout_seconds) {
-            timer.set(message.payload.session.keepalive_timeout_seconds * 1500);
+            idleTimer.set(message.payload.session.keepalive_timeout_seconds * 1500);
           }
           subscribe(sessionId);
         }
@@ -102,11 +134,6 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
     }
   }).connect() : null;
 
-  timer.callback = function () {
-    console.log('Socket is idle for too long; reconnection attempt');
-    wsClient?.connect();
-  }
-
   return wsClient;
 }
 
@@ -114,12 +141,6 @@ type Client = {
   info: { name: string };
   socket: ClientConnection;
 };
-
-/*
-function findClient (clients: List<Client>, socket: ClientConnection) {
-  return clients.iterate(function (client) { return client.socket === socket; });
-}
-*/
 
 function removeClient(clients: List<Client>, socket: ClientConnection) {
   clients.remove(function (client) {
