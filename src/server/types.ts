@@ -1,4 +1,11 @@
-import type { EventSubStatus, EventSubType, EventSubTypeVersion, EventTypeConditions, Scope } from './common-types/eventsub-types';
+import type {
+  EventSubNotification,
+  EventSubStatus,
+  EventSubType,
+  EventSubTypeVersion,
+  EventTypeConditions,
+  Scope,
+} from './common-types/eventsub-types';
 
 export type RequestParamValue<V = string | number | boolean> =
   | V
@@ -9,6 +16,7 @@ export type RequestParamValue<V = string | number | boolean> =
 export type RequestParams = Record<string, RequestParamValue>;
 export type RESTMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 export type RequestUrl = string | [string, RequestParams];
+export type Notification<T extends keyof EventSubType = keyof EventSubType> = EventSubNotification<T>['payload'];
 
 export type TokenResponse = {
   access_token: string;

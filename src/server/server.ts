@@ -2,13 +2,14 @@ import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { API } from './constants';
 import { config } from './config';
-import { getCommand, getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
+import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
 import type { Scope } from './common-types/eventsub-types';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
 import type { WSIncomeEvent, BadgeStore, WSEvent } from './common-types/ws-events';
 import { downloadResources } from './resource-downloader';
+import { getCommand } from './chat-commands';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';

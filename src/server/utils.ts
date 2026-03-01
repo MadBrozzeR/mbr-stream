@@ -2,10 +2,10 @@ import { IncomingMessage, OutgoingHttpHeaders } from 'http';
 import https from 'https';
 import http from 'http';
 import { Logger } from 'mbr-logger';
-import type { RequestParams, RequestUrl, RESTMethod } from './types';
+import type { RequestParams, RequestUrl, RESTMethod, Notification } from './types';
 import { config } from './config';
-import type { BadgeInfo, EventSubMessageMap, EventSubNotification, EventSubType } from './common-types/eventsub-types';
-import type { BadgeData, BadgeStore, ChatCommand } from './common-types/ws-events';
+import type { BadgeInfo, EventSubMessageMap, EventSubType } from './common-types/eventsub-types';
+import type { BadgeData, BadgeStore } from './common-types/ws-events';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';
@@ -162,8 +162,6 @@ export function isEventSubMessageType<K extends keyof EventSubMessageMap> (
   return data.metadata.message_type === type;
 };
 
-export type Notification<T extends keyof EventSubType = keyof EventSubType> = EventSubNotification<T>['payload'];
-
 export function isEventType<T extends keyof EventSubType>(
   notification: Notification,
   ...types: T[]
@@ -192,28 +190,4 @@ export function getUserBadges (badges: BadgeInfo[], badgeStore: BadgeStore) {
   });
 
   return result;
-}
-
-export function getCommand (message: Notification<'channel.chat.message'>) {
-  const fragments = message.event.message.fragments;
-  const firstFragment = fragments[0];
-  if (firstFragment && firstFragment.type === 'text' && firstFragment.text[0] === '!') {
-    const result: ChatCommand = {
-      cmd: '',
-      params: [],
-    };
-    const splitted = firstFragment.text.trim().split(' ');
-    result.cmd = splitted[0] || '';
-    for (let index = 1 ; index < splitted.length ; ++index) {
-      result.params.push({ type: 'text', text: splitted[index] || '' });
-    }
-    for (let index = 1 ; index < fragments.length ; ++index) {
-      const fragment = fragments[index];
-      fragment && result.params.push(fragment);
-    }
-
-    return result;
-  }
-
-  return null;
 }
