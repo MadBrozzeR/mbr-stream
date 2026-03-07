@@ -61,6 +61,36 @@ const SUBSCRIPTIONS: {
     version: '1',
     condition: { to_broadcaster_user_id: condition.to_broadcaster_user_id || '' },
   }),
+  'channel.guest_star_session.begin': (condition) => ({
+    type: 'channel.guest_star_session.begin',
+    version: 'beta',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.guest_star_session.end': (condition) => ({
+    type: 'channel.guest_star_session.end',
+    version: 'beta',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.guest_star_guest.update': (condition) => ({
+    type: 'channel.guest_star_guest.update',
+    version: 'beta',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.guest_star_settings.update': (condition) => ({
+    type: 'channel.guest_star_settings.update',
+    version: 'beta',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.shoutout.create': (condition) => ({
+    type: 'channel.shoutout.create',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.moderator_user_id },
+  }),
+  'channel.shoutout.receive': (condition) => ({
+    type: 'channel.shoutout.receive',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.moderator_user_id },
+  }),
 };
 
 export async function subscribe (sessionId: string) {
@@ -72,6 +102,7 @@ export async function subscribe (sessionId: string) {
       moderator_user_id: userInfo.id,
       to_broadcaster_user_id: userInfo.id,
     };
+    const limits = [0, 0];
 
     const result = (await Promise.all(
       Object.keys(SUBSCRIPTIONS)
@@ -81,7 +112,12 @@ export async function subscribe (sessionId: string) {
               ...SUBSCRIPTIONS[type](condition),
               transport: { method: 'websocket', session_id: sessionId },
             })
-              .then((): SubResult => [type, true])
+              .then((response): SubResult => {
+                limits[1] = response.max_total_cost;
+                limits[0] = Math.max(limits[0] || 0, response.total_cost);
+
+                return [type, true];
+              })
               .catch((): SubResult => [type, false])
           }
 
@@ -94,6 +130,7 @@ export async function subscribe (sessionId: string) {
     }, {});
 
     console.log('EventSub subscription result:', result);
+    console.log(`Limits: ${limits[0]}/${limits[1]}`);
 
     return result;
   } catch (error) {

@@ -24,3 +24,4 @@ export function getCommand (message: Notification<'channel.chat.message'>) {
 
   return null;
 }
+

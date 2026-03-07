@@ -264,3 +264,212 @@ export type GetChannelChatBadgesRequest = {
 };
 
 export type GetChannelChatBadgesResponse = GetGlobalChatBadgesResponse;
+
+export type GetChannelGuestStarSettingsRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+};
+
+export type GetChannelGuestStarSettingsResponse = {
+  is_moderator_send_live_enabled: boolean;
+  slot_count: number;
+  is_browser_source_audio_enabled: boolean;
+  group_layout: string;
+  browser_source_token: string;
+};
+
+export type UpdateChannelGuestStarSettingsRequestParams = {
+  broadcaster_id: string;
+};
+
+export type UpdateChannelGuestStarSettingsRequest = {
+  is_moderator_send_live_enabled?: boolean;
+  slot_count?: number;
+  is_browser_source_audio_enabled?: boolean;
+  group_layout?: string;
+  regenerate_browser_sources?: boolean;
+};
+
+export type UpdateChannelGuestStarSettingsResponse = void;
+
+export type GetGuestStarSessionRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+};
+
+export type GetGuestStarSessionResponse = {
+  data: Array<{
+    id: string;
+    guests: Array<{
+      slot_id: string;
+      is_live: boolean;
+      user_id: string;
+      user_display_name: string;
+      user_login: string;
+      volume: number;
+      assigned_at: string;
+      audio_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+      video_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+    }>;
+  }>;
+};
+
+export type CreateGuestStarSessionRequest = {
+  broadcaster_id: string;
+};
+
+export type CreateGuestStarSessionResponse = {
+  data: Array<{
+    id: string;
+    guests: Array<{
+      slot_id: string;
+      is_live: boolean;
+      user_id: string;
+      user_display_name: string;
+      user_login: string;
+      volume: number;
+      assigned_at: string;
+      audio_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+      video_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+    }>;
+  }>;
+};
+
+export type EndGuestStarSessionRequest = {
+  broadcaster_id: string;
+  session_id: string;
+};
+
+export type EndGuestStarSessionResponse = {
+  data: Array<{
+    id: string;
+    guests: Array<{
+      slot_id: string;
+      is_live: boolean;
+      user_id: string;
+      user_display_name: string;
+      user_login: string;
+      volume: number;
+      assigned_at: string;
+      audio_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+      video_settings: {
+        is_host_enabled: boolean;
+        is_guest_enabled: boolean;
+        is_available: boolean;
+      };
+    }>;
+  }>;
+};
+
+export type GetGuestStarInvitesRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+};
+
+export type GetGuestStarInvitesResponse = {
+  data: Array<{
+    user_id: string;
+    invited_at: string;
+    status: 'INVITED' | 'ACCEPTED' | 'READY';
+    is_video_enabled: boolean;
+    is_audio_enabled: boolean;
+    is_video_available: boolean;
+    is_audio_available: boolean;
+  }>;
+};
+
+export type SendGuestStarInviteRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  guest_id: string;
+};
+
+export type SendGuestStarInviteResponse = void;
+
+export type DeleteGuestStarInviteRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  guest_id: string;
+};
+
+export type DeleteGuestStarInviteResponse = void;
+
+export type AssignGuestStarSlotRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  guest_id: string;
+  slot_id: string;
+};
+
+export type AssignGuestStarSlotResponse = void;
+
+export type UpdateGuestStarSlotRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  source_slot_id: string;
+  destination_slot_id: string;
+};
+
+export type UpdateGuestStarSlotResponse = void;
+
+export type DeleteGuestStarSlotRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  guest_id: string;
+  slot_id: string;
+  should_reinvite_guest?: string;
+};
+
+export type DeleteGuestStarSlotResponse = void;
+
+export type UpdateGuestStarSlotSettingsRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  session_id: string;
+  slot_id: string;
+  is_audio_enabled?: boolean;
+  is_video_enabled?: boolean;
+  is_live?: boolean;
+  volume?: number;
+};
+
+export type UpdateGuestStarSlotSettingsResponse = void;
+
+export type SendShoutoutRequest = {
+  from_broadcaster_id: string;
+  to_broadcaster_id: string;
+  moderator_id: string;
+};
+
+export type SendShoutoutResponse = void;
+
+/*
+MACRO
+:s/ //gIexport type ARequest = {};hiVkkkyPjjjjj:s/Request/Response/^wwyiwjjop^~:s/Response//>>>>A(params: Types.m18k02wyiw`1pa) {  return userApiRequest<Types.m15k02wyiw`1pa>();},0xx
+*/

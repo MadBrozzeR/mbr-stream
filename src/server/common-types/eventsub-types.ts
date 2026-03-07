@@ -87,7 +87,7 @@ export type Scope =
   | 'chat:read' // View chat messages sent in a chatroom using an IRC connection.
   | 'whispers:read'; // Receive whisper messages for your user using PubSub.
 
-type EventSubTypeEntity<V extends number, C extends Record<string, Condition<any, any>>, P = unknown> = {
+type EventSubTypeEntity<V extends number | string, C extends Record<string, Condition<any, any>>, P = unknown> = {
   conditions: C;
   version: V;
   payload: P;
@@ -222,6 +222,102 @@ export type EventSubType = {
     to_broadcaster_user_name: string;
     viewers: number;
   }>;
+
+  'channel.guest_star_session.begin': EventSubTypeEntity<'beta', {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_name: string;
+    broadcaster_user_login: string;
+    moderator_user_id: string;
+    moderator_user_name: string;
+    moderator_user_login: string;
+    session_id: string;
+    started_at: string;
+  }>;
+
+  'channel.guest_star_session.end': EventSubTypeEntity<'beta', {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_name: string;
+    broadcaster_user_login: string;
+    session_id: string;
+    started_at: string;
+    ended_at: string;
+    host_user_id: string;
+    host_user_name: string;
+    host_user_login: string;
+  }>;
+
+  'channel.guest_star_guest.update': EventSubTypeEntity<'beta', {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+  broadcaster_user_id: string;
+  broadcaster_user_name: string;
+  broadcaster_user_login: string;
+  session_id: string;
+  moderator_user_id: string;
+  moderator_user_name: string;
+  moderator_user_login: string;
+  guest_user_id: string;
+  guest_user_name: string;
+  guest_user_login: string;
+  slot_id: string;
+  state: 'invited' | 'accepted' | 'ready' | 'backstage' | 'live' | 'removed';
+  host_user_id: string;
+  host_user_name: string;
+  host_user_login: string;
+  host_video_enabled: boolean;
+  host_audio_enabled: boolean;
+  host_volume: number;
+  }>;
+
+  'channel.guest_star_settings.update': EventSubTypeEntity<'beta', {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_name: string;
+    broadcaster_user_login: string;
+    is_moderator_send_live_enabled: boolean;
+    slot_count: number;
+    is_browser_source_audio_enabled: boolean;
+    group_layout: 'tiled' | 'screenshare' | 'horizontal_top' | 'horizontal_bottom' | 'vertical_left' | 'vertical_right';
+  }>;
+
+  // moderator:read:shoutouts or moderator:manage:shoutouts
+  'channel.shoutout.create': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    from_broadcaster_user_id: string;
+    from_broadcaster_user_login: string;
+    from_broadcaster_user_name: string;
+    viewer_count: number;
+    started_at: string;
+  }>;
+
+  // moderator:read:shoutouts or moderator:manage:shoutouts
+  'channel.shoutout.receive': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    moderator_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    from_broadcaster_user_id: string;
+    from_broadcaster_user_login: string;
+    from_broadcaster_user_name: string;
+    viewer_count: number;
+    started_at: string;
+  }>;
 };
 
 export type EventTypeConditions<T extends keyof EventSubType> = Merge<OmitNever<{
@@ -283,7 +379,7 @@ type EventSubSubscriptionPayload<K extends keyof EventSubType> = {
 export type EventSubNotification<K extends keyof EventSubType> = EventSubMessageTemplate<'notification', {
   subscription: EventSubSubscriptionPayload<K>;
   event: EventSubType[K]['payload'];
-}, K>
+}, K>;
 
 export type EventSubMessageMap = {
   session_welcome: EventSubMessageTemplate<'session_welcome', {
