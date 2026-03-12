@@ -139,7 +139,7 @@ export type EventSubType = {
     broadcaster_user_login: string;
     broadcaster_user_name: string;
     followed_at: string;
-  }>
+  }>;
 
   'channel.update': EventSubTypeEntity<2, {
     broadcaster_user_id: Condition;

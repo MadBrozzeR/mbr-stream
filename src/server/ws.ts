@@ -17,8 +17,8 @@ const logger = new Logger(config.eventSubLog, {
   }
 });
 
-function log(message: string) {
-  logger.put(`[${new Date().toJSON()}]${message}`)
+function log(message: string, type: string) {
+  logger.put(`[${new Date().toJSON()}]${type}|${message}`)
 }
 
 class Timer {
@@ -58,7 +58,10 @@ class Timer {
 
 const RECONNECT_ON_ERROR_DELAY = 60000;
 
-export const startWSClient = function (callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void) {
+export const startWSClient = function (
+  callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void,
+  infoCallback: (message: string) => void
+) {
   let sessionId = '';
   const history: any[] = [];
   const idleTimer = new Timer(function () {
@@ -72,17 +75,27 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
   const wsClient = config.startChat ? new MadSocketClient({
     connect() {
       console.log('Connected to twitch Server');
+      infoCallback('Connection to Twitch is established');
     },
 
     error(error) {
+      log(`{"message":"${error.message}"}`, 'error');
       if (error.message.indexOf('429') > -1) {
-        console.log(`Connected ended with status 429. Recconnecting in ${RECONNECT_ON_ERROR_DELAY / 1000}s`);
+        const errorMessage = `Connected ended with status 429. Recconnecting in ${RECONNECT_ON_ERROR_DELAY / 1000}s`;
+        console.log(errorMessage);
+        infoCallback(errorMessage);
         reconnectionTimer.set(RECONNECT_ON_ERROR_DELAY);
+      } else {
+        console.log(error);
+        if (error instanceof Error) {
+          infoCallback(error.message);
+        }
       }
     },
 
     disconnect() {
       console.log('Connection is closed');
+      infoCallback('Connection is closed');
       idleTimer.stop();
       if (!reconnectionTimer.isActive()) {
         this.connect();
@@ -91,7 +104,7 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
 
     async message(data) {
       const dataString = data.toString();
-      log(dataString);
+      log(dataString, 'message');
       idleTimer.set();
 
       try {
@@ -106,7 +119,7 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
         }
 
         else if (isEventSubMessageType(message, 'session_reconnect')) {
-          this.connect(message.payload.session.reconnect_url);
+          this.connect({ url: message.payload.session.reconnect_url });
         }
 
         else if (isEventSubMessageType(message, 'notification')) {
@@ -132,7 +145,9 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
 
       console.log(type, this.status, info);
     }
-  }).connect() : null;
+  }) : null;
+
+  wsClient?.connect();
 
   return wsClient;
 }

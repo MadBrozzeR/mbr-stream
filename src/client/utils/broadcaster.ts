@@ -10,6 +10,7 @@ export type Broadcast = {
   eventSubEvent: WSEvent<'notification'>['payload'];
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
+  info: string;
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

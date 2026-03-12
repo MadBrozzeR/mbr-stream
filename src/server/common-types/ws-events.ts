@@ -49,6 +49,7 @@ export type WSEventsMap = {
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
   moduleSetup: { module: string; setup: Record<string, string> | null; };
+  info: string;
 };
 
 export type WSEvents = {

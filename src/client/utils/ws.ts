@@ -66,6 +66,10 @@ export const startWebSocket = function (host: Host) {
         host.cast('interfaceAction', message.payload);
         break;
 
+      case 'info':
+        host.cast('info', message.payload);
+        break;
+
       case 'moduleSetup':
         urlState.set(message.payload.module, message.payload.setup);
         break;

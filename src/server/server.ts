@@ -148,6 +148,8 @@ try {
         wsServer.sendData({ type: 'notification', payload });
       });
     }
+  }, function (info) {
+    wsServer.sendData({ type: 'info', payload: info });
   });
 
   wsServer.listen(function (message) {

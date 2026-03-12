@@ -123,6 +123,10 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
             `You just gave ${event.event.broadcaster_user_name} a SHOUTOUT for ${event.event.viewer_count} viewers`,
         });
       }
+    } else if (isCast('info', data)) {
+      append({
+        message: data.payload,
+      });
     }
   });
 });
