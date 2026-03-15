@@ -170,10 +170,20 @@ function removeClient(clients: List<Client>, socket: ClientConnection) {
 
 function getClientNames (clients: List<Client>) {
   let names = '';
+  const counters: Record<string, number> = {};
 
   clients.iterate(function ({ info: { name } }) {
-    names += names ? `, ${name}` : name;
+    if (counters[name]) {
+      counters[name] += 1;
+    } else {
+      counters[name] = 1;
+    }
   });
+
+  for (const name in counters) if (counters[name]) {
+    const count = counters[name] > 1 ? ` [${counters[name]}]` : '';
+    names += names ? `, ${name}${count}` : name;
+  }
 
   return names;
 }
@@ -220,7 +230,7 @@ export function startWSServer () {
         listener.call(ifc, message);
       });
     }
-  }, { debug: console.log });
+  });
 
   const ifc = {
     attach(request: Request) {
