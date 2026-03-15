@@ -80,6 +80,12 @@ function processIncomingMessage (message: WSIncomeEvent) {
 
     case 'bot-say': {
       const messageText = message.payload;
+
+      if (!config.startChat) {
+        console.log('[BOT-SAY]:', messageText);
+        return;
+      }
+
       getUserInfo().then(function (info) {
         if (info && messageText) {
           api.Chat.sendChatMessage({
