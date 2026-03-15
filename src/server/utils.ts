@@ -191,3 +191,27 @@ export function getUserBadges (badges: BadgeInfo[], badgeStore: BadgeStore) {
 
   return result;
 }
+
+export function wait (time: number) {
+  return time ? new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  }) : Promise.resolve();
+}
+
+export function consoleLogOptimized (timeout = 0, handler = console.log) {
+  type Params = Parameters<typeof console.log>;
+  let params: Params | null = null;
+  let timeoutRef: ReturnType<typeof setTimeout> | null = null;
+
+  return function (...args: Params) {
+    params = args;
+    timeoutRef && clearTimeout(timeoutRef);
+
+    timeoutRef = setTimeout(function () {
+      params && handler(...params);
+      timeoutRef && clearTimeout(timeoutRef);
+      timeoutRef = null;
+      params = null;
+    }, timeout);
+  }
+}

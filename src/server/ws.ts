@@ -4,7 +4,7 @@ import { config } from './config';
 import { subscribe } from './api-wrappers';
 import { Request } from 'mbr-serv-request';
 import type { EventSubMessageMap } from './common-types/eventsub-types';
-import { isEventSubMessageType } from './utils';
+import { consoleLogOptimized, isEventSubMessageType } from './utils';
 import type { WSEvents, WSIncomeEvent } from './common-types/ws-events';
 import { List } from './list';
 
@@ -57,6 +57,8 @@ class Timer {
 }
 
 const RECONNECT_ON_ERROR_DELAY = 60000;
+
+const logClients = consoleLogOptimized(1000);
 
 export const startWSClient = function (
   callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void,
@@ -161,6 +163,7 @@ function removeClient(clients: List<Client>, socket: ClientConnection) {
   clients.remove(function (client) {
     if (client.socket === socket) {
       console.log(`Client ${client.info.name} disconnected`);
+      logClients(`Currently connected: ${getClientNames(clients)}`);
       return true;
     };
 
@@ -217,7 +220,7 @@ export function startWSServer () {
       });
 
       console.log(`Client ${name} has connected`);
-      console.log(`Currently connected: ${getClientNames(clients)}`);
+      logClients(`Currently connected: ${getClientNames(clients)}`);
     },
     disconnect() {
       removeClient(clients, this)
