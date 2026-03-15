@@ -37,6 +37,7 @@ const TEST_MESSAGE: ChatMessageEvent = {
 };
 
 const INFO_USER = '[INFO]';
+const EMOTE_SCALE_TIMEOUT = 3000;
 
 type LogEntryParams = {
   user?: string;
@@ -54,7 +55,7 @@ export const LogEntry = newComponent('div.event_log--entry', function (
   if (typeof message === 'string') {
     entry.dom('span.event_log--entry_text').params({ innerText: message });
   } else {
-    entry.dom(MessageRow, { message });
+    entry.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
   }
 });
 
