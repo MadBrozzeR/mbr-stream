@@ -203,3 +203,7 @@ export function classNameToggler (node: HTMLElement, className: string) {
     toggle ? node.classList.add(className) : node.classList.remove(className);
   }
 };
+
+export function step (value: number, size: number) {
+  return ~~(value / size) * size;
+}

@@ -4,6 +4,7 @@ type Origin = { x: number, y: number };
 export type DraggerListeners = {
   move?: (x: number, y: number, origin: { x: number, y: number }) => void;
   apply?: (x: number, y: number, origin: { x: number, y: number }) => void;
+  wheel?: (direction: 'up' | 'down') => void;
 }
 
 export function setDragger (root: Splux<HTMLElement, any>) {
@@ -20,6 +21,7 @@ export function setDragger (root: Splux<HTMLElement, any>) {
   function handleMouseUp (event: MouseEvent) {
     root.node.removeEventListener('mousemove', handleMove);
     root.node.removeEventListener('mouseup', handleMouseUp);
+    root.node.removeEventListener('wheel', handleWheel);
 
     if (origin && currentListeners && currentListeners.apply) {
       currentListeners.apply(event.clientX - origin.x, event.clientY - origin.y, origin);
@@ -34,6 +36,12 @@ export function setDragger (root: Splux<HTMLElement, any>) {
     }
   }
 
+  function handleWheel (event: WheelEvent) {
+    if (currentListeners && currentListeners.wheel) {
+      currentListeners.wheel(event.deltaY < 0 ? 'up' : 'down');
+    }
+  }
+
   root.node.addEventListener('mousedown', handleMouseDown);
 
   return function (listeners: DraggerListeners) {
@@ -41,5 +49,6 @@ export function setDragger (root: Splux<HTMLElement, any>) {
 
     root.node.addEventListener('mousemove', handleMove);
     root.node.addEventListener('mouseup', handleMouseUp);
+    root.node.addEventListener('wheel', handleWheel);
   };
 }

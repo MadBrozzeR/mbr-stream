@@ -3,7 +3,7 @@ import { Host, newComponent } from '../splux-host';
 import { MoverControlSvg } from '../svg/mover-controls.svg';
 import { isCast } from '../utils/broadcaster';
 import { urlState } from '../utils/url-state';
-import { getDashName, isKeyOf, splitByFirst } from '../utils/utils';
+import { getDashName, isKeyOf, splitByFirst, step } from '../utils/utils';
 import { ParamsDialog } from './params-dialog';
 
 type Values = Record<string, string>;
@@ -206,108 +206,160 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
       switch (handle) {
         case 'move-left': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.left;
+
           host.dragger({
             move(x) {
-              onPreview && onPreview({ left: ~~(box.left + x) + 'px', right: '' });
+              value = step(box.left + x, 10);
+              onPreview && onPreview({ left: value + 'px', right: '' });
             },
-            apply(x) {
-              onChange && onChange({ left: ~~(box.left + x) + 'px', right: '' });
+            apply() {
+              onChange && onChange({ left: value + 'px', right: '' });
               controls.anchor({ 'resize-left': true, 'resize-right':  false});
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ left: value + 'px', right: '' });
             },
           });
           break;
         }
         case 'move-top': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.top;
+
           host.dragger({
             move(_x, y) {
-              onPreview && onPreview({ top: ~~(box.top + y) + 'px', bottom: '' });
+              value = step(box.top + y, 10);
+              onPreview && onPreview({ top: value + 'px', bottom: '' });
             },
-            apply(_x, y) {
-              onChange && onChange({ top: ~~(box.top + y) + 'px', bottom: '' });
+            apply() {
+              onChange && onChange({ top: value + 'px', bottom: '' });
               controls.anchor({ 'resize-top': true, 'resize-bottom':  false});
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ top: value + 'px', bottom: '' });
             },
           });
           break;
         }
         case 'move-bottom': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.bottom;
+
           host.dragger({
             move(_x, y) {
-              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', top: '' });
+              value = step(box.bottom - y, 10);
+              onPreview && onPreview({ bottom: value + 'px', top: '' });
             },
-            apply(_x, y) {
-              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', top: '' });
+            apply() {
+              onChange && onChange({ bottom: value + 'px', top: '' });
               controls.anchor({ 'resize-bottom': true, 'resize-top':  false});
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ bottom: value + 'px', top: '' });
             },
           });
           break;
         }
         case 'move-right': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.right;
+
           host.dragger({
             move(x) {
-              onPreview && onPreview({ right: ~~(box.right - x) + 'px', left: '' });
+              value = step(box.right - x, 10);
+              onPreview && onPreview({ right: value + 'px', left: '' });
             },
-            apply(x) {
-              onChange && onChange({ right: ~~(box.right - x) + 'px', left: '' });
+            apply() {
+              onChange && onChange({ right: value + 'px', left: '' });
               controls.anchor({ 'resize-right': true, 'resize-left':  false});
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ right: value + 'px', left: '' });
             },
           });
           break;
         }
         case 'resize-left': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.width;
+
           host.dragger({
             move(x) {
-              const newWidth = ~~(box.width - x);
-              onPreview && onPreview({ width: newWidth + 'px' });
-              controls.set({ width: newWidth, height: box.height });
+              value = step(box.width - x, 10);
+              onPreview && onPreview({ width: value + 'px' });
+              controls.set({ width: value, height: box.height });
             },
-            apply(x) {
-              onChange && onChange({ width: ~~(box.width - x) + 'px' });
+            apply() {
+              onChange && onChange({ width: value + 'px' });
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ width: value + 'px' });
             },
           });
           break;
         }
         case 'resize-right': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.width;
+
           host.dragger({
             move(x) {
-              const newWidth = ~~(box.width + x);
-              onPreview && onPreview({ width: newWidth + 'px' });
-              controls.set({ width: newWidth, height: box.height });
+              value = step(box.width + x, 10);
+              onPreview && onPreview({ width: value + 'px' });
+              controls.set({ width: value, height: box.height });
             },
-            apply(x) {
-              onChange && onChange({ width: ~~(box.width + x) + 'px' });
+            apply() {
+              onChange && onChange({ width: value + 'px' });
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ width: value + 'px' });
             },
           });
           break;
         }
         case 'resize-top': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.height;
+
           host.dragger({
             move(_x, y) {
-              const newHeight= ~~(box.height - y);
-              onPreview && onPreview({ height: newHeight + 'px' });
-              controls.set({ width: box.width, height: newHeight });
+              value = step(box.height - y, 10);
+              onPreview && onPreview({ height: value + 'px' });
+              controls.set({ width: box.width, height: value });
             },
-            apply(_x, y) {
-              onChange && onChange({ height: ~~(box.height - y) + 'px' });
+            apply() {
+              onChange && onChange({ height: value + 'px' });
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ height: value + 'px' });
             },
           });
           break;
         }
         case 'resize-bottom': {
           const box = host.getModulePosition(moverControlsSpl);
+          let value = box.height;
+
           host.dragger({
             move(_x, y) {
-              const newHeight= ~~(box.height + y);
-              onPreview && onPreview({ height: newHeight + 'px' });
-              controls.set({ width: box.width, height: newHeight });
+              value = step(box.height + y, 10);
+              onPreview && onPreview({ height: value + 'px' });
+              controls.set({ width: box.width, height: value });
             },
-            apply(_x, y) {
-              onChange && onChange({ height: ~~(box.height + y) + 'px' });
+            apply() {
+              onChange && onChange({ height: value + 'px' });
+            },
+            wheel(direction) {
+              value += direction === 'up' ? 1 : -1;
+              onPreview && onPreview({ height: value + 'px' });
             },
           });
           break;
