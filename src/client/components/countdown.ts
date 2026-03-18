@@ -2,7 +2,7 @@ import { newComponent } from '../splux-host';
 import { FrameSvg } from '../svg/frame.svg';
 import { animation } from '../utils/animation';
 import { Timer } from '../utils/timer';
-import { getDateFromString, getTimeString, zeroLead } from '../utils/utils';
+import { addTime, getDateFromString, getTimeString, zeroLead } from '../utils/utils';
 import { Mover } from './mover';
 import { Toolbox } from './toolbar';
 
@@ -177,18 +177,25 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       height: '60px',
       time: '2025-12-05T21:00:00.000+03:00',
     },
+    prepareValues(values) {
+      const date = addTime(values['time'] || '', timer.finishTime);
+
+      if (date && date !== timer.finishTime) {
+        return {
+          time: getTimeString(date),
+        };
+      }
+
+      return values;
+    },
     onSetupChange(values) {
-      const date = getDateFromString(values['time'] || '', timer.finishTime);
       if (values['width'] && values['height']) {
         resizeFrame(values['width'], values['height']);
       }
 
-      if (date && date !== timer.finishTime) {
-        timer.set(date);
-
-        return {
-          time: getTimeString(date),
-        };
+      if (values['time']) {
+        const time = getDateFromString(values['time']);
+        time && timer.set(time);
       }
 
       return;

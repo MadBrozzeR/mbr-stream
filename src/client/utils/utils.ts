@@ -126,7 +126,7 @@ const TIME_MULTIPLIER = {
   s: 1000,
 };
 
-export function getDateFromString (time: string, base?: number) {
+export function addTime (time: string, base?: number) {
   const addTimeMatch = ADD_TIME_RE.exec(time);
   let result = 0;
 
@@ -139,9 +139,13 @@ export function getDateFromString (time: string, base?: number) {
     } else {
       result += increment;
     }
-  } else {
-    result = Date.parse(time);
-  };
+  }
+
+  return result;
+}
+
+export function getDateFromString (time: string) {
+  const result = Date.parse(time);
 
   return isNaN(result) ? 0 : result;
 }

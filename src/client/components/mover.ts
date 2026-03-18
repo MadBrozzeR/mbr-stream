@@ -6,11 +6,14 @@ import { urlState } from '../utils/url-state';
 import { getDashName, isKeyOf, splitByFirst } from '../utils/utils';
 import { ParamsDialog } from './params-dialog';
 
+type Values = Record<string, string>;
+
 type Props = {
   id: string;
   title?: string | undefined;
-  vars?: Record<string, string> | undefined;
-  onSetupChange?: ((values: Record<string, string>) => void | Record<string, string>) | undefined;
+  vars?: Values | undefined;
+  onSetupChange?: ((values: Values) => void) | undefined;
+  prepareValues?: ((values: Values) => Values) | undefined;
   component: Splux<any, any>;
 };
 
@@ -62,8 +65,6 @@ const DEFAULT_VARS: Record<string, string> = {
   height: '',
 };
 
-type Values = Record<string, string>;
-
 function adoptPosition (oldValues: Values, newValues: Values, element: Splux<HTMLElement, Host>) {
   let result = newValues;
   let elementBox: ReturnType<typeof element.host.getModulePosition> | null = null;
@@ -97,6 +98,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   component,
   vars: initialVars,
   onSetupChange,
+  prepareValues,
 }: Props) {
   const host = this.host;
   host.styles.add('mover', STYLES);
@@ -117,7 +119,8 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       }
     },
     onApply(values, prevValues) {
-      const valueChange = onSetupChange?.(values);
+      const valueChange = prepareValues ? prepareValues(values) : values;
+      onSetupChange && onSetupChange(valueChange);
       currentVars = valueChange ? Object.assign({}, values, valueChange) : values;
       applyVars(currentVars, component, prevValues);
       urlState.set(id, currentVars);
@@ -140,7 +143,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
     if (isCast('hashStateChange', data) && id in data.payload) {
       const prevValues = currentVars === initialValues ? undefined : currentVars;
       currentVars = data.payload[id] || initialValues;
-      onSetupChange?.(currentVars);
+      onSetupChange && onSetupChange(currentVars);
       dialog.set(currentVars);
       applyVars(currentVars, component, prevValues);
     }
