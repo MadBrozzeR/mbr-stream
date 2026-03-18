@@ -1,6 +1,10 @@
 import { SpluxSVG } from '../utils/svg';
 import { Styles } from '../lib-ref/mbr-style';
+import { isKeyOf } from '../utils/utils';
 
+const FILL_ACTIVE = '#002';
+const FILL_LOCKED = '#777';
+const FILL_HOVER = '#00a';
 const RESIZER_WIDTH = 5;
 const RESIZER_MARGIN = 10;
 const RESIZER_OFFSET = 2;
@@ -10,11 +14,12 @@ const MIDDLE_HEIGHT = MIDDLE_WIDTH;
 
 const STYLES = Styles.compile({
   '.controls': {
-    fill: '#002',
+    fill: FILL_ACTIVE,
 
     ':hover': {
-      fill: '#00a',
+      fill: FILL_HOVER,
     },
+
   },
 
   '.resizer_horizontal': {
@@ -31,6 +36,15 @@ const STYLES = Styles.compile({
 
   '.middle': {
     cursor: 'pointer',
+  },
+
+  '.controls-locked': {
+    cursor: 'not-allowed',
+    fill: FILL_LOCKED,
+
+    ':hover': {
+      fill: FILL_LOCKED,
+    },
   },
 });
 
@@ -50,9 +64,13 @@ export function MoverControlSvg (props: Props) {
   const halfMiddleWidth = MIDDLE_WIDTH / 2;
   const halfMiddleHeight = MIDDLE_HEIGHT / 2;
 
+  const handles: { [K in HandleName]?: SpluxSVG<SVGElement> } = {}
+
   function createActionListener (name: HandleName) {
     return function () {
-      props.onAction(name);
+      if (name in handles && handles[name] && !handles[name].node.classList.contains('controls-locked')) {
+        props.onAction(name);
+      }
     }
   }
 
@@ -62,16 +80,11 @@ export function MoverControlSvg (props: Props) {
     });
     const resizer = this.dom('g', function () {
       const dom = {
-        left: this.dom('path.controls.resizer_horizontal'),
-        top: this.dom('path.controls.resizer_vertical'),
-        right: this.dom('path.controls.resizer_horizontal'),
-        bottom: this.dom('path.controls.resizer_vertical'),
+        left: handles['resize-left'] = this.dom('path.controls.resizer_horizontal'),
+        top: handles['resize-top'] = this.dom('path.controls.resizer_vertical'),
+        right: handles['resize-right'] = this.dom('path.controls.resizer_horizontal'),
+        bottom: handles['resize-bottom'] = this.dom('path.controls.resizer_vertical'),
       };
-
-      dom.left.node.onmousedown = createActionListener('resize-left');
-      dom.top.node.onmousedown = createActionListener('resize-top');
-      dom.right.node.onmousedown = createActionListener('resize-right');
-      dom.bottom.node.onmousedown = createActionListener('resize-bottom');
 
       return function ({ width, height }: GeometryProps) {
         dom.left.params({ d: `M0,${RESIZER_MARGIN} l${RESIZER_WIDTH},${RESIZER_WIDTH} V${height - RESIZER_MARGIN - RESIZER_WIDTH} l-${RESIZER_WIDTH},${RESIZER_WIDTH} Z` });
@@ -83,18 +96,12 @@ export function MoverControlSvg (props: Props) {
 
     const mover = this.dom('g', function () {
       const dom = {
-        topLeft: this.dom('path.controls.mover'),
-        topRight: this.dom('path.controls.mover'),
-        bottomLeft: this.dom('path.controls.mover'),
-        bottomRight: this.dom('path.controls.mover'),
-        middle: this.dom('rect.controls.middle'),
+        topLeft: handles['move-top-left'] = this.dom('path.controls.mover'),
+        topRight: handles['move-top-right'] = this.dom('path.controls.mover'),
+        bottomLeft: handles['move-bottom-left'] = this.dom('path.controls.mover'),
+        bottomRight: handles['move-bottom-right'] = this.dom('path.controls.mover'),
+        middle: handles['click-middle'] = this.dom('rect.controls.middle'),
       };
-
-      dom.topLeft.node.onmousedown = createActionListener('move-top-left');
-      dom.topRight.node.onmousedown = createActionListener('move-top-right');
-      dom.bottomLeft.node.onmousedown = createActionListener('move-bottom-left');
-      dom.bottomRight.node.onmousedown = createActionListener('move-bottom-right');
-      dom.middle.node.onclick = createActionListener('click-middle');
 
       return function ({ width, height }: GeometryProps) {
         const halfWidth = width / 2;
@@ -141,14 +148,29 @@ export function MoverControlSvg (props: Props) {
       }
     });
 
+    for (const key in handles) if (isKeyOf(key, handles) && handles[key]) {
+      handles[key].node.onmousedown = createActionListener(key);
+    }
+
     function set (props: GeometryProps) {
       svg.params({ width: props.width, height: props.height, viewBox: `0 0 ${props.width} ${props.height}` });
       resizer(props);
       mover(props);
     };
 
+    function anchor (handleNames: Partial<Record<HandleName, boolean>>) {
+      for (const key in handles) if (isKeyOf(key, handles) && handles[key]) {
+        if (handleNames[key]) {
+          handles[key].node.classList.add('controls-locked');
+        } else {
+          handles[key].node.classList.remove('controls-locked');
+        }
+      }
+    }
+
     return {
       splux: this,
+      anchor,
       set,
     };
   });

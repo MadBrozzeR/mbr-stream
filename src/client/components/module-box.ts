@@ -23,7 +23,7 @@ export const ModuleBox = newComponent(`${Toolbox.tag || 'div'}.module_box`, func
     vars: params.vars,
     onSetupChange: function (values) {
       params.onSetupChange && params.onSetupChange(values);
-      moverControls();
+      moverControls.update(200, values);
     },
   });
 
@@ -38,10 +38,15 @@ export const ModuleBox = newComponent(`${Toolbox.tag || 'div'}.module_box`, func
     component: params.component,
     onChange(props) {
       mover.apply(props);
+      mover.setAnimation(true);
     },
     onPreview(props) {
       mover.preview(props);
+      mover.setAnimation(false);
     },
+    onSetupClick() {
+      mover.show();
+    }
   });
 
   return toolbox;
