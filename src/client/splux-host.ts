@@ -5,7 +5,7 @@ import type { Broadcast } from './utils/broadcaster';
 import type { StreamInfo, WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
 import type { DraggerListeners } from './utils/dragger';
 
-const DEFAULT_RECT = { top: 0, right: 0, bottom: 0, left: 0 };
+const DEFAULT_RECT = { top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 };
 
 export function newHost () {
   const host = {

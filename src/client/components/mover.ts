@@ -109,6 +109,14 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   const [, elementName] = splitByFirst(id, '+');
   const dashName = getDashName();
 
+  function preview (values: Values) {
+    applyVars(values, component);
+  }
+
+  function resetPreview () {
+    applyVars(currentVars, component);
+  }
+
   const dialog = ParamsDialog.call(this, this, {
     title: (title || id) + (elementName ? ` (${elementName})` : ''),
     values: currentVars,
@@ -119,9 +127,9 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       }
     },
     onApply(values, prevValues) {
-      const valueChange = prepareValues ? prepareValues(values) : values;
+      const valueChange = prepareValues ? Object.assign({}, values, prepareValues(values)) : values;
       onSetupChange && onSetupChange(valueChange);
-      currentVars = valueChange ? Object.assign({}, values, valueChange) : values;
+      currentVars = Object.assign({}, currentVars, valueChange);
       applyVars(currentVars, component, prevValues);
       urlState.set(id, currentVars);
       if (dashName) {
@@ -154,6 +162,8 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
     apply(values: Values) {
       dialog.apply(values);
     },
+    preview,
+    resetPreview,
   };
 });
 
@@ -168,10 +178,14 @@ type MoverChangeParams = {
 
 type MoverControlsProps = {
   onChange?: (params: MoverChangeParams) => void;
+  onPreview?: (params: MoverChangeParams) => void;
+  component: Splux<any, any>;
 };
 
 export const MoverControls = newComponent('div.mover_controls', function (moverControlsSpl, {
-  onChange
+  onChange,
+  onPreview,
+  component,
 }: MoverControlsProps) {
   const host = this.host;
   const controls = MoverControlSvg({
@@ -181,11 +195,10 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
             move(x, y) {
-              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+              onPreview && onPreview({ top: ~~(box.top + y) + 'px', left: ~~(box.left + x) + 'px', bottom: '', right: '' });
             },
             apply(x, y) {
-              onChange && onChange({ top: box.top + y + 'px', left: box.left + x + 'px', bottom: '', right: '' });
-              moverControlsSpl.node.style.transform = '';
+              onChange && onChange({ top: ~~(box.top + y) + 'px', left: ~~(box.left + x) + 'px', bottom: '', right: '' });
             },
           });
           break;
@@ -194,11 +207,10 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
             move(x, y) {
-              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+              onPreview && onPreview({ top: ~~(box.top + y) + 'px', right: ~~(box.right - x) + 'px', bottom: '', left: '' });
             },
             apply(x, y) {
-              onChange && onChange({ top: box.top + y + 'px', right: box.right - x + 'px', bottom: '', left: '' });
-              moverControlsSpl.node.style.transform = '';
+              onChange && onChange({ top: ~~(box.top + y) + 'px', right: ~~(box.right - x) + 'px', bottom: '', left: '' });
             },
           });
           break;
@@ -207,11 +219,10 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
             move(x, y) {
-              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', left: ~~(box.left + x) + 'px', top: '', right: '' });
             },
             apply(x, y) {
-              onChange && onChange({ bottom: box.bottom - y + 'px', left: box.left + x + 'px', top: '', right: '' });
-              moverControlsSpl.node.style.transform = '';
+              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', left: ~~(box.left + x) + 'px', top: '', right: '' });
             },
           });
           break;
@@ -220,11 +231,10 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
             move(x, y) {
-              moverControlsSpl.node.style.transform = `translate(${x}px, ${y}px)`;
+              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', right: ~~(box.right - x) + 'px', top: '', left: '' });
             },
             apply(x, y) {
-              onChange && onChange({ bottom: box.bottom - y + 'px', right: box.right - x + 'px', top: '', left: '' });
-              moverControlsSpl.node.style.transform = '';
+              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', right: ~~(box.right - x) + 'px', top: '', left: '' });
             },
           });
           break;
@@ -235,15 +245,16 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
   this.node.appendChild(controls.splux.node);
   let lastSizeKey = '';
 
-  return function set(values: Record<string, string>) {
-    const currentSizeKey = (values['width'] || '') + (values['height'] || '');
-    if (currentSizeKey === lastSizeKey) {
-      return;
-    }
+  return function update() {
+    requestAnimationFrame(function () {
+      const box = host.getModulePosition(component);
+      const currentSizeKey = box.width + '/' + box.height;
+      if (currentSizeKey === lastSizeKey) {
+        return;
+      }
 
-    lastSizeKey = currentSizeKey;
-    const width = values['width'] && parseInt(values['width'], 10) || 0;
-    const height = values['height'] && parseInt(values['height'], 10) || 0;
-    controls.set({ width, height });
+      lastSizeKey = currentSizeKey;
+      controls.set({ width: box.width, height: box.height });
+    });
   };
 });

@@ -67,6 +67,8 @@ Splux.start(function (body, head) {
         left: moduleRect.left,
         bottom: pageRect.bottom - moduleRect.bottom,
         right: pageRect.right - moduleRect.right,
+        width: moduleRect.right - moduleRect.left,
+        height: moduleRect.bottom - moduleRect.top,
       };
     }
 
