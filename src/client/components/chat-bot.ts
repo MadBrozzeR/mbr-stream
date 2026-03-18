@@ -65,15 +65,12 @@ export const ChatBot = newComponent('div.chat_bot', function (_, { id }: Params)
   }
   let displayMessage = function () {}
 
-  const timer = new Timer(function (current, status) {
-    switch (status) {
-      case 'complete':
-        send();
-        timer.set(Date.now() + setup.timeout);
-        break;
-      case 'run':
-        display(this.finishTime - current);
-        break;
+  const timer = new Timer(function (timeLeft) {
+    if (timeLeft > 0) {
+      display(timeLeft);
+    } else {
+      send();
+      timer.set(Date.now() + setup.timeout);
     }
   });
 
@@ -91,6 +88,7 @@ export const ChatBot = newComponent('div.chat_bot', function (_, { id }: Params)
     },
     onSetupChange(values) {
       const timeout = parseInt(values['timeout'] || '', 10);
+      display(timeout);
 
       if (values['message'] && values['message'] !== setup.message) {
         setup.message = values['message'].replace(NEW_LINE_RE, '\n');

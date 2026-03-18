@@ -16,7 +16,7 @@ export const Audio = newComponent('audio.audio', function () {
   };
 
   this.host.play = function (src) {
-    const source = '/static/downloaded/sound/' + src;
+    const source = src[0] === '/' ? src : ('/static/downloaded/sound/' + src);
 
     if (audio.node.src === source) {
       audio.node.play();

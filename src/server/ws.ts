@@ -4,7 +4,7 @@ import { config } from './config';
 import { subscribe } from './api-wrappers';
 import { Request } from 'mbr-serv-request';
 import type { EventSubMessageMap } from './common-types/eventsub-types';
-import { isEventSubMessageType } from './utils';
+import { consoleLogOptimized, isEventSubMessageType } from './utils';
 import type { WSEvents, WSIncomeEvent } from './common-types/ws-events';
 import { List } from './list';
 
@@ -17,50 +17,97 @@ const logger = new Logger(config.eventSubLog, {
   }
 });
 
-function log(message: string) {
-  logger.put(`[${new Date().toJSON()}]${message}`)
+function log(message: string, type: string) {
+  logger.put(`[${new Date().toJSON()}]${type}|${message}`)
 }
 
 class Timer {
   ref: ReturnType<typeof setTimeout> | null = null;
   timeout = 0;
-  callback: () => void = function () {};
+  callback: () => void;
+
+  constructor(callback: () => void = function () {}) {
+    this.callback = callback;
+  }
 
   set(timeout?: number) {
+    const timer = this;
+
     if (timeout !== undefined) {
       this.timeout = timeout;
     }
+
     this.stop();
     if (this.timeout) {
-      this.ref = setTimeout(this.callback, this.timeout);
+      this.ref = setTimeout(function () {
+        timer.stop();
+        timer.callback();
+      }, this.timeout);
     }
   }
 
   stop() {
     this.ref && clearTimeout(this.ref);
+    this.ref = null;
+  }
+
+  isActive() {
+    return !!this.ref;
   }
 }
 
-export const startWSClient = function (callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void) {
+const RECONNECT_ON_ERROR_DELAY = 60000;
+
+const logClients = consoleLogOptimized(1000);
+
+export const startWSClient = function (
+  callback: (message: EventSubMessageMap[keyof EventSubMessageMap]) => void,
+  infoCallback: (message: string) => void
+) {
   let sessionId = '';
   const history: any[] = [];
-  const timer = new Timer();
+  const idleTimer = new Timer(function () {
+    console.log('Socket is idle for too long; reconnection attempt');
+    wsClient?.connect();
+  });
+  const reconnectionTimer = new Timer(function () {
+    wsClient?.connect();
+  });
 
   const wsClient = config.startChat ? new MadSocketClient({
     connect() {
       console.log('Connected to twitch Server');
+      infoCallback('Connection to Twitch is established');
+    },
+
+    error(error) {
+      log(`{"message":"${error.message}"}`, 'error');
+      if (error.message.indexOf('429') > -1) {
+        const errorMessage = `Connected ended with status 429. Recconnecting in ${RECONNECT_ON_ERROR_DELAY / 1000}s`;
+        console.log(errorMessage);
+        infoCallback(errorMessage);
+        reconnectionTimer.set(RECONNECT_ON_ERROR_DELAY);
+      } else {
+        console.log(error);
+        if (error instanceof Error) {
+          infoCallback(error.message);
+        }
+      }
     },
 
     disconnect() {
       console.log('Connection is closed');
-      timer.stop();
-      this.connect();
+      infoCallback('Connection is closed');
+      idleTimer.stop();
+      if (!reconnectionTimer.isActive()) {
+        this.connect();
+      }
     },
 
     async message(data) {
       const dataString = data.toString();
-      log(dataString);
-      timer.set();
+      log(dataString, 'message');
+      idleTimer.set();
 
       try {
         const message: EventSubMessageMap[keyof EventSubMessageMap] = JSON.parse(dataString);
@@ -68,13 +115,13 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
         if (isEventSubMessageType(message, 'session_welcome')) {
           sessionId = message.payload.session.id;
           if (message.payload.session.keepalive_timeout_seconds) {
-            timer.set(message.payload.session.keepalive_timeout_seconds * 1500);
+            idleTimer.set(message.payload.session.keepalive_timeout_seconds * 1500);
           }
           subscribe(sessionId);
         }
 
         else if (isEventSubMessageType(message, 'session_reconnect')) {
-          this.connect(message.payload.session.reconnect_url);
+          this.connect({ url: message.payload.session.reconnect_url });
         }
 
         else if (isEventSubMessageType(message, 'notification')) {
@@ -100,12 +147,9 @@ export const startWSClient = function (callback: (message: EventSubMessageMap[ke
 
       console.log(type, this.status, info);
     }
-  }).connect() : null;
+  }) : null;
 
-  timer.callback = function () {
-    console.log('Socket is idle for too long; reconnection attempt');
-    wsClient?.connect();
-  }
+  wsClient?.connect();
 
   return wsClient;
 }
@@ -115,16 +159,11 @@ type Client = {
   socket: ClientConnection;
 };
 
-/*
-function findClient (clients: List<Client>, socket: ClientConnection) {
-  return clients.iterate(function (client) { return client.socket === socket; });
-}
-*/
-
 function removeClient(clients: List<Client>, socket: ClientConnection) {
   clients.remove(function (client) {
     if (client.socket === socket) {
       console.log(`Client ${client.info.name} disconnected`);
+      logClients(`Currently connected: ${getClientNames(clients)}`);
       return true;
     };
 
@@ -134,10 +173,20 @@ function removeClient(clients: List<Client>, socket: ClientConnection) {
 
 function getClientNames (clients: List<Client>) {
   let names = '';
+  const counters: Record<string, number> = {};
 
   clients.iterate(function ({ info: { name } }) {
-    names += names ? `, ${name}` : name;
+    if (counters[name]) {
+      counters[name] += 1;
+    } else {
+      counters[name] = 1;
+    }
   });
+
+  for (const name in counters) if (counters[name]) {
+    const count = counters[name] > 1 ? ` [${counters[name]}]` : '';
+    names += names ? `, ${name}${count}` : name;
+  }
 
   return names;
 }
@@ -171,7 +220,7 @@ export function startWSServer () {
       });
 
       console.log(`Client ${name} has connected`);
-      console.log(`Currently connected: ${getClientNames(clients)}`);
+      logClients(`Currently connected: ${getClientNames(clients)}`);
     },
     disconnect() {
       removeClient(clients, this)
@@ -184,7 +233,7 @@ export function startWSServer () {
         listener.call(ifc, message);
       });
     }
-  }, { debug: console.log });
+  });
 
   const ifc = {
     attach(request: Request) {

@@ -4,6 +4,7 @@ import { Emote } from './emote';
 
 type Params = {
   message: ChatMessageEvent;
+  scaleEmotesFor?: number;
 };
 
 const STYLES = {
@@ -18,11 +19,20 @@ const STYLES = {
     '--emote': {
       height: '1em',
       verticalAlign: 'middle',
+      transition: '.3s transform ease-in-out',
+
+      ':hover': {
+        transform: 'scale(2)',
+      },
+
+      '-scaled': {
+        transform: 'scale(2)',
+      },
     },
   },
 };
 
-export const MessageRow = newComponent('div.message_row', function (row, { message }: Params) {
+export const MessageRow = newComponent('div.message_row', function (row, { message, scaleEmotesFor = 0 }: Params) {
   this.host.styles.add('message-row', STYLES);
   const emotes: Array<ReturnType<typeof Emote>> = [];
 
@@ -37,14 +47,26 @@ export const MessageRow = newComponent('div.message_row', function (row, { messa
         break;
       case 'emote':
         if (fragment.emote) {
-          emotes.push(row.dom(Emote, {
+          const emote = row.dom(Emote, {
             id: fragment.emote.id,
             alt: fragment.text,
             className: 'message_row--emote',
-          }));
+          });
+          if (scaleEmotesFor) {
+            emote.splux.node.classList.add('message_row--emote-scaled');
+          }
+          emotes.push(emote);
         }
         break;
     }
+  }
+
+  if (scaleEmotesFor) {
+    setTimeout(function () {
+      emotes.forEach(function (emote) {
+        emote.splux.node.classList.remove('message_row--emote-scaled');
+      });
+    }, scaleEmotesFor);
   }
 
   return {

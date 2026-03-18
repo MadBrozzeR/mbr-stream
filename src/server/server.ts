@@ -1,14 +1,13 @@
 import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
-import { API } from './constants';
 import { config } from './config';
-import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType, jsonToUrlEncoded } from './utils';
-import type { Scope } from './common-types/eventsub-types';
+import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType } from './utils';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
-import type { WSIncomeEvent, BadgeStore, WSEvent } from './common-types/ws-events';
+import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand } from './common-types/ws-events';
 import { downloadResources } from './resource-downloader';
+import { getCommand } from './chat-commands';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -41,13 +40,19 @@ const apiStorage = {
     });
   }),
 
-  getUser: dataStorageKeys(function (id) {
-    return api.Users.getUsers({ id }).then(function (response) {
-      return response.data[0] ? {
-        name: response.data[0].display_name,
-        image: response.data[0].profile_image_url,
-        description: response.data[0].description,
-      } : null;
+  getUser: dataStorageKeys(function (ids) {
+    return api.Users.getUsers({ id: ids }).then(function (response) {
+      const result: Record<string, { name: string; description: string; image: string }> = {};
+
+      return response.data.reduce(function (result, item) {
+        result[item.id] = {
+          name: item.display_name,
+          description: item.description,
+          image: item.profile_image_url,
+        };
+
+        return result;
+      }, result);
     });
   }),
 };
@@ -75,8 +80,13 @@ function processIncomingMessage (message: WSIncomeEvent) {
 
     case 'bot-say': {
       const messageText = message.payload;
+
+      if (!config.startChat) {
+        console.log('[BOT-SAY]:', messageText);
+        return;
+      }
+
       getUserInfo().then(function (info) {
-        console.log(info, messageText);
         if (info && messageText) {
           api.Chat.sendChatMessage({
             sender_id: info.id,
@@ -103,6 +113,19 @@ function processIncomingMessage (message: WSIncomeEvent) {
   return null;
 }
 
+function processCommand(command: ChatCommand | null) {
+  if (command && command.cmd === '!so') {
+    const mention = command.params[0]?.mention;
+    mention && getUserInfo().then(function (info) {
+      api.Chat.sendShoutout({
+        from_broadcaster_id: info.id,
+        to_broadcaster_id: mention.user_id,
+        moderator_id: info.id,
+      }).catch(console.log);
+    }).catch(console.log);
+  }
+}
+
 try {
   startWSClient(function (message) {
     if (isEventSubMessageType(message, 'notification')) {
@@ -110,24 +133,29 @@ try {
         event: message.payload,
         user: null,
         badges: [],
+        command: null,
       };
 
       const messagePayload = message.payload;
       const promise = isEventType(messagePayload, 'channel.chat.message')
         ? Promise.all([
           apiStorage.getBadges(),
-          apiStorage.getUser(messagePayload.event.chatter_user_id),
+          apiStorage.getUser([messagePayload.event.chatter_user_id]),
         ]).then(function ([badgeStore, user]) {
           if (badgeStore) {
             payload.badges = getUserBadges(messagePayload.event.badges, badgeStore);
           }
-          payload.user = user;
+          payload.user = user[messagePayload.event.chatter_user_id] || null;
+          payload.command = getCommand(messagePayload);
+          processCommand(payload.command);
         })
         : Promise.resolve(payload);
       promise.then(function () {
         wsServer.sendData({ type: 'notification', payload });
       });
     }
+  }, function (info) {
+    wsServer.sendData({ type: 'info', payload: info });
   });
 
   wsServer.listen(function (message) {
@@ -188,22 +216,7 @@ export async function server (request: Request) {
 
   || request.route({
     '/connect'(request) {
-      const scope: Scope[] = [
-        'channel:read:subscriptions',
-        'moderator:read:followers',
-        'moderator:read:chatters',
-        'user:read:chat',
-        'user:write:chat',
-      ];
-
-      const params = jsonToUrlEncoded({
-        client_id: config.clientId,
-        redirect_uri: config.redirectUri,
-        response_type: 'code',
-        scope: scope.join(' '),
-      });
-
-      request.redirect(`${API.AUTHORIZE}?${params}`)
+      request.redirect(api.getConnectLink());
     },
 
     '/favicon.ico'(request) {request.send();},

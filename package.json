@@ -27,12 +27,12 @@
     "typescript": "^5.9.2"
   },
   "dependencies": {
-    "madsocket": "^2.2.2",
+    "madsocket": "^2.4.0",
     "mbr-config": "^1.1.1",
     "mbr-logger": "^0.0.1",
     "mbr-serv-request": "^0.3.2",
     "mbr-state": "^0.2.0",
     "mbr-style": "^1.1.3",
-    "splux": "^1.8.0"
+    "splux": "^1.8.2"
   }
 }

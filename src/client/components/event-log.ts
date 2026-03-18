@@ -36,23 +36,26 @@ const TEST_MESSAGE: ChatMessageEvent = {
   fragments: [{"type":"text","text":"3 emoji ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"PopNemo","cheermote":null,"emote":{"id":"emotesv2_5d523adb8bbb4786821cd7091e47da21","emote_set_id":"0","owner_id":"0","format":["static","animated"]},"mention":null},{"type":"text","text":" ya-ya ","cheermote":null,"emote":null,"mention":null},{"type":"emote","text":"SirSword","cheermote":null,"emote":{"id":"301544922","emote_set_id":"300374282","owner_id":"139075904","format":["static"]},"mention":null}],
 };
 
+const INFO_USER = '[INFO]';
+const EMOTE_SCALE_TIMEOUT = 3000;
+
 type LogEntryParams = {
-  user: string;
-  badges: BadgeData[];
+  user?: string;
+  badges?: BadgeData[];
   message: string | ChatMessageEvent;
   userColor?: string;
 };
 
 export const LogEntry = newComponent('div.event_log--entry', function (
   entry,
-  { user, message, userColor, badges }: LogEntryParams
+  { user = INFO_USER, message, userColor, badges = [] }: LogEntryParams
 ) {
   entry.dom(UserName, { name: user, badges, color: userColor });
   entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
     entry.dom('span.event_log--entry_text').params({ innerText: message });
   } else {
-    entry.dom(MessageRow, { message });
+    entry.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
   }
 });
 
@@ -76,7 +79,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   this.dom(Toolbox, { items: {
     test() {
-      append({ user: 'testMessage', message: TEST_MESSAGE, badges: []});
+      append({ user: 'testMessage', message: TEST_MESSAGE });
     },
     move() { mover.show() },
   } }).dom('div.event_log--log', function (log) {
@@ -88,33 +91,43 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {
-      if (isEventType(data.payload.event, 'channel.chat.message')) {
+      const event = data.payload.event;
+
+      if (isEventType(event, 'channel.chat.message')) {
         append({
-          user: data.payload.event.event.chatter_user_name,
+          user: event.event.chatter_user_name,
           badges: data.payload.badges,
-          message: data.payload.event.event.message,
-          userColor: data.payload.event.event.color,
+          message: event.event.message,
+          userColor: event.event.color,
         });
-      } else if (isEventType(data.payload.event, 'channel.follow')) {
+      } else if (isEventType(event, 'channel.follow')) {
         append({
-          user: '[INFO]',
-          badges: [],
-          message: `${data.payload.event.event.user_name} is now FOLLOWING!`,
+          message: `${event.event.user_name} is now FOLLOWING!`,
         });
-      } else if (isEventType(data.payload.event, 'channel.subscribe')) {
+      } else if (isEventType(event, 'channel.subscribe')) {
         append({
-          user: '[INFO]',
-          badges: [],
-          message: `${data.payload.event.event.user_name} is now SUBSCRIBED!`,
+          message: `${event.event.user_name} is now SUBSCRIBED!`,
         });
-      } else if (isEventType(data.payload.event, 'channel.raid')) {
+      } else if (isEventType(event, 'channel.raid')) {
         append({
-          user: '[INFO]',
-          badges: [],
-          message: `${data.payload.event.event.from_broadcaster_user_name} RAIDED your stream!` +
-            ` (${data.payload.event.event.viewers} viewers)`,
+          message: `${event.event.from_broadcaster_user_name} RAIDED your stream!` +
+            ` (${event.event.viewers} viewers)`,
+        });
+      } else if (isEventType(event, 'channel.shoutout.receive')) {
+        append({
+          message:
+            `${event.event.from_broadcaster_user_name} just gave you a SHOUTOUT for ${event.event.viewer_count} viewers`,
+        });
+      } else if (isEventType(event, 'channel.shoutout.create')) {
+        append({
+          message:
+            `You just gave ${event.event.broadcaster_user_name} a SHOUTOUT for ${event.event.viewer_count} viewers`,
         });
       }
+    } else if (isCast('info', data)) {
+      append({
+        message: data.payload,
+      });
     }
   });
 });

@@ -152,3 +152,50 @@ export function getTimeString (time: number) {
     zeroLead(date.getHours()) + ':' + zeroLead(date.getMinutes()) + ':' + zeroLead(date.getSeconds()) + '.' +
     zeroLead(date.getMilliseconds(), '000') + '+03:00';
 }
+
+type CompareKeyStatus = 'removed' | 'stay' | 'new';
+export function compareKeys (source: Record<string, any>, updated: Record<string, any>, callback: (key: string, status: CompareKeyStatus) => void) {
+  const status: Record<string, CompareKeyStatus> = {};
+  for (const key in source) {
+    status[key] = 'removed';
+  }
+  for (const key in updated) {
+    if (key in status) {
+      status[key] = 'stay';
+    } else {
+      status[key] = 'new';
+    }
+  }
+
+  for (const key in status) if (status[key]) {
+    callback(key, status[key]);
+  }
+}
+
+export function keyMapper<T extends Record<string, any>> (array: T[], useAsKey: string = 'id') {
+  const result: Record<string, T> = {};
+
+  for (let index = 0 ; index < array.length ; ++index) {
+    const item = array[index];
+    if (item && useAsKey in item) {
+      result[item[useAsKey]] = item;
+    }
+  }
+
+  return result;
+}
+
+const NOT_LETTER_RE = /\W/;
+
+export function getExtension (file: string) {
+  const dotPosition = file.lastIndexOf('.');
+  const result = dotPosition > -1 ? file.substring(dotPosition + 1) : '';
+
+  return (!result || NOT_LETTER_RE.test(result)) ? '' : result;
+}
+
+export function classNameToggler (node: HTMLElement, className: string) {
+  return function (toggle: boolean) {
+    toggle ? node.classList.add(className) : node.classList.remove(className);
+  }
+};

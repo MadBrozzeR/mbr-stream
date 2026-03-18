@@ -12,6 +12,7 @@ type Props = {
 };
 
 const TIMEOUT = 20000;
+const EMOTE_SCALE_TIMEOUT = 2000;
 
 const TEST_MODE: { isActive: boolean, message: EventPayloadData['channel.chat.message'] } = {
   isActive: true,
@@ -110,7 +111,7 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
     if (typeof message === 'string') {
       this.dom('span').params({ innerText: message });
     } else {
-      const messageRow = this.dom(MessageRow, { message });
+      const messageRow = this.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
       disableAnimation = function () {
         messageRow.setAnimation('static');
       };

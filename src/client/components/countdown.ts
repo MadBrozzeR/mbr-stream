@@ -217,14 +217,11 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
     });
     const display = this.dom(TimerDisplay);
 
-    timer.callback = function (current, status) {
-      switch (status) {
-        case 'complete':
-          display.text(FINISH_TEXT);
-          break;
-        case 'run':
-          display.set(this.finishTime - current);
-          break;
+    timer.callback = function (timeLeft) {
+      if (timeLeft > 0) {
+        display.set(timeLeft);
+      } else {
+        display.text(FINISH_TEXT);
       }
     };
   });

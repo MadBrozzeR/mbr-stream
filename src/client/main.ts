@@ -13,6 +13,9 @@ import { StreamInfo } from './components/stream-info';
 import { EventLog } from './components/event-log';
 import { ChatBot } from './components/chat-bot';
 import { setDragger } from './utils/dragger';
+import { ChatterList } from './components/chatter-list';
+import { ChromakeySvg } from './svg/chromakey.svg';
+import { Reactions } from './components/reactions';
 
 const STYLES = {
   'html, body': {
@@ -27,6 +30,20 @@ const STYLES = {
   },
 };
 
+const CHROMAKEYS = {
+  'chromakey-green1':
+    '1 0 0 0 0 ' +
+    '0 1 0 0 0 ' +
+    '0 0 1 0 0 ' +
+    '-0.5 -1 1 1 0',
+
+  'chromakey-green':
+    '1 0 0 0 0 ' +
+    '0 1 0 0 0 ' +
+    '0 0 1 0 0 ' +
+    '0 -1 0 1 0',
+};
+
 Splux.start(function (body, head) {
   const host = this.host;
   head.dom(host.styles.target);
@@ -39,6 +56,7 @@ Splux.start(function (body, head) {
 
   const moduleManager = this.dom('div.page_content', function (manager) {
     this.dom(Audio);
+    this.node.appendChild(ChromakeySvg(CHROMAKEYS).node);
 
     host.getModulePosition = function (module) {
       const pageRect = manager.node.getBoundingClientRect();
@@ -60,6 +78,8 @@ Splux.start(function (body, head) {
       streamInfo: StreamInfo,
       events: EventLog,
       chatBot: ChatBot,
+      chatters: ChatterList,
+      reactions: Reactions,
     });
   });
 
