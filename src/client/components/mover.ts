@@ -204,54 +204,54 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
   const controls = MoverControlSvg({
     onAction(handle) {
       switch (handle) {
-        case 'move-top-left': {
+        case 'move-left': {
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
-            move(x, y) {
-              onPreview && onPreview({ top: ~~(box.top + y) + 'px', left: ~~(box.left + x) + 'px', bottom: '', right: '' });
+            move(x) {
+              onPreview && onPreview({ left: ~~(box.left + x) + 'px', right: '' });
             },
-            apply(x, y) {
-              onChange && onChange({ top: ~~(box.top + y) + 'px', left: ~~(box.left + x) + 'px', bottom: '', right: '' });
-              controls.anchor({ 'resize-top': true, 'resize-left': true });
+            apply(x) {
+              onChange && onChange({ left: ~~(box.left + x) + 'px', right: '' });
+              controls.anchor({ 'resize-left': true, 'resize-right':  false});
             },
           });
           break;
         }
-        case 'move-top-right': {
+        case 'move-top': {
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
-            move(x, y) {
-              onPreview && onPreview({ top: ~~(box.top + y) + 'px', right: ~~(box.right - x) + 'px', bottom: '', left: '' });
+            move(_x, y) {
+              onPreview && onPreview({ top: ~~(box.top + y) + 'px', bottom: '' });
             },
-            apply(x, y) {
-              onChange && onChange({ top: ~~(box.top + y) + 'px', right: ~~(box.right - x) + 'px', bottom: '', left: '' });
-              controls.anchor({ 'resize-top': true, 'resize-right': true });
+            apply(_x, y) {
+              onChange && onChange({ top: ~~(box.top + y) + 'px', bottom: '' });
+              controls.anchor({ 'resize-top': true, 'resize-bottom':  false});
             },
           });
           break;
         }
-        case 'move-bottom-left': {
+        case 'move-bottom': {
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
-            move(x, y) {
-              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', left: ~~(box.left + x) + 'px', top: '', right: '' });
+            move(_x, y) {
+              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', top: '' });
             },
-            apply(x, y) {
-              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', left: ~~(box.left + x) + 'px', top: '', right: '' });
-              controls.anchor({ 'resize-bottom': true, 'resize-left': true });
+            apply(_x, y) {
+              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', top: '' });
+              controls.anchor({ 'resize-bottom': true, 'resize-top':  false});
             },
           });
           break;
         }
-        case 'move-bottom-right': {
+        case 'move-right': {
           const box = host.getModulePosition(moverControlsSpl);
           host.dragger({
-            move(x, y) {
-              onPreview && onPreview({ bottom: ~~(box.bottom - y) + 'px', right: ~~(box.right - x) + 'px', top: '', left: '' });
+            move(x) {
+              onPreview && onPreview({ right: ~~(box.right - x) + 'px', left: '' });
             },
-            apply(x, y) {
-              onChange && onChange({ bottom: ~~(box.bottom - y) + 'px', right: ~~(box.right - x) + 'px', top: '', left: '' });
-              controls.anchor({ 'resize-bottom': true, 'resize-right': true });
+            apply(x) {
+              onChange && onChange({ right: ~~(box.right - x) + 'px', left: '' });
+              controls.anchor({ 'resize-right': true, 'resize-left':  false});
             },
           });
           break;

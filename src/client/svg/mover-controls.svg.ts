@@ -48,7 +48,7 @@ const STYLES = Styles.compile({
   },
 });
 
-type HandleName = 'resize-left' | 'resize-top' | 'resize-right' | 'resize-bottom' | 'move-top-left' | 'move-top-right' | 'move-bottom-left' | 'move-bottom-right' | 'click-middle';
+type HandleName = 'resize-left' | 'resize-top' | 'resize-right' | 'resize-bottom' | 'move-left' | 'move-top' | 'move-bottom' | 'move-right' | 'click-middle';
 
 type GeometryProps = {
   width: number;
@@ -60,7 +60,7 @@ type Props = {
 };
 
 export function MoverControlSvg (props: Props) {
-  const halfOffset = MOVER_OFFSET / 2;
+  // const halfOffset = MOVER_OFFSET / 2;
   const halfMiddleWidth = MIDDLE_WIDTH / 2;
   const halfMiddleHeight = MIDDLE_HEIGHT / 2;
 
@@ -96,10 +96,10 @@ export function MoverControlSvg (props: Props) {
 
     const mover = this.dom('g', function () {
       const dom = {
-        topLeft: handles['move-top-left'] = this.dom('path.controls.mover'),
-        topRight: handles['move-top-right'] = this.dom('path.controls.mover'),
-        bottomLeft: handles['move-bottom-left'] = this.dom('path.controls.mover'),
-        bottomRight: handles['move-bottom-right'] = this.dom('path.controls.mover'),
+        left: handles['move-left'] = this.dom('path.controls.mover'),
+        top: handles['move-top'] = this.dom('path.controls.mover'),
+        bottom: handles['move-bottom'] = this.dom('path.controls.mover'),
+        right: handles['move-right'] = this.dom('path.controls.mover'),
         middle: handles['click-middle'] = this.dom('rect.controls.middle'),
       };
 
@@ -107,37 +107,29 @@ export function MoverControlSvg (props: Props) {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
 
-        dom.topLeft.params({ d:
-          `M${RESIZER_WIDTH + RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}` +
-          `H${halfWidth - halfOffset}` +
-          `V${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
-          `H${halfWidth - halfMiddleWidth - MOVER_OFFSET}` +
-          `V${halfHeight - halfOffset}` +
-          `H${RESIZER_WIDTH + RESIZER_OFFSET}`
+        dom.left.params({ d:
+          `M${RESIZER_WIDTH + RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET}` +
+          `L${halfWidth - halfMiddleWidth - MOVER_OFFSET},${halfHeight - halfMiddleHeight}` +
+          `V${halfHeight + halfMiddleHeight}` +
+          `L${RESIZER_WIDTH + RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET}`
         });
-        dom.topRight.params({ d:
-          `M${width - RESIZER_WIDTH - RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}` +
-          `H${halfWidth + halfOffset}` +
-          `V${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
-          `H${halfWidth + halfMiddleWidth + MOVER_OFFSET}` +
-          `V${halfHeight - halfOffset}` +
-          `H${width - RESIZER_WIDTH - RESIZER_OFFSET}`
+        dom.top.params({ d:
+          `M${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}` +
+          `L${halfWidth - halfMiddleWidth},${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
+          `H${halfWidth + halfMiddleWidth}` +
+          `L${width - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}`
         });
-        dom.bottomLeft.params({ d:
-          `M${RESIZER_WIDTH + RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}` +
-          `H${halfWidth - halfOffset}` +
-          `V${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
-          `H${halfWidth - halfMiddleWidth - MOVER_OFFSET}` +
-          `V${halfHeight + halfOffset}` +
-          `H${RESIZER_WIDTH + RESIZER_OFFSET}`
+        dom.bottom.params({ d:
+          `M${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}` +
+          `L${halfWidth - halfMiddleWidth},${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
+          `H${halfWidth + halfMiddleWidth}` +
+          `L${width - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}`
         });
-        dom.bottomRight.params({ d:
-          `M${width - RESIZER_WIDTH - RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}` +
-          `H${halfWidth + halfOffset}` +
-          `V${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
-          `H${halfWidth + halfMiddleWidth + MOVER_OFFSET}` +
-          `V${halfHeight + halfOffset}` +
-          `H${width - RESIZER_WIDTH - RESIZER_OFFSET}`
+        dom.right.params({ d:
+          `M${width - RESIZER_WIDTH - RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET}` +
+          `L${halfWidth + halfMiddleWidth + MOVER_OFFSET},${halfHeight - halfMiddleHeight}` +
+          `V${halfHeight + halfMiddleHeight}` +
+          `L${width - RESIZER_WIDTH - RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET}`
         });
         dom.middle.params({
           x: halfWidth - halfMiddleWidth,
@@ -158,11 +150,11 @@ export function MoverControlSvg (props: Props) {
       mover(props);
     };
 
-    function anchor (handleNames: Partial<Record<HandleName, boolean>>) {
+    function anchor (handleNames: Partial<Record<HandleName, boolean | undefined>>) {
       for (const key in handles) if (isKeyOf(key, handles) && handles[key]) {
-        if (handleNames[key]) {
+        if (handleNames[key] === true) {
           handles[key].node.classList.add('controls-locked');
-        } else {
+        } else if (handleNames[key] === false) {
           handles[key].node.classList.remove('controls-locked');
         }
       }
