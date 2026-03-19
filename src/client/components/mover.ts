@@ -414,3 +414,26 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
     }
   };
 });
+
+export function appendMoverShowListeners (component: Splux<HTMLElement, any>, key: number) {
+  let visible = false;
+
+  document.addEventListener('keydown', function (event) {
+    if (event.keyCode === key) {
+      visible = true;
+      component.node.classList.add('show_mover_controls');
+    }
+  });
+  document.addEventListener('keyup', function (event) {
+    if (event.keyCode === key) {
+      visible = false;
+      component.node.classList.remove('show_mover_controls');
+    }
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (visible) {
+      visible = false;
+      component.node.classList.remove('show_mover_controls');
+    }
+  });
+}

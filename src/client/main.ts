@@ -16,6 +16,7 @@ import { setDragger } from './utils/dragger';
 import { ChatterList } from './components/chatter-list';
 import { ChromakeySvg } from './svg/chromakey.svg';
 import { Reactions } from './components/reactions';
+import { appendMoverShowListeners } from './components/mover';
 
 const STYLES = {
   'html, body': {
@@ -60,6 +61,8 @@ Splux.start(function (body, head) {
     this.dom(Audio);
     this.node.appendChild(ChromakeySvg(CHROMAKEYS).node);
 
+    appendMoverShowListeners(this, KEY_CODE_CTRL);
+
     host.getModulePosition = function (module) {
       const pageRect = manager.node.getBoundingClientRect();
       const moduleRect = module.node.getBoundingClientRect();
@@ -73,16 +76,6 @@ Splux.start(function (body, head) {
         height: moduleRect.bottom - moduleRect.top,
       };
     }
-    body.node.addEventListener('keydown', function (event) {
-      if (event.keyCode === KEY_CODE_CTRL) {
-        manager.node.classList.add('show_mover_controls');
-      }
-    });
-    body.node.addEventListener('keyup', function (event) {
-      if (event.keyCode === KEY_CODE_CTRL) {
-        manager.node.classList.remove('show_mover_controls');
-      }
-    });
 
     return useModuleManager(this, {
       chat: ChatBox,
