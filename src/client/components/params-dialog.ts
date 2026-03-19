@@ -1,4 +1,5 @@
-import { newComponent } from '../splux-host';
+import { Splux } from '../lib-ref/splux';
+import { Host, newComponent } from '../splux-host';
 import { Modal } from './modal';
 
 type Values = Record<string, string>;
@@ -15,8 +16,20 @@ type Props = {
 const STYLES = {
   '.params_dialog': {
     '--label': {
-      display: 'block',
+      display: 'flex',
       marginBottom: '4px',
+      height: '2em',
+      alignItems: 'center',
+
+      '-error': {
+        color: 'red',
+      },
+
+      ':hover': {
+        ' .params_dialog--clear_input': {
+          display: 'block',
+        },
+      },
     },
 
     '--property_name': {
@@ -57,6 +70,15 @@ const STYLES = {
       border: '1px solid black',
       borderRadius: '4px',
     },
+
+    '--clear_input': {
+      width: '1.5em',
+      marginLeft: '-1.5em',
+      textAlign: 'center',
+      cursor: 'pointer',
+      fontSize: '1.2em',
+      display: 'none',
+    },
   },
 };
 
@@ -83,6 +105,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
   host.styles.add('params_dialog', STYLES);
   let currentValues = defaultValues;
   const inputs: Record<string, HTMLInputElement> = {}
+  const rows: Record<string, Splux<HTMLLabelElement, Host>> = {};
 
   function apply(event?: Event) {
     event && event.preventDefault();
@@ -116,7 +139,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
 
   modal.content.dom('form', function (form) {
     for (const name in defaultValues) {
-      form.dom('label.params_dialog--label', function () {
+      rows[name] = form.dom('label.params_dialog--label', function () {
         this.dom('span.params_dialog--property_name').params({ innerText: name });
         inputs[name] = this.dom('input.params_dialog--property_input').params({
           value: currentValues[name] || '',
@@ -127,6 +150,13 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
             }
           }
         }).node;
+        this.dom('div.params_dialog--clear_input').params({
+          innerText: '✕',
+          onclick() {
+            inputs[name] && (inputs[name].value = '');
+            onChange && onChange('', name);
+          },
+        });
       });
     }
 
@@ -146,7 +176,20 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
     });
   });
 
+  function setErrors(values: Record<string, boolean>) {
+    for (const name in values) {
+      if (rows[name]) {
+        if (values[name] === true) {
+          rows[name].node.classList.add('params_dialog--label-error');
+        } else {
+          rows[name].node.classList.remove('params_dialog--label-error');
+        }
+      }
+    }
+  }
+
   return {
+  setErrors,
     set(values: Values) {
       for (const name in values) {
         inputs[name] && (inputs[name].value = values[name] || '');
@@ -155,6 +198,15 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
     apply(values: Values) {
       this.set(values);
       apply();
+    },
+    getValues() {
+      const result: Values = {};
+
+      iterateInputs(inputs, function (input, key) {
+        result[key] = input.value;
+      });
+
+      return result;
     },
     block: this,
     show: modal.show,

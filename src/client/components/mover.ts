@@ -1,4 +1,4 @@
-import { Splux } from '../lib-ref/splux';
+import { ComponentSplux, Splux } from '../lib-ref/splux';
 import { Host, newComponent } from '../splux-host';
 import { MoverControlSvg } from '../svg/mover-controls.svg';
 import { isCast } from '../utils/broadcaster';
@@ -96,6 +96,22 @@ function applyVars (vars: Values | undefined, element: Splux<HTMLElement, Host>,
   }
 }
 
+function validate (dialog: ComponentSplux<typeof ParamsDialog>) {
+  const values = dialog.getValues();
+
+  if (values['left'] && values['right'] && values['width']) {
+    dialog.setErrors({ left: true, right: true, width: true });
+  } else {
+    dialog.setErrors({ left: false, right: false, width: false });
+  }
+
+  if (values['top'] && values['bottom'] && values['height']) {
+    dialog.setErrors({ top: true, bottom: true, height: true });
+  } else {
+    dialog.setErrors({ top: false, bottom: false, height: false });
+  }
+}
+
 export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   id,
   title,
@@ -133,11 +149,8 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   const dialog = ParamsDialog.call(this, this, {
     title: (title || id) + (elementName ? ` (${elementName})` : ''),
     values: currentVars,
-    onChange(value, name) {
-      const concurrent = MUTUALLY_EXCLUSIVE[name];
-      if (concurrent && value) {
-        dialog.set({ [concurrent]: '' });
-      }
+    onChange() {
+      validate(dialog);
     },
     onApply(values, prevValues) {
       const valueChange = prepareValues ? Object.assign({}, values, prepareValues(values)) : values;

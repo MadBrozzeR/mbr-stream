@@ -38,6 +38,7 @@ export function setDragger (root: Splux<HTMLElement, any>) {
 
   function handleWheel (event: WheelEvent) {
     if (currentListeners && currentListeners.wheel) {
+      event.preventDefault();
       currentListeners.wheel(event.deltaY < 0 ? 'up' : 'down');
     }
   }
@@ -49,6 +50,6 @@ export function setDragger (root: Splux<HTMLElement, any>) {
 
     root.node.addEventListener('mousemove', handleMove);
     root.node.addEventListener('mouseup', handleMouseUp);
-    root.node.addEventListener('wheel', handleWheel);
+    root.node.addEventListener('wheel', handleWheel, { passive: false });
   };
 }
