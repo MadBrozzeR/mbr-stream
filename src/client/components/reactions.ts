@@ -3,8 +3,7 @@ import { isCast } from '../utils/broadcaster';
 import { isEventType } from '../utils/utils';
 import { FollowClip } from './clips/follow';
 import { LurkClip } from './clips/lurk';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 const STYLES = {
   '.reactions': {
@@ -49,7 +48,7 @@ export const Reactions = newComponent('div.reactions', function (_, { id }: Para
   let test = function test() {};
   const queue = reactionQueue();
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     id,
     title: 'Reactions',
     component: this,
@@ -59,13 +58,7 @@ export const Reactions = newComponent('div.reactions', function (_, { id }: Para
       width: '100%',
       height: '200px',
     },
-  });
-
-  this.dom(Toolbox, {
-    items: {
-      setup() {
-        mover.show();
-      },
+    toolbarItems: {
       test() {
         test();
       },

@@ -44,6 +44,8 @@ const CHROMAKEYS = {
     '0 -1 0 1 0',
 };
 
+const KEY_CODE_CTRL = 17;
+
 Splux.start(function (body, head) {
   const host = this.host;
   head.dom(host.styles.target);
@@ -71,6 +73,16 @@ Splux.start(function (body, head) {
         height: moduleRect.bottom - moduleRect.top,
       };
     }
+    body.node.addEventListener('keydown', function (event) {
+      if (event.keyCode === KEY_CODE_CTRL) {
+        manager.node.classList.add('show_mover_controls');
+      }
+    });
+    body.node.addEventListener('keyup', function (event) {
+      if (event.keyCode === KEY_CODE_CTRL) {
+        manager.node.classList.remove('show_mover_controls');
+      }
+    });
 
     return useModuleManager(this, {
       chat: ChatBox,

@@ -4,9 +4,8 @@ import type { ChatMessageEvent } from '../type';
 import { isCast } from '../utils/broadcaster';
 import { isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
 import { UserName } from './user-name';
+import { ModuleBox } from './module-box';
 
 type Params = {
   id: string;
@@ -65,7 +64,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   let append = function (params: LogEntryParams) { console.log(params) };
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Event Log',
@@ -75,14 +74,12 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       bottom: '0',
       left: '0',
     },
-  });
-
-  this.dom(Toolbox, { items: {
-    test() {
-      append({ user: 'testMessage', message: TEST_MESSAGE });
+    toolbarItems: {
+      test() {
+        append({ user: 'testMessage', message: TEST_MESSAGE });
+      },
     },
-    move() { mover.show() },
-  } }).dom('div.event_log--log', function (log) {
+  }).dom('div.event_log--log', function (log) {
     append = function (params) {
       log.dom(LogEntry, params);
       log.node.scrollTo(0, log.node.scrollHeight);

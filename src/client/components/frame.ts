@@ -1,7 +1,6 @@
 import { newComponent } from '../splux-host';
 import { FrameSvg } from '../svg/frame.svg';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 type Props = {
   id: string;
@@ -16,7 +15,7 @@ export const Frame = newComponent('div.frame', function (_, { id }: Props) {
     frameSvg.set({ width, height, type });
   }
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     id,
     title: 'Frame',
     component: this,
@@ -28,10 +27,7 @@ export const Frame = newComponent('div.frame', function (_, { id }: Props) {
       type: 'transparent_orange',
     },
     onSetupChange: set,
-  });
-  this.dom(Toolbox, { items: {
-    move() { mover.show() },
-  } }).node.appendChild(frameSvg.splux.node);
+  }).node.appendChild(frameSvg.splux.node);
 
   set({ width: '200px', height: '160px' });
 });

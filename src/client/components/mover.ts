@@ -40,11 +40,16 @@ const STYLES = {
   },
 
   '.mover_controls': {
+    display: 'none',
     position: 'absolute',
     left: 0,
     top: 0,
     width: '100%',
     height: '100%',
+  },
+
+  '.show_mover_controls .mover_controls': {
+    display: 'block',
   },
 };
 

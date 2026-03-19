@@ -1,9 +1,8 @@
 import { StreamInfo } from '@common-types/ws-events';
 import { Host, newComponent } from '../splux-host';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
 import { compareKeys, keyMapper } from '../utils/utils';
 import { Splux } from '../lib-ref/splux';
+import { ModuleBox } from './module-box';
 
 const STYLES = {};
 
@@ -29,7 +28,7 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
   }
   const list: Record<string, Splux<HTMLDivElement, Host>> = {};
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     id,
     title: 'Chatter List',
     component: this,
@@ -39,11 +38,7 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
       right: '0',
       bottom: '0',
     },
-  });
-
-  this.dom(Toolbox, { items: {
-    setup() { mover.show(); },
-  } }).dom('div.chatters--wrapper', function (wrapper) {
+   }).dom('div.chatters--wrapper', function (wrapper) {
     updateFromStreamInfo = function (streamInfo) {
       if (streamInfo) {
         const currentChatters = keyMapper(streamInfo?.chatters);

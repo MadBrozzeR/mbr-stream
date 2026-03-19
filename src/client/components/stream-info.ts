@@ -1,7 +1,6 @@
 import type { StreamInfo as StreamInfoData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 const STYLES = {
   '.stream_info': {
@@ -52,7 +51,7 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
   const host = this.host;
   host.styles.add('stream-info', STYLES);
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Stream Info',
@@ -62,13 +61,7 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
       top: '0',
       left: '0',
     },
-  });
-
-  this.dom(Toolbox, {
-    items: {
-      move() { mover.show() },
-    },
-    position: 'bottom',
+    toolbarPosition: 'bottom',
   }).dom('div.stream_info--panel', function () {
     const status = this.dom('div.stream_info--status');
     const viewers = this.dom('div.stream_info--viewers');

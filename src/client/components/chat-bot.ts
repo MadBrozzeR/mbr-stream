@@ -1,7 +1,6 @@
 import { newComponent } from '../splux-host';
 import { Timer } from '../utils/timer';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 type Params = {
   id: string;
@@ -74,7 +73,7 @@ export const ChatBot = newComponent('div.chat_bot', function (_, { id }: Params)
     }
   });
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Chat Bot',
@@ -101,14 +100,8 @@ export const ChatBot = newComponent('div.chat_bot', function (_, { id }: Params)
           timer.set(Date.now() + timeout);
         }
       }
-    }
-  });
-
-  this.dom(Toolbox, { items: {
-    move() {
-      mover.show();
     },
-  } }).dom('div.chat_bot--setup', function () {
+  }).dom('div.chat_bot--setup', function () {
     this.dom('div.chat_bot--info_bar', function () {
       this.dom('label.chat_bot--info_bar-label', function () {
         this.dom('input.chat_bot--info_bar-checkbox').params({

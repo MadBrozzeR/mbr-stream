@@ -3,8 +3,7 @@ import { FrameSvg } from '../svg/frame.svg';
 import { animation } from '../utils/animation';
 import { Timer } from '../utils/timer';
 import { addTime, getDateFromString, getTimeString, zeroLead } from '../utils/utils';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 type Props = {
   id: string;
@@ -166,7 +165,7 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
   const timer = new Timer(function () {});
   let resizeFrame = function (width: string, height: string) { width; height; };
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Countdown',
@@ -200,20 +199,16 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
 
       return;
     },
-  });
-
-  this.dom(Toolbox, { items: {
-    pause() {
-      if (timer.status === 'run') {
-        timer.stop();
-      } else {
-        timer.set(timer.finishTime);
-      }
+    toolbarItems: {
+      pause() {
+        if (timer.status === 'run') {
+          timer.stop();
+        } else {
+          timer.set(timer.finishTime);
+        }
+      },
     },
-    setup() {
-      mover.show();
-    },
-  } }).dom('div.countdown--content', function () {
+  }).dom('div.countdown--content', function () {
     this.dom('div.countdown--frame', function () {
       const frameSvg = FrameSvg({ width: 400, height: 60, type: 'dark_blue_orange' });
       this.node.appendChild(frameSvg.splux.node);

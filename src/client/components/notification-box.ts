@@ -5,8 +5,7 @@ import { isCast } from '../utils/broadcaster';
 import { firstMessage } from '../utils/notification-utils';
 import { changeModes, checkForAutoMessage, imageAtlas, isDefined, isEventType } from '../utils/utils';
 import { MessageRow } from './message-row';
-import { Mover } from './mover';
-import { Toolbox } from './toolbar';
+import { ModuleBox } from './module-box';
 
 type Props = {
   id: string;
@@ -213,7 +212,7 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
     muted: false,
   };
 
-  const mover = this.dom(Mover, {
+  this.dom(ModuleBox, {
     component: this,
     id,
     title: 'Notifications',
@@ -229,13 +228,9 @@ export const NotificationBox = newComponent('div.notification_box', function (_b
         changeModes(mode, settings['mode']);
       }
     },
-  });
-
-  this.dom(Toolbox, {
-    position: 'bottom',
-    items: {
+    toolbarPosition: 'bottom',
+    toolbarItems: {
       test() { push(TEST_MODE.notification) },
-      move() { mover.show() },
     },
   }).dom('div.notification_box--list', function (list) {
     const notificationList = {
