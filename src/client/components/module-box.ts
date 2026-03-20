@@ -1,5 +1,6 @@
 import { ComponentParams, newComponent } from '../splux-host';
-import { Mover, MoverControls } from './mover';
+import { Mover } from './mover';
+import { MoverControls } from './mover-controls';
 import { Toolbox } from './toolbar';
 
 type MoverParams = ComponentParams<typeof Mover>;

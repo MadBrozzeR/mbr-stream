@@ -15,3 +15,5 @@ export type NotificationToast = {
 };
 
 export type ChatMessageEvent = Message;
+
+export type Values = Record<string, string>;

@@ -16,7 +16,7 @@ import { setDragger } from './utils/dragger';
 import { ChatterList } from './components/chatter-list';
 import { ChromakeySvg } from './svg/chromakey.svg';
 import { Reactions } from './components/reactions';
-import { appendMoverShowListeners } from './components/mover';
+import { appendMoverShowListeners } from './components/mover-controls';
 
 const STYLES = {
   'html, body': {

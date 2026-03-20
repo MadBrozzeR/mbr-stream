@@ -3,6 +3,7 @@ import { Styles } from '../lib-ref/mbr-style';
 import { isKeyOf } from '../utils/utils';
 
 const FILL_ACTIVE = '#002';
+const FILL_ACTIVE_TRANSPARENT  = 'rgba(0 0 34 / 80%)';
 const FILL_LOCKED = '#777';
 const FILL_HOVER = '#00a';
 const RESIZER_WIDTH = 5;
@@ -32,6 +33,7 @@ const STYLES = Styles.compile({
 
   '.mover': {
     cursor: 'move',
+    fill: FILL_ACTIVE_TRANSPARENT,
   },
 
   '.middle': {
