@@ -48,7 +48,7 @@ const STYLES = Styles.compile({
   },
 });
 
-type HandleName = 'resize-left' | 'resize-top' | 'resize-right' | 'resize-bottom' | 'move-left' | 'move-top' | 'move-bottom' | 'move-right' | 'click-middle';
+type HandleName = 'resize-left' | 'resize-top' | 'resize-right' | 'resize-bottom' | 'move-left' | 'move-top' | 'move-bottom' | 'move-right' | 'move-top-left' | 'move-top-right' | 'move-bottom-left' | 'move-bottom-right' | 'click-middle';
 
 type GeometryProps = {
   width: number;
@@ -60,9 +60,8 @@ type Props = {
 };
 
 export function MoverControlSvg (props: Props) {
-  // const halfOffset = MOVER_OFFSET / 2;
-  const halfMiddleWidth = MIDDLE_WIDTH / 2;
-  const halfMiddleHeight = MIDDLE_HEIGHT / 2;
+  const resizerSize = RESIZER_WIDTH + RESIZER_OFFSET;
+  const halfOffset = MOVER_OFFSET / 2;
 
   const handles: { [K in HandleName]?: SpluxSVG<SVGElement> } = {}
 
@@ -96,6 +95,10 @@ export function MoverControlSvg (props: Props) {
 
     const mover = this.dom('g', function () {
       const dom = {
+        topLeft: handles['move-top-left'] = this.dom('path.controls.mover'),
+        topRight: handles['move-top-right'] = this.dom('path.controls.mover'),
+        bottomLeft: handles['move-bottom-left'] = this.dom('path.controls.mover'),
+        bottomRight: handles['move-bottom-right'] = this.dom('path.controls.mover'),
         left: handles['move-left'] = this.dom('path.controls.mover'),
         top: handles['move-top'] = this.dom('path.controls.mover'),
         bottom: handles['move-bottom'] = this.dom('path.controls.mover'),
@@ -106,36 +109,92 @@ export function MoverControlSvg (props: Props) {
       return function ({ width, height }: GeometryProps) {
         const halfWidth = width / 2;
         const halfHeight = height / 2;
+        const linearMoverWidth = width / 5;
+        const linearMoverHeight = height / 5;
+        const halfLinearMoverWidth = linearMoverWidth / 2;
+        const halfLinearMoverHeight = linearMoverHeight / 2;
+        const currentMiddleWidth = Math.min(MIDDLE_WIDTH, linearMoverWidth);
+        const currentMiddleHeight = Math.min(MIDDLE_HEIGHT, linearMoverHeight);
+        const halfMiddleWidth = currentMiddleWidth / 2;
+        const halfMiddleHeight = currentMiddleHeight / 2;
 
         dom.left.params({ d:
-          `M${RESIZER_WIDTH + RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET}` +
-          `L${halfWidth - halfMiddleWidth - MOVER_OFFSET},${halfHeight - halfMiddleHeight}` +
-          `V${halfHeight + halfMiddleHeight}` +
-          `L${RESIZER_WIDTH + RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET}`
+          `M${resizerSize},${halfHeight - halfLinearMoverHeight}` +
+          `H${resizerSize + linearMoverWidth}` +
+          `V${halfHeight + halfLinearMoverHeight}` +
+          `H${resizerSize}`
         });
         dom.top.params({ d:
-          `M${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}` +
-          `L${halfWidth - halfMiddleWidth},${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
-          `H${halfWidth + halfMiddleWidth}` +
-          `L${width - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET}`
+          `M${halfWidth - halfLinearMoverWidth},${resizerSize}` +
+          `V${resizerSize + linearMoverHeight}` +
+          `H${halfWidth + halfLinearMoverWidth}` +
+          `V${resizerSize}`
         });
         dom.bottom.params({ d:
-          `M${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}` +
-          `L${halfWidth - halfMiddleWidth},${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
-          `H${halfWidth + halfMiddleWidth}` +
-          `L${width - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET}`
+          `M${halfWidth - halfLinearMoverWidth},${height - resizerSize}` +
+          `V${height - resizerSize - linearMoverHeight}` +
+          `H${halfWidth + halfLinearMoverWidth}` +
+          `V${height - resizerSize}`
         });
         dom.right.params({ d:
-          `M${width - RESIZER_WIDTH - RESIZER_OFFSET},${RESIZER_WIDTH + RESIZER_OFFSET + MOVER_OFFSET}` +
-          `L${halfWidth + halfMiddleWidth + MOVER_OFFSET},${halfHeight - halfMiddleHeight}` +
-          `V${halfHeight + halfMiddleHeight}` +
-          `L${width - RESIZER_WIDTH - RESIZER_OFFSET},${height - RESIZER_WIDTH - RESIZER_OFFSET - MOVER_OFFSET}`
+          `M${width - resizerSize},${halfHeight - halfLinearMoverHeight}` +
+          `H${width - resizerSize - linearMoverWidth}` +
+          `V${halfHeight + halfLinearMoverHeight}` +
+          `H${width - resizerSize}`
+        });
+        dom.topLeft.params({ d:
+          `M${resizerSize},${resizerSize}` +
+          `H${halfWidth - halfLinearMoverWidth - MOVER_OFFSET}` +
+          `V${resizerSize + linearMoverHeight + MOVER_OFFSET}` +
+          `H${halfWidth - MOVER_OFFSET}` +
+          `V${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
+          `H${halfWidth - halfMiddleWidth - MOVER_OFFSET}` +
+          `V${halfHeight - halfOffset}` +
+          `H${resizerSize + linearMoverWidth + MOVER_OFFSET}` +
+          `V${halfHeight - halfLinearMoverHeight - MOVER_OFFSET}` +
+          `H${resizerSize}`
+        });
+        dom.topRight.params({ d:
+          `M${width - resizerSize},${resizerSize}` +
+          `H${halfWidth + halfLinearMoverWidth + MOVER_OFFSET}` +
+          `V${resizerSize + linearMoverHeight + MOVER_OFFSET}` +
+          `H${halfWidth + halfOffset}` +
+          `V${halfHeight - halfMiddleHeight - MOVER_OFFSET}` +
+          `H${halfWidth + halfMiddleWidth + MOVER_OFFSET}` +
+          `V${halfHeight - halfOffset}` +
+          `H${width - resizerSize - linearMoverWidth - MOVER_OFFSET}` +
+          `V${halfHeight - halfLinearMoverHeight - MOVER_OFFSET}` +
+          `H${width - resizerSize}`
+        });
+        dom.bottomLeft.params({ d:
+          `M${resizerSize},${height - resizerSize}` +
+          `H${halfWidth - halfLinearMoverWidth - MOVER_OFFSET}` +
+          `V${height - resizerSize - linearMoverHeight - MOVER_OFFSET}` +
+          `H${halfWidth - halfOffset}` +
+          `V${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
+          `H${halfWidth - halfMiddleWidth - MOVER_OFFSET}` +
+          `V${halfHeight + halfOffset}` +
+          `H${resizerSize + linearMoverWidth + MOVER_OFFSET}` +
+          `V${halfHeight + halfLinearMoverHeight + MOVER_OFFSET}` +
+          `H${resizerSize}`
+        });
+        dom.bottomRight.params({ d:
+          `M${width - resizerSize},${height - resizerSize}` +
+          `H${halfWidth + halfLinearMoverWidth + MOVER_OFFSET}` +
+          `V${height - resizerSize - linearMoverHeight - MOVER_OFFSET}` +
+          `H${halfWidth + halfOffset}` +
+          `V${halfHeight + halfMiddleHeight + MOVER_OFFSET}` +
+          `H${halfWidth + halfMiddleWidth + MOVER_OFFSET}` +
+          `V${halfHeight + halfOffset}` +
+          `H${width - resizerSize - linearMoverWidth - MOVER_OFFSET}` +
+          `V${halfHeight + halfLinearMoverHeight + MOVER_OFFSET}` +
+          `H${width - resizerSize}`
         });
         dom.middle.params({
           x: halfWidth - halfMiddleWidth,
           y: halfHeight - halfMiddleHeight,
-          width: MIDDLE_WIDTH,
-          height: MIDDLE_HEIGHT,
+          width: currentMiddleWidth,
+          height: currentMiddleHeight,
         });
       }
     });

@@ -222,6 +222,114 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
   const controls = MoverControlSvg({
     onAction(handle) {
       switch (handle) {
+        case 'move-top-left': {
+          const box = host.getModulePosition(moverControlsSpl);
+          const value = { x: box.left, y: box.top };
+
+          host.dragger({
+            move(x, y) {
+              value.x = step(box.left + x, 10);
+              value.y = step(box.top + y, 10);
+              onPreview && onPreview({ left: value.x + 'px', top: value.y + 'px', right: '', bottom: '' });
+            },
+            apply() {
+              onChange && onChange({ left: value.x + 'px', top: value.y + 'px', right: '', bottom: '' });
+            },
+            wheel(direction) {
+              if (direction === 'up') {
+                value.x += 1;
+                value.y += 1;
+              } else {
+                value.x -= 1;
+                value.y -= 1;
+              }
+              onPreview && onPreview({ left: value.x + 'px', top: value.y + 'px', right: '', bottom: '' });
+            }
+          });
+
+          break;
+        }
+        case 'move-top-right': {
+          const box = host.getModulePosition(moverControlsSpl);
+          const value = { x: box.right, y: box.top };
+
+          host.dragger({
+            move(x, y) {
+              value.x = step(box.right - x, 10);
+              value.y = step(box.top + y, 10);
+              onPreview && onPreview({ right: value.x + 'px', top: value.y + 'px', left: '', bottom: '' });
+            },
+            apply() {
+              onChange && onChange({ right: value.x + 'px', top: value.y + 'px', left: '', bottom: '' });
+            },
+            wheel(direction) {
+              if (direction === 'up') {
+                value.x += 1;
+                value.y += 1;
+              } else {
+                value.x -= 1;
+                value.y -= 1;
+              }
+              onPreview && onPreview({ right: value.x + 'px', top: value.y + 'px',left: '', bottom: '' });
+            }
+          });
+
+          break;
+        }
+        case 'move-bottom-left': {
+          const box = host.getModulePosition(moverControlsSpl);
+          const value = { x: box.left, y: box.bottom };
+
+          host.dragger({
+            move(x, y) {
+              value.x = step(box.left + x, 10);
+              value.y = step(box.bottom - y, 10);
+              onPreview && onPreview({ left: value.x + 'px', bottom: value.y + 'px', right: '', top: '' });
+            },
+            apply() {
+              onChange && onChange({ left: value.x + 'px', bottom: value.y + 'px', right: '', top: '' });
+            },
+            wheel(direction) {
+              if (direction === 'up') {
+                value.x += 1;
+                value.y += 1;
+              } else {
+                value.x -= 1;
+                value.y -= 1;
+              }
+              onPreview && onPreview({ left: value.x + 'px', bottom: value.y + 'px', right: '', top: '' });
+            }
+          });
+
+          break;
+        }
+        case 'move-bottom-right': {
+          const box = host.getModulePosition(moverControlsSpl);
+          const value = { x: box.right, y: box.bottom };
+
+          host.dragger({
+            move(x, y) {
+              value.x = step(box.right - x, 10);
+              value.y = step(box.bottom - y, 10);
+              onPreview && onPreview({ right: value.x + 'px', bottom: value.y + 'px', left: '', top: '' });
+            },
+            apply() {
+              onChange && onChange({ right: value.x + 'px', bottom: value.y + 'px', left: '', top: '' });
+            },
+            wheel(direction) {
+              if (direction === 'up') {
+                value.x += 1;
+                value.y += 1;
+              } else {
+                value.x -= 1;
+                value.y -= 1;
+              }
+              onPreview && onPreview({ right: value.x + 'px', bottom: value.y + 'px', left: '', top: '' });
+            }
+          });
+
+          break;
+        }
         case 'move-left': {
           const box = host.getModulePosition(moverControlsSpl);
           let value = box.left;
@@ -233,7 +341,6 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             },
             apply() {
               onChange && onChange({ left: value + 'px', right: '' });
-              controls.anchor({ 'resize-left': true, 'resize-right':  false});
             },
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
@@ -253,7 +360,6 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             },
             apply() {
               onChange && onChange({ top: value + 'px', bottom: '' });
-              controls.anchor({ 'resize-top': true, 'resize-bottom':  false});
             },
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
@@ -273,7 +379,6 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             },
             apply() {
               onChange && onChange({ bottom: value + 'px', top: '' });
-              controls.anchor({ 'resize-bottom': true, 'resize-top':  false});
             },
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
@@ -293,7 +398,6 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             },
             apply() {
               onChange && onChange({ right: value + 'px', left: '' });
-              controls.anchor({ 'resize-right': true, 'resize-left':  false});
             },
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
@@ -318,6 +422,7 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
               onPreview && onPreview({ width: value + 'px' });
+              controls.set({ width: value, height: box.height });
             },
           });
           break;
@@ -338,6 +443,7 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
               onPreview && onPreview({ width: value + 'px' });
+              controls.set({ width: value, height: box.height });
             },
           });
           break;
@@ -358,6 +464,7 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
               onPreview && onPreview({ height: value + 'px' });
+              controls.set({ width: box.width, height: value });
             },
           });
           break;
@@ -378,6 +485,7 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
             wheel(direction) {
               value += direction === 'up' ? 1 : -1;
               onPreview && onPreview({ height: value + 'px' });
+              controls.set({ width: box.width, height: value });
             },
           });
           break;
