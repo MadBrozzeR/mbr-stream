@@ -207,3 +207,21 @@ export function classNameToggler (node: HTMLElement, className: string) {
 export function step (value: number, size: number) {
   return ~~(value / size) * size;
 }
+
+export function transitionUpdater (time: number, callback: () => void) {
+  let until = -1;
+
+  function tickFunction (current: number) {
+    if (until < 0) {
+      until = current + time;
+    }
+
+    callback();
+
+    if (until > current) {
+      requestAnimationFrame(tickFunction);
+    }
+  }
+
+  requestAnimationFrame(tickFunction);
+}

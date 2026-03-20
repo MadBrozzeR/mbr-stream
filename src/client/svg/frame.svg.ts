@@ -31,6 +31,7 @@ type Props = { width: number, height: number, type?: string };
 export function FrameSvg ({ width, height, type }: Props) {
   return SpluxSVG.createSvg({ width, height }, function (svg) {
     let currentType = type || 'transparent_orange';
+    const currentSize = { width, height };
     svg.node.classList.add(`type_${currentType}`);
 
     function setType (type: string) {
@@ -157,7 +158,18 @@ export function FrameSvg ({ width, height, type }: Props) {
       };
     });
 
-    function set({ width, height, type }: { width: number, height: number, type?: string | undefined}) {
+    function set({ width, height, type }: { width?: number | undefined, height?: number | undefined, type?: string | undefined}) {
+      if (width === undefined) {
+        width = currentSize.width;
+      } else {
+        currentSize.width = width;
+      }
+      if (height === undefined) {
+        height = currentSize.height;
+      } else {
+        currentSize.height = height;
+      }
+
       svg.params({ width, height, viewBox: `0 0 ${width} ${height}` });
       type && setType(type);
       wire(width, height);

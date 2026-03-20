@@ -12,6 +12,7 @@ type Props = {
   vars?: Values | undefined;
   onSetupChange?: ((values: Values) => void) | undefined;
   prepareValues?: ((values: Values) => Values) | undefined;
+  onPreview?: ((values: Values) => void) | undefined;
   component: Splux<HTMLElement, any>;
 };
 
@@ -116,6 +117,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   component,
   vars: initialVars,
   onSetupChange,
+  onPreview,
   prepareValues,
 }: Props) {
   const host = this.host;
@@ -129,6 +131,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
 
   function preview (values: Values) {
     applyVars(values, component);
+    onPreview && onPreview(values);
   }
 
   function resetPreview () {

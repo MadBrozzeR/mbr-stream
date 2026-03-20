@@ -2,7 +2,7 @@ import type { Splux } from '../lib-ref/splux';
 import { newComponent } from '../splux-host';
 import { MoverControlSvg } from '../svg/mover-controls.svg';
 import type { Values } from '../type';
-import { step } from '../utils/utils';
+import { step, transitionUpdater } from '../utils/utils';
 
 type MoverChangeParams = {
   top?: string;
@@ -309,8 +309,6 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
 
   return {
     update(time = 0, values?: Values) {
-      let timeLimit = -1;
-
       if (values) {
         controls.anchor({
           'resize-top': !!values['top'],
@@ -320,26 +318,14 @@ export const MoverControls = newComponent('div.mover_controls', function (moverC
         });
       }
 
-      function callback (currentTime: number) {
+      transitionUpdater(time, function () {
         const box = host.getModulePosition(component);
         const currentSizeKey = box.width + '/' + box.height;
         if (currentSizeKey !== lastSizeKey) {
           lastSizeKey = currentSizeKey;
           controls.set({ width: box.width, height: box.height });
         }
-
-        if (time > 0) {
-          if (timeLimit === -1) {
-            timeLimit = currentTime + time;
-          }
-
-          if (currentTime < timeLimit) {
-            requestAnimationFrame(callback);
-          }
-        }
-      }
-
-      requestAnimationFrame(callback);
+      });
     }
   };
 });

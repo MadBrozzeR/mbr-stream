@@ -163,7 +163,7 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
   const { host } = this;
   host.styles.add('countdown', STYLES);
   const timer = new Timer(function () {});
-  let resizeFrame = function (width: string, height: string) { width; height; };
+  let resizeFrame = function ({ width, height }: { width?: string | undefined, height?:  string | undefined }) { width; height; };
 
   this.dom(ModuleBox, {
     component: this,
@@ -175,6 +175,9 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       width: '400px',
       height: '60px',
       time: '2025-12-05T21:00:00.000+03:00',
+    },
+    onPreview(values) {
+      resizeFrame(values);
     },
     prepareValues(values) {
       const date = addTime(values['time'] || '', timer.finishTime);
@@ -189,7 +192,7 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
     },
     onSetupChange(values) {
       if (values['width'] && values['height']) {
-        resizeFrame(values['width'], values['height']);
+        resizeFrame(values);
       }
 
       if (values['time']) {
@@ -213,8 +216,8 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       const frameSvg = FrameSvg({ width: 400, height: 60, type: 'dark_blue_orange' });
       this.node.appendChild(frameSvg.splux.node);
 
-      resizeFrame = function (width: string, height: string) {
-        frameSvg.set({ width: parseInt(width, 10), height: parseInt(height, 10) });
+      resizeFrame = function ({ width, height }) {
+        frameSvg.set({ width: width && parseInt(width, 10) || undefined, height: height && parseInt(height, 10) || undefined });
       };
     });
     const display = this.dom(TimerDisplay);

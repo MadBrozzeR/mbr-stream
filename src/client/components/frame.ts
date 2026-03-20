@@ -9,8 +9,8 @@ type Props = {
 export const Frame = newComponent('div.frame', function (_, { id }: Props) {
   const frameSvg = FrameSvg({ width: 400, height: 300 });
   function set(values: Record<string, string>) {
-    const width = values['width'] && parseInt(values['width']) || 0;
-    const height = values['height'] && parseInt(values['height']) || 0;
+    const width = values['width'] && parseInt(values['width'], 10) || undefined;
+    const height = values['height'] && parseInt(values['height'], 10) || undefined;
     const type = values['type'];
     frameSvg.set({ width, height, type });
   }
@@ -25,6 +25,9 @@ export const Frame = newComponent('div.frame', function (_, { id }: Props) {
       bottom: '20px',
       right: '20px',
       type: 'transparent_orange',
+    },
+    onPreview(values) {
+      set(values);
     },
     onSetupChange: set,
   }).node.appendChild(frameSvg.splux.node);

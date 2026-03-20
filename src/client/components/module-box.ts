@@ -13,6 +13,7 @@ type Params = {
   vars?: MoverParams['vars'];
   prepareValues?: MoverParams['prepareValues'];
   onSetupChange?: MoverParams['onSetupChange'];
+  onPreview?: MoverParams['onPreview'];
   toolbarItems?: ToolboxParams['items'];
   toolbarPosition?: ToolboxParams['position'];
 };
@@ -28,6 +29,7 @@ export const ModuleBox = newComponent(`${Toolbox.tag || 'div'}.module_box`, func
       params.onSetupChange && params.onSetupChange(values);
       moverControls.update(200, values);
     },
+    onPreview: params.onPreview,
   });
 
   const toolbox = Toolbox.call(this, this, {
