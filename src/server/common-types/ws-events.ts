@@ -10,8 +10,14 @@ export type StreamInfo = {
   isOnline: boolean;
   viewers: number;
   chatters: Chatter[];
-  title: string;
   userId: string;
+  info: {
+    title: string;
+    categoryId: string;
+    category: string;
+    language: string;
+    tags: string;
+  };
 };
 
 export type BadgeData = {

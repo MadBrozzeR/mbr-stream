@@ -4,6 +4,7 @@ import { Styles } from './lib-ref/mbr-style';
 import type { Broadcast } from './utils/broadcaster';
 import type { StreamInfo, WSIncomeEvent, WSIncomeEventActions, WSIncomeEventResponse } from '@common-types/ws-events';
 import type { DraggerListeners } from './utils/dragger';
+import { StoragePull } from './utils/storage';
 
 const DEFAULT_RECT = { top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0 };
 
@@ -12,6 +13,10 @@ export function newHost () {
     styles: Styles.create(),
     state: {
       streamInfo: new State<StreamInfo | null>(null),
+      streamList: new StoragePull<StreamInfo['info']>(
+        'mbr-stream/stream-list',
+        function (item, info) { return item.title === info.title }
+      ),
     },
     play(src: string) {
       console.log(src);

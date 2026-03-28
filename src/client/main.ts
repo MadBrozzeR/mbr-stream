@@ -102,6 +102,7 @@ Splux.start(function (body, head) {
   this.tuneIn(function (cast) {
     if (isCast('streamInfo', cast)) {
       host.state.streamInfo.set(cast.payload);
+      host.state.streamList.put(cast.payload.info);
     }
   });
 }, newHost());

@@ -150,7 +150,13 @@ export async function getStreamInfo () {
     isOnline: false,
     chatters: [],
     userId: '',
-    title: '',
+    info: {
+      title: '',
+      category: '',
+      categoryId: '',
+      tags: '',
+      language: '',
+    },
   };
 
   try {
@@ -160,10 +166,16 @@ export async function getStreamInfo () {
       api.Streams.getStreams({ user_id: userInfo.id }),
       api.Chat.getChatters({ broadcaster_id: userInfo.id, moderator_id: userInfo.id }),
     ]);
-    if (streams.data[0]) {
+    const data = streams.data[0];
+
+    if (data) {
       result.isOnline = true;
-      result.viewers = streams.data[0].viewer_count;
-      result.title = streams.data[0].title;
+      result.viewers = data.viewer_count;
+      result.info.title = data.title;
+      result.info.category = data.game_name;
+      result.info.categoryId = data.game_id;
+      result.info.language = data.language;
+      result.info.tags = data.tags.join(',');
     }
     result.chatters = chatters.data.map((chatter) => ({
       id: chatter.user_id,
