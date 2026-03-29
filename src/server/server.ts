@@ -5,7 +5,7 @@ import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType } fr
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
-import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand } from './common-types/ws-events';
+import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand, WSIncomeEventResponse, WSIncomeEventActions } from './common-types/ws-events';
 import { downloadResources } from './resource-downloader';
 import { getCommand } from './chat-commands';
 
@@ -61,56 +61,73 @@ downloadResources().then(function (result) {
   console.log('Resources statuses:', result);
 });
 
-function processIncomingMessage (message: WSIncomeEvent) {
-  switch (message.action) {
-    case 'get-stream-info': {
-      const info = streamInfoPolling?.get();
-      info && wsServer.sendData({ type: 'streamInfo', payload: info });
-      return info || null;
+const incomingMessageProcessor: {
+  [T in WSIncomeEventActions]: (message: WSIncomeEvent<T>) => WSIncomeEventResponse<T>;
+} = {
+  async 'get-stream-info'() {
+    const info = streamInfoPolling?.get();
+    info && wsServer.sendData({ type: 'streamInfo', payload: info });
+    return info || null;
+  },
+
+  async 'clear-all-chats'() {
+    wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
+  },
+
+  async 'module-setup'(message) {
+    const payload = { module: message.payload.module, setup: message.payload.setup };
+    wsServer.sendData({ type: 'moduleSetup', payload }, { name: message.payload.view });
+  },
+
+  async 'bot-say'(message) {
+    const messageText = message.payload;
+
+    if (!config.startChat) {
+      console.log('[BOT-SAY]:', messageText);
+      return;
     }
 
-    case 'clear-all-chats':
-      wsServer.sendData({ type: 'interfaceAction', payload: 'chat-clear' })
-      return null;
-
-    case 'module-setup':
-      const payload = { module: message.payload.module, setup: message.payload.setup };
-      wsServer.sendData({ type: 'moduleSetup', payload }, { name: message.payload.view });
-      return null;
-
-    case 'bot-say': {
-      const messageText = message.payload;
-
-      if (!config.startChat) {
-        console.log('[BOT-SAY]:', messageText);
-        return;
-      }
-
-      getUserInfo().then(function (info) {
-        if (info && messageText) {
-          api.Chat.sendChatMessage({
-            sender_id: info.id,
-            broadcaster_id: info.id,
-            message: '[AUTO] ' + messageText,
-          }).then(function (response) {
-            response.data.forEach(function (data) {
-              if (!data.is_sent) {
-                console.log(
-                  'Message has not been sent. ' +
-                  `Reason: [${data.drop_reason?.code || 'no-code'}] ${data.drop_reason?.message || 'No reason'}`
-                );
-              }
-            });
-          }).catch(function (error) {
-            console.log(error);
+    getUserInfo().then(function (info) {
+      if (info && messageText) {
+        api.Chat.sendChatMessage({
+          sender_id: info.id,
+          broadcaster_id: info.id,
+          message: '[AUTO] ' + messageText,
+        }).then(function (response) {
+          response.data.forEach(function (data) {
+            if (!data.is_sent) {
+              console.log(
+                'Message has not been sent. ' +
+                `Reason: [${data.drop_reason?.code || 'no-code'}] ${data.drop_reason?.message || 'No reason'}`
+              );
+            }
           });
-        }
-      });
-      return null;
-    }
-  }
+        }).catch(function (error) {
+          console.log(error);
+        });
+      }
+    });
+  },
 
-  return null;
+  async 'get-categories'(message) {
+    if (!message.payload.query) {
+      return [];
+    }
+
+    const response = await api.Search.searchCategories({ query: message.payload.query });
+    const payload = response.data.map(function (data) {
+      return {
+        id: data.id,
+        name: data.name,
+      };
+    });
+
+    return payload;
+  }
+}
+
+function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {
+  return incomingMessageProcessor[message.action](message);
 }
 
 function processCommand(command: ChatCommand | null) {
@@ -271,15 +288,20 @@ export async function server (request: Request) {
 
     async '/action'(request) {
       if (request.request.method === 'POST') {
-        const response = await request.getData();
-        const data: WSIncomeEvent = JSON.parse(response.toString());
+        try {
+          const response = await request.getData();
+          const data: WSIncomeEvent = JSON.parse(response.toString());
+          const result = await processIncomingMessage(data);
 
-        const result = processIncomingMessage(data);
-
-        if (result) {
-          request.send(JSON.stringify(result));
-        } else {
-          request.status = 204;
+          if (result !== undefined) {
+            request.send(JSON.stringify(result));
+          } else {
+            request.status = 204;
+            request.send();
+          }
+        } catch (error) {
+          console.log(error);
+          request.status = 500;
           request.send();
         }
       } else {

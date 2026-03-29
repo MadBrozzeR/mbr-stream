@@ -13,7 +13,6 @@ export type StreamInfo = {
   userId: string;
   info: {
     title: string;
-    categoryId: string;
     category: string;
     language: string;
     tags: string;
@@ -70,7 +69,7 @@ export type WSEvent<K extends keyof WSEventsMap = keyof WSEventsMap> = {
 export type WSIncomeEventParams = {
   'get-stream-info': {
     request: void;
-    response: StreamInfo;
+    response: StreamInfo | null;
   };
   'clear-all-chats': {
     request: void;
@@ -84,6 +83,10 @@ export type WSIncomeEventParams = {
     request: string;
     response: void;
   };
+  'get-categories': {
+    request: { query: string; };
+    response: Array<{ id: string; name: string; }>;
+  },
 };
 
 export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEventParams> = {

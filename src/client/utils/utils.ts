@@ -225,3 +225,20 @@ export function transitionUpdater (time: number, callback: () => void) {
 
   requestAnimationFrame(tickFunction);
 }
+
+export function debounce<T extends Array<any>> (delay: number, callback: (...args: T) => void) {
+  let lastArgs: T | null = null;
+  let timeout: ReturnType<typeof setTimeout> | null = null;
+
+  return function (...args: T) {
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
+    lastArgs = args;
+
+    timeout = setTimeout(function () {
+      lastArgs && callback(...lastArgs);
+    }, delay);
+  }
+}

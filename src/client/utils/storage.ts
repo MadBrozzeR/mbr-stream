@@ -41,7 +41,7 @@ export class StoragePull<T> {
     const storage = this;
     const count = this.state.state.length;
     const newList = ([] as T[]).concat(this.state.state);
-    const index = newList.findIndex(function (item) { storage.picker(item, info) });
+    const index = newList.findIndex(function (item) { return storage.picker(item, info) });
     const pickedItem = pickItemByIndex(newList, index);
 
     if (pickedItem) {
@@ -58,12 +58,21 @@ export class StoragePull<T> {
     return info;
   }
 
-  get() {
+  get({ clone }: { clone?: boolean } = {}) {
+    if (clone) {
+      const result: T[] = [];
+      return result.concat(this.state.state);
+    }
+
     return this.state.state;
   }
 
+  getLast() {
+    return this.state.state[this.state.state.length - 1] || null;
+  }
+
   checkLast(info: T) {
-    const last = this.state.state[this.state.state.length - 1];
+    const last = this.getLast();
 
     if (last && JSON.stringify(last) === JSON.stringify(info)) {
       return true;

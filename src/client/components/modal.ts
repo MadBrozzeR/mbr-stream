@@ -27,7 +27,7 @@ const STYLES = {
 };
 
 type Props = {
-  onClose: () => void | boolean;
+  onClose?: () => void | boolean;
   title?: string | undefined;
 };
 
@@ -44,7 +44,7 @@ export const Modal = newComponent('dialog.modal', function (modal, { title = '',
   host.styles.add('modal', STYLES);
 
   this.dom(ModalTitle, { title, onClose() {
-    const result = onClose();
+    const result = onClose ? onClose() : true;
 
     if (result !== false) {
       modal.node.close();

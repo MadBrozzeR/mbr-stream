@@ -1,6 +1,7 @@
 import type { StreamInfo as StreamInfoData } from '@common-types/ws-events';
 import { newComponent } from '../splux-host';
 import { ModuleBox } from './module-box';
+import { ChangeStreamInfo } from './change-stream-info';
 
 const STYLES = {
   '.stream_info': {
@@ -35,6 +36,29 @@ const STYLES = {
       content: '"C: "',
       display: 'inline',
     },
+
+    '--title': {
+      flex: 1,
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      paddingLeft: '1em',
+
+      '-await': {
+        opacity: 0.8,
+
+        ':before': {
+          content: '"⧖"',
+          display: 'inline',
+          marginRight: '8px',
+        }
+      },
+    },
+
+    '--edit': {
+      width: '1.5em',
+      height: '1.5em',
+    },
   },
 };
 
@@ -66,6 +90,34 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
     const status = this.dom('div.stream_info--status');
     const viewers = this.dom('div.stream_info--viewers');
     const chatters = this.dom('div.stream_info--chatters');
+    const title = this.dom('div.stream_info--title', function (title) {
+      let current = '';
+      let updated = '';
+
+      function compare() {
+        title.node.innerText = updated || current;
+
+        if (current === updated) {
+          title.node.classList.remove('stream_info--title-await');
+        } else {
+          title.node.classList.add('stream_info--title-await');
+        }
+      }
+
+      return {
+        setCurrent (title: string) {
+          current = title;
+          compare();
+        },
+        setUpdated (title: string) {
+          updated = title;
+          compare();
+        }
+      };
+    });
+    this.dom('div.stream_info--edit', function () {
+      this.dom(ChangeStreamInfo, {});
+    });
 
     status.node.classList.add(STATUS.OFFLINE);
 
@@ -83,13 +135,24 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
       viewers.node.innerText = streamInfo.viewers.toString();
 
       chatters.node.innerText = streamInfo.chatters.length.toString();
+
+      title.setCurrent(streamInfo.info.title);
+    }
+
+    function updateTitleFromStreamList (list: Array<StreamInfoData['info']>) {
+      const last = list[list.length - 1];
+      if (last) {
+        title.setUpdated(last.title);
+      }
     }
 
     host.state.streamInfo.listen(set);
+    host.state.streamList.state.listen(updateTitleFromStreamList);
 
     this.on({
       remove() {
         host.state.streamInfo.unlisten(set);
+        host.state.streamList.state.listen(updateTitleFromStreamList);
       },
     })
   });

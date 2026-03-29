@@ -21,5 +21,6 @@ export const API = {
   HYPETRAIN: `${HELIX}/hypetrain`,
   MODERATION: `${HELIX}/moderation`,
   POLLS: `${HELIX}/polls`,
+  SEARCH: `${HELIX}/search`,
   STREAMS: `${HELIX}/streams`,
 };

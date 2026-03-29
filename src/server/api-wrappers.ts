@@ -153,7 +153,6 @@ export async function getStreamInfo () {
     info: {
       title: '',
       category: '',
-      categoryId: '',
       tags: '',
       language: '',
     },
@@ -172,8 +171,7 @@ export async function getStreamInfo () {
       result.isOnline = true;
       result.viewers = data.viewer_count;
       result.info.title = data.title;
-      result.info.category = data.game_name;
-      result.info.categoryId = data.game_id;
+      result.info.category = data.game_id + '|' +data.game_name;
       result.info.language = data.language;
       result.info.tags = data.tags.join(',');
     }

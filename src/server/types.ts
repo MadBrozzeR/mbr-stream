@@ -11,11 +11,12 @@ export type RequestParamValue<V = string | number | boolean> =
   | V
   | V[]
   | { [key: string]: RequestParamValue<V> }
+  | { [key: string]: RequestParamValue<V> }[]
   | undefined;
 
 export type RequestParams = Record<string, RequestParamValue>;
 export type RESTMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-export type RequestUrl = string | [string, RequestParams];
+export type RequestUrl = string | [string, RequestParams] | [string, string, RequestParams];
 export type Notification<T extends keyof EventSubType = keyof EventSubType> = EventSubNotification<T>['payload'];
 
 export type TokenResponse = {
@@ -468,6 +469,40 @@ export type SendShoutoutRequest = {
 };
 
 export type SendShoutoutResponse = void;
+
+export type SearchCategoriesRequest = {
+  query: string;
+  first?: number;
+  after?: string;
+};
+
+export type SearchCategoriesResponse = {
+  data: Array<{
+    box_art_url: string;
+    name: string;
+    id: string;
+  }>;
+};
+
+export type ModifyChannelInformationRequestParams = {
+  broadcaster_id: string;
+};
+
+export type ModifyChannelInformationRequest = {
+  game_id?: string;
+  broadcaster_language?: string;
+  title?: string;
+  delay?: number;
+  tags?: string[];
+  content_classification_labels?: Array<{
+    id: string;
+    is_enabled: boolean;
+  }>;
+  is_branded_content?: boolean;
+};
+
+export type ModifyChannelInformationResponse = void;
+
 
 /*
 MACRO

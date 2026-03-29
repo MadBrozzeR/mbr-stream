@@ -65,6 +65,17 @@ const api = {
     getChannelsInfo(params: Types.GetChannelsInfoRequest) {
       return userApiRequest<Types.GetChannelsInfoResponse>([API.CHANNELS, params]);
     },
+    modifyChannelInformation({
+      broadcaster_id,
+      ...params
+    }: Types.ModifyChannelInformationRequestParams & Types.ModifyChannelInformationRequest) {
+      // channel:manage:broadcast
+      return userApiRequest<Types.ModifyChannelInformationResponse>(
+        [API.CHANNELS, { broadcaster_id }],
+        'PATCH',
+        params
+      );
+    },
     getChannelFollowers(params: Types.GetChannelFollowersRequest) {
       return userApiRequest<Types.GetChannelFollowersResponse>([`${API.CHANNELS}/followers`, params]);
     },
@@ -187,6 +198,11 @@ const api = {
       );
     },
   },
+  Search: {
+    searchCategories(params: Types.SearchCategoriesRequest) {
+      return userApiRequest<Types.SearchCategoriesResponse>([API.SEARCH, '/categories', params]);
+    },
+  },
 };
 
 type TwitchApiParams<S extends ETypes.Scope> = {
@@ -222,6 +238,7 @@ export class TwitchApi<S extends ETypes.Scope> {
   Streams = api.Streams;
   Users = api.Users;
   GuestStar = api.GuestStar;
+  Search = api.Search;
 };
 
 const apiInstance = new TwitchApi({
@@ -229,6 +246,7 @@ const apiInstance = new TwitchApi({
   redirectUri: config.redirectUri,
   scope: [
     'channel:read:subscriptions',
+    'channel:manage:broadcast',
     'moderator:read:followers',
     'moderator:read:chatters',
     'user:read:chat',

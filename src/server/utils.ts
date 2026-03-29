@@ -13,7 +13,11 @@ export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   for (const key in data) if (data[key] !== undefined) {
     if (data[key] instanceof Array) {
       data[key].forEach((value) => {
-        result += `${result ? '&' : ''}${key}=${encodeURIComponent(value)}`
+        if (typeof value === 'object') {
+          result += `${result ? '&' : ''}${key}=${encodeURIComponent(JSON.stringify(value))}`;
+        } else {
+          result += `${result ? '&' : ''}${key}=${encodeURIComponent(value)}`;
+        }
       });
     } else if (data[key] instanceof Object) {
       result += `${result ? '&' : ''}${key}=${encodeURIComponent(JSON.stringify(data[key]))}`;
@@ -58,7 +62,11 @@ export function doRequest (
   headers: OutgoingHttpHeaders = {}
 ) {
   return new Promise<IncomingMessage>(function (resolve, reject) {
-    const requestUrl = typeof url === 'string' ? url : urlWithParams(url[0], url[1]);
+    const requestUrl = typeof url === 'string'
+      ? url
+      : url.length === 2
+        ? urlWithParams(url[0], url[1])
+        : urlWithParams(url[0] + url[1], url[2]);
     log(`Request ${method} ${requestUrl}`);
     const isTls = requestUrl.substring(0, 5) === 'https';
     log(`Data: ${data}`);
