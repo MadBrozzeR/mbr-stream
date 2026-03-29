@@ -129,15 +129,18 @@ export const ChangeStreamInfo = newComponent('div.change_stream_info', function 
     },
     buttons: {
       'Send': {
-        action() {
+        async action() {
           const values = form.get();
           if (values['title']) {
-            host.state.streamList.put({
+            const payload = {
               title: values['title'],
               category: values['category'] || '',
               language: values['language'] || '',
               tags: values['tags'] || '',
-            });
+            };
+            host.state.streamList.put(payload);
+            await host.send({ action: 'update-stream-info', payload });
+            modal.close();
           }
         },
       },

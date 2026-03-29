@@ -56,6 +56,13 @@ const STYLES = {
       height: '1.5em',
       border: '1px solid black',
       borderRadius: '4px',
+
+      '-await': {
+        ':before': {
+          content: '"⧖"',
+          display: 'inline',
+        },
+      },
     },
 
     '--content': {
@@ -162,7 +169,7 @@ type Field = {
 };
 
 type Button = {
-  action?: () => void;
+  action?: () => void | Promise<void>;
   className?: string;
 };
 
@@ -363,7 +370,17 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
         if (buttonParams) {
           const button = this.dom('button.form--button').params({ innerText: text, onclick(event) {
             event.preventDefault();
-            buttonParams.action && buttonParams.action();
+            const promise = buttonParams.action && buttonParams.action();
+
+            if (promise) {
+              button.node.disabled = true;
+              button.node.classList.add('form--button-await');
+
+              promise.finally(function () {
+                button.node.disabled = false;
+                button.node.classList.remove('form--button-await');
+              });
+            }
           } });
 
           if (buttonParams.className) {

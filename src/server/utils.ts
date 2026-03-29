@@ -45,7 +45,7 @@ export function getResponseData (response: IncomingMessage) {
 
 function getResponseJson (response: IncomingMessage) {
   return getResponseData(response).then(function (data) {
-    return JSON.parse(data.toString());
+    return data.length ? JSON.parse(data.toString()) : undefined;
   });
 }
 

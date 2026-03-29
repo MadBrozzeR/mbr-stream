@@ -87,6 +87,10 @@ export type WSIncomeEventParams = {
     request: { query: string; };
     response: Array<{ id: string; name: string; }>;
   },
+  'update-stream-info': {
+    request: { title: string; tags: string; category: string; language: string; };
+    response: void;
+  };
 };
 
 export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEventParams> = {

@@ -123,6 +123,20 @@ const incomingMessageProcessor: {
     });
 
     return payload;
+  },
+
+  async 'update-stream-info'({ payload }) {
+    const userInfo = await getUserInfo();
+
+    await api.Channels.modifyChannelInformation({
+      broadcaster_id: userInfo.id,
+      title: payload.title,
+      tags: payload.tags.split(/,\s*/g),
+      game_id: payload.category.split('|')[0] || '',
+      broadcaster_language: payload.language,
+    });
+
+    return;
   }
 }
 
