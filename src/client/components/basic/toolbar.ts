@@ -1,4 +1,4 @@
-import { newComponent } from '../splux-host';
+import { newComponent } from '/@client/splux-host';
 
 type Params = {
   items: Record<string, () => void>;

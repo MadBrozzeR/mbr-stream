@@ -1,4 +1,4 @@
-import { newComponent } from '../splux-host';
+import { newComponent } from '/@client/splux-host';
 
 const STYLES = {
   '.audio': {

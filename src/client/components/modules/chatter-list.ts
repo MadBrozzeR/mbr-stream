@@ -1,8 +1,8 @@
 import { StreamInfo } from '@common-types/ws-events';
-import { Host, newComponent } from '../splux-host';
-import { compareKeys, keyMapper } from '../utils/utils';
-import { Splux } from '../lib-ref/splux';
-import { ModuleBox } from './module-box';
+import { Host, newComponent } from '/@client/splux-host';
+import { compareKeys, keyMapper } from '/@client/utils/utils';
+import { Splux } from '/@client/lib-ref/splux';
+import { ModuleBox } from '../basic/module-box';
 
 const STYLES = {};
 

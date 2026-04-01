@@ -8,7 +8,8 @@
     "declaration": false,
     "moduleResolution": "node",
     "paths": {
-      "@common-types/*": ["../server/common-types/*"]
+      "@common-types/*": ["../server/common-types/*"],
+      "/@client/*": ["./*"]
     },
 
     /* Type Checking */

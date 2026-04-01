@@ -1,9 +1,9 @@
-import { newComponent } from '../splux-host';
-import { FrameSvg } from '../svg/frame.svg';
-import { animation } from '../utils/animation';
-import { Timer } from '../utils/timer';
-import { addTime, getDateFromString, getTimeString, zeroLead } from '../utils/utils';
-import { ModuleBox } from './module-box';
+import { newComponent } from '/@client/splux-host';
+import { FrameSvg } from '/@client/svg/frame.svg';
+import { animation } from '/@client/utils/animation';
+import { Timer } from '/@client/utils/timer';
+import { addTime, getDateFromString, getTimeString, zeroLead } from '/@client/utils/utils';
+import { ModuleBox } from '../basic/module-box';
 
 type Props = {
   id: string;

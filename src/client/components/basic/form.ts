@@ -1,6 +1,6 @@
-import type { ComponentSplux, Splux } from '../lib-ref/splux';
-import { Host, newComponent } from '../splux-host';
-import { debounce } from '../utils/utils';
+import type { ComponentSplux, Splux } from '/@client/lib-ref/splux';
+import { Host, newComponent } from '/@client/splux-host';
+import { debounce } from '/@client/utils/utils';
 
 const DEBOUNCE_DELAY = 1000;
 

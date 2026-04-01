@@ -1,5 +1,5 @@
-import { Splux } from '../lib-ref/splux';
-import { Host, newComponent } from '../splux-host';
+import { Splux } from '/@client/lib-ref/splux';
+import { Host, newComponent } from '/@client/splux-host';
 import { Modal } from './modal';
 
 type Values = Record<string, string>;

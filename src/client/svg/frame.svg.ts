@@ -1,5 +1,5 @@
-import { SpluxSVG } from '../utils/svg';
-import { Styles } from '../lib-ref/mbr-style';
+import { SpluxSVG } from '/@client/utils/svg';
+import { Styles } from '/@client/lib-ref/mbr-style';
 
 const STYLES = Styles.compile({
   '.placeholder': { fill: 'none' },

@@ -1,4 +1,4 @@
-import { SpluxSVG } from '../utils/svg'
+import { SpluxSVG } from '/@client/utils/svg'
 
 export function ChromakeySvg (values: Record<string, string>) {
   return SpluxSVG.createSvg({ width: 0, height: 0 }, function () {

@@ -1,5 +1,5 @@
 import { BadgeData } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
+import { newComponent } from '/@client/splux-host';
 
 type Props = {
   badges: BadgeData[];

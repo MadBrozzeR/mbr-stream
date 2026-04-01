@@ -1,6 +1,6 @@
-import { SpluxSVG } from '../utils/svg';
-import { Styles } from '../lib-ref/mbr-style';
-import { isKeyOf } from '../utils/utils';
+import { SpluxSVG } from '/@client/utils/svg';
+import { Styles } from '/@client/lib-ref/mbr-style';
+import { isKeyOf } from '/@client/utils/utils';
 
 const FILL_ACTIVE = '#002';
 const FILL_ACTIVE_TRANSPARENT  = 'rgba(0 0 34 / 80%)';

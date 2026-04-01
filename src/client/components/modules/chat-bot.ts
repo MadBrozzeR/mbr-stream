@@ -1,6 +1,6 @@
-import { newComponent } from '../splux-host';
-import { Timer } from '../utils/timer';
-import { ModuleBox } from './module-box';
+import { newComponent } from '/@client/splux-host';
+import { Timer } from '/@client/utils/timer';
+import { ModuleBox } from '../basic/module-box';
 
 type Params = {
   id: string;

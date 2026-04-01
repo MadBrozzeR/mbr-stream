@@ -1,5 +1,5 @@
 import type { StreamInfo } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
+import { newComponent } from '/@client/splux-host';
 import { Form } from './form';
 import { Modal } from './modal';
 

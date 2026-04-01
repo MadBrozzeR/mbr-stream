@@ -1,5 +1,5 @@
 import type { BadgeData } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
+import { newComponent } from '/@client/splux-host';
 import { Badges } from './badges';
 
 const STYLES = {

@@ -1,22 +1,23 @@
 import { Splux } from './lib-ref/splux';
 import { newHost } from './splux-host';
-import { ChatBox } from './components/chat-box';
-import { NotificationBox } from './components/notification-box';
-import { Audio } from './components/audio';
+import { Audio } from './components/basic/audio';
 import { urlState } from './utils/url-state';
 import { createCast, isCast } from './utils/broadcaster';
 import { useModuleManager } from './utils/utils';
-import { Frame } from './components/frame';
-import { Countdown } from './components/countdown';
 import { startWebSocket } from './utils/ws';
-import { StreamInfo } from './components/stream-info';
-import { EventLog } from './components/event-log';
-import { ChatBot } from './components/chat-bot';
 import { setDragger } from './utils/dragger';
-import { ChatterList } from './components/chatter-list';
 import { ChromakeySvg } from './svg/chromakey.svg';
-import { Reactions } from './components/reactions';
-import { appendMoverShowListeners } from './components/mover-controls';
+import { appendMoverShowListeners } from './components/basic/mover-controls';
+
+import { ChatBox } from './components/modules/chat-box';
+import { NotificationBox } from './components/modules/notification-box';
+import { Frame } from './components/modules/frame';
+import { Countdown } from './components/modules/countdown';
+import { StreamInfo } from './components/modules/stream-info';
+import { EventLog } from './components/modules/event-log';
+import { ChatBot } from './components/modules/chat-bot';
+import { ChatterList } from './components/modules/chatter-list';
+import { Reactions } from './components/modules/reactions';
 
 const STYLES = {
   'html, body': {

@@ -1,8 +1,8 @@
-import type { Splux } from '../lib-ref/splux';
-import { newComponent } from '../splux-host';
-import { MoverControlSvg } from '../svg/mover-controls.svg';
-import type { Values } from '../type';
-import { step, transitionUpdater } from '../utils/utils';
+import type { Splux } from '/@client/lib-ref/splux';
+import { newComponent } from '/@client/splux-host';
+import { MoverControlSvg } from '/@client/svg/mover-controls.svg';
+import type { Values } from '/@client/type';
+import { step, transitionUpdater } from '/@client/utils/utils';
 
 type MoverChangeParams = {
   top?: string;

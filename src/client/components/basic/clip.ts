@@ -1,5 +1,5 @@
-import { newComponent } from '../splux-host';
-import { getExtension } from '../utils/utils';
+import { newComponent } from '/@client/splux-host';
+import { getExtension } from '/@client/utils/utils';
 
 const STYLES = {
   '.clip': {

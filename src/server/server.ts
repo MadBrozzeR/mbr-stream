@@ -197,8 +197,9 @@ try {
 }
 
 export async function server (request: Request) {
+  console.log(request.request.url);
   // console.log(request.request.url);
-  request.match(/^\/modules\/(.+)$/, function (regMatch) {
+  request.match(/^\/@client\/(.+)$/, function (regMatch) {
     switch (regMatch[1]) {
       case 'lib-ref/splux':
         this.sendFile(`${MODULES_ROOT}splux/index.js`)

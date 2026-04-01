@@ -1,11 +1,11 @@
-import { Splux } from '../lib-ref/splux';
-import { Host, newComponent } from '../splux-host';
-import type { NotificationToast } from '../type';
-import { isCast } from '../utils/broadcaster';
-import { firstMessage } from '../utils/notification-utils';
-import { changeModes, checkForAutoMessage, imageAtlas, isDefined, isEventType } from '../utils/utils';
-import { MessageRow } from './message-row';
-import { ModuleBox } from './module-box';
+import { Splux } from '/@client/lib-ref/splux';
+import { Host, newComponent } from '/@client/splux-host';
+import type { NotificationToast } from '/@client/type';
+import { isCast } from '/@client/utils/broadcaster';
+import { firstMessage } from '/@client/utils/notification-utils';
+import { changeModes, checkForAutoMessage, imageAtlas, isDefined, isEventType } from '/@client/utils/utils';
+import { MessageRow } from '../basic/message-row';
+import { ModuleBox } from '../basic/module-box';
 
 type Props = {
   id: string;

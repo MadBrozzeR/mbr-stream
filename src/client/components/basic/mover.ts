@@ -1,10 +1,10 @@
-import type { ComponentSplux, Splux } from '../lib-ref/splux';
-import { Host, newComponent } from '../splux-host';
-import { isCast } from '../utils/broadcaster';
-import { urlState } from '../utils/url-state';
-import { getDashName, isKeyOf, splitByFirst } from '../utils/utils';
+import type { ComponentSplux, Splux } from '/@client/lib-ref/splux';
+import { Host, newComponent } from '/@client/splux-host';
+import { isCast } from '/@client/utils/broadcaster';
+import { urlState } from '/@client/utils/url-state';
+import { getDashName, isKeyOf, splitByFirst } from '/@client/utils/utils';
+import type { Values } from '/@client/type';
 import { ParamsDialog } from './params-dialog';
-import type { Values } from '../type';
 
 type Props = {
   id: string;

@@ -1,5 +1,5 @@
-import { newComponent } from '../splux-host';
-import type { ChatMessageEvent } from '../type';
+import { newComponent } from '/@client/splux-host';
+import type { ChatMessageEvent } from '/@client/type';
 import { Emote } from './emote';
 
 type Params = {

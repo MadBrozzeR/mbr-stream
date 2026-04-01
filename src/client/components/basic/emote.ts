@@ -1,5 +1,5 @@
-import { newComponent } from '../splux-host';
-import { useTemplate } from '../utils/utils';
+import { newComponent } from '/@client/splux-host';
+import { useTemplate } from '/@client/utils/utils';
 
 type Size = '1.0' | '2.0' | '3.0' | '4.0';
 type Animation = 'static' | 'default';

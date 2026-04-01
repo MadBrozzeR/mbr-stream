@@ -1,7 +1,7 @@
-import { newComponent } from '../../splux-host';
-import { classNameToggler } from '../../utils/utils';
-import { Clip } from '../clip';
-import { Fade } from '../fade';
+import { newComponent } from '/@client/splux-host';
+import { classNameToggler } from '/@client/utils/utils';
+import { Clip } from '../basic/clip';
+import { Fade } from '../basic/fade';
 
 const STYLES = {
   '.lurk_clip': {

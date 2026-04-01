@@ -1,5 +1,5 @@
-import { newComponent } from '../../splux-host';
-import { classNameToggler } from '../../utils/utils';
+import { newComponent } from '/@client/splux-host';
+import { classNameToggler } from '/@client/utils/utils';
 
 const DURATION = 8000;
 

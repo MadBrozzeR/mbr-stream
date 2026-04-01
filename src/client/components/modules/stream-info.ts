@@ -1,7 +1,7 @@
 import type { StreamInfo as StreamInfoData } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
-import { ModuleBox } from './module-box';
-import { ChangeStreamInfo } from './change-stream-info';
+import { newComponent } from '/@client/splux-host';
+import { ModuleBox } from '../basic/module-box';
+import { ChangeStreamInfo } from '../basic/change-stream-info';
 
 const STYLES = {
   '.stream_info': {

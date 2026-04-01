@@ -1,6 +1,6 @@
-import { newComponent } from '../splux-host';
-import { FrameSvg } from '../svg/frame.svg';
-import { ModuleBox } from './module-box';
+import { newComponent } from '/@client/splux-host';
+import { FrameSvg } from '/@client/svg/frame.svg';
+import { ModuleBox } from '../basic/module-box';
 
 type Props = {
   id: string;

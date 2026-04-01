@@ -1,4 +1,4 @@
-import { ComponentParams, newComponent } from '../splux-host';
+import { ComponentParams, newComponent } from '/@client/splux-host';
 import { Mover } from './mover';
 import { MoverControls } from './mover-controls';
 import { Toolbox } from './toolbar';

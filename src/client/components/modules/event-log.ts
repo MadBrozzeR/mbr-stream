@@ -1,11 +1,11 @@
 import type { BadgeData } from '@common-types/ws-events';
-import { newComponent } from '../splux-host';
-import type { ChatMessageEvent } from '../type';
-import { isCast } from '../utils/broadcaster';
-import { isEventType } from '../utils/utils';
-import { MessageRow } from './message-row';
-import { UserName } from './user-name';
-import { ModuleBox } from './module-box';
+import { newComponent } from '/@client/splux-host';
+import type { ChatMessageEvent } from '/@client/type';
+import { isCast } from '/@client/utils/broadcaster';
+import { isEventType } from '/@client/utils/utils';
+import { MessageRow } from '../basic/message-row';
+import { UserName } from '../basic/user-name';
+import { ModuleBox } from '../basic/module-box';
 
 type Params = {
   id: string;

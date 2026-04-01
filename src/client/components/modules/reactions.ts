@@ -1,9 +1,9 @@
-import { newComponent } from '../splux-host';
-import { isCast } from '../utils/broadcaster';
-import { isEventType } from '../utils/utils';
-import { FollowClip } from './clips/follow';
-import { LurkClip } from './clips/lurk';
-import { ModuleBox } from './module-box';
+import { newComponent } from '/@client/splux-host';
+import { isCast } from '/@client/utils/broadcaster';
+import { isEventType } from '/@client/utils/utils';
+import { FollowClip } from '../clips/follow';
+import { LurkClip } from '../clips/lurk';
+import { ModuleBox } from '../basic/module-box';
 
 const STYLES = {
   '.reactions': {
