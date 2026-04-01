@@ -1,5 +1,6 @@
 import { SpluxSVG } from '/@client/utils/svg'
 
+// DEPRECATED
 export function ChromakeySvg (values: Record<string, string>) {
   return SpluxSVG.createSvg({ width: 0, height: 0 }, function () {
     this.dom('defs', function () {

@@ -6,7 +6,6 @@ import { createCast, isCast } from './utils/broadcaster';
 import { useModuleManager } from './utils/utils';
 import { startWebSocket } from './utils/ws';
 import { setDragger } from './utils/dragger';
-import { ChromakeySvg } from './svg/chromakey.svg';
 import { appendMoverShowListeners } from './components/basic/mover-controls';
 
 import { ChatBox } from './components/modules/chat-box';
@@ -32,20 +31,6 @@ const STYLES = {
   },
 };
 
-const CHROMAKEYS = {
-  'chromakey-green1':
-    '1 0 0 0 0 ' +
-    '0 1 0 0 0 ' +
-    '0 0 1 0 0 ' +
-    '-0.5 -1 1 1 0',
-
-  'chromakey-green':
-    '1 0 0 0 0 ' +
-    '0 1 0 0 0 ' +
-    '0 0 1 0 0 ' +
-    '0 -1 0 1 0',
-};
-
 const KEY_CODE_CTRL = 17;
 
 Splux.start(function (body, head) {
@@ -60,7 +45,6 @@ Splux.start(function (body, head) {
 
   const moduleManager = this.dom('div.page_content', function (manager) {
     this.dom(Audio);
-    this.node.appendChild(ChromakeySvg(CHROMAKEYS).node);
 
     appendMoverShowListeners(this, KEY_CODE_CTRL);
 

@@ -1,6 +1,6 @@
 import { newComponent } from '/@client/splux-host';
 import { classNameToggler } from '/@client/utils/utils';
-import { Clip } from '../basic/clip';
+import { CanvasClip } from '../basic/canvas-clip';
 import { Fade } from '../basic/fade';
 
 const STYLES = {
@@ -8,7 +8,6 @@ const STYLES = {
     height: '100%',
     width: '140px',
     justifyContent: 'center',
-    filter: 'url(#chromakey-green1)',
     position: 'relative',
     display: 'none',
 
@@ -43,9 +42,10 @@ export const LurkClip = newComponent('div.lurk_clip', function () {
 
   const fader = this.dom(Fade);
 
-  const clip = fader.splux.dom(Clip, {
+  const clip = fader.splux.dom(CanvasClip, {
     src: 'video/shulker_lurk-2500.webm',
     audio: 'video/shulker_lurk-2500-audio.ogg',
+    chromakey: [229, 165, 9, 20],
   });
 
   const setName = fader.splux.dom('div.lurk_clip--name_line', function () {

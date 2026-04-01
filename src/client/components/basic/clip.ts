@@ -22,6 +22,7 @@ const TYPES: Record<string, string> = {
 
 const ROOT_PATH = '/static/';
 
+// DEPRECATED
 export const Clip = newComponent('video.clip', function (clip, { src, width, type, audio }: Params) {
   const host = this.host;
   host.styles.add('clip', STYLES);

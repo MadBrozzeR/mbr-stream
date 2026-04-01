@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  background: black url(images/popup-left.png);
+}
+.defs {
+  width: 0;
+  height: 0;
+  position: absolute;
+  left: -100px;
+}
+.video {
+  filter: url(#chromakey);
+  display: none;
+}
+#canvas {
+  width: 300px;
+}
+</style>
+</head>
+<body>
+<svg viewBox="0 0 90 50" class="defs">
+  <defs>
+    <filter id="chromakey" color-interpolation-filters="sRGB" x="0" y="0" height="100%" width="100%">
+      <feColorMatrix type="matrix"
+      values="0 0 0 0 0
+              0 0 0 0 0
+              0 0 0 0 0
+              0 -1 0 0 1"
+      result="only-green" />
+      <feColorMatrix in="only-green" type="matrix"
+      values="-1 0 0 0 1
+              0 -1 0 0 1
+              0 0 -1 0 1
+              0 0 0 -1 1"
+      result="mask"/>
+      <feComposite in="SourceGraphic" in2="only-green" operator="in" />
+    </filter>
+  </defs>
+</svg>
+<video class="video" controls width="300">
+  <!-- <source src="video/shulker_lurk-2500-g.mp4" type="video/mp4" /> -->
+</video>
+<canvas id="canvas"></canvas>
+<script>
+var video = document.getElementsByTagName('video')[0];
+// video.crossOrigin = 'Anonymous';
+video.src = 'video/shulker_lurk-2500-g.mp4';
+var canvas = document.getElementById('canvas');
+canvas.addEventListener('click', function () {
+  video.play();
+});
+var context = canvas.getContext('2d');
+video.addEventListener('canplaythrough', function () {
+  context.canvas.width = video.videoWidth;
+  context.canvas.height = video.videoHeight;
+});
+
+function videoFrameProcessor () {
+  var width = context.canvas.width;
+  var height = context.canvas.height;
+  context.drawImage(video, 0, 0);
+  // It's not working because of security policy. Should start actual server to make it work
+  // const image = context.getImageData(0, 0, width, height);
+  // console.log(image);
+  video.requestVideoFrameCallback(videoFrameProcessor);
+}
+video.requestVideoFrameCallback(videoFrameProcessor);
+// console.log(video);
+</script>
+</body>
+</html>
