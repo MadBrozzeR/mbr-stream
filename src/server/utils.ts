@@ -2,9 +2,9 @@ import { IncomingMessage, OutgoingHttpHeaders } from 'http';
 import https from 'https';
 import http from 'http';
 import { Logger } from 'mbr-logger';
-import type { RequestParams, RequestUrl, RESTMethod, Notification } from './types';
+import type { RequestParams, RequestUrl, RESTMethod, Notification, CommandGroup } from './types';
 import { config } from './config';
-import type { BadgeInfo, EventSubMessageMap, EventSubType } from './common-types/eventsub-types';
+import type { BadgeInfo, EventSubMessageMap, EventSubNotification, EventSubType } from './common-types/eventsub-types';
 import type { BadgeData, BadgeStore } from './common-types/ws-events';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
@@ -170,8 +170,15 @@ export function isEventSubMessageType<K extends keyof EventSubMessageMap> (
   return data.metadata.message_type === type;
 };
 
+export function isEventSubNotificationType<T extends keyof EventSubType>(
+  data: EventSubNotification<any>,
+  type: T
+): data is EventSubNotification<T> {
+  return isEventSubMessageType(data, 'notification') && isEventType(data.payload, type);
+}
+
 export function isEventType<T extends keyof EventSubType>(
-  notification: Notification,
+  notification: Notification<any>,
   ...types: T[]
 ): notification is { [K in T]: Notification<K> }[T] {
   for (let index = 0 ; index < types.length ; ++index) {
@@ -222,4 +229,23 @@ export function consoleLogOptimized (timeout = 0, handler = console.log) {
       params = null;
     }, timeout);
   }
+}
+
+export function getGroupFromBadges (badges: BadgeInfo[]) {
+  let group: CommandGroup = 'chatter';
+
+  badges.some(function (badge) {
+    switch (badge.set_id) {
+      case 'broadcaster':
+        group = 'broadcaster';
+        return true;
+      case 'moderator':
+        group = 'moderator';
+        return true;
+    }
+
+    return false;
+  });
+
+  return group;
 }

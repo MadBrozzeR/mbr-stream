@@ -1,13 +1,15 @@
 import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { config } from './config';
-import { getStringRecord, getUserBadges, isEventSubMessageType, isEventType } from './utils';
+import { getGroupFromBadges, getStringRecord, getUserBadges, isEventSubMessageType, isEventSubNotificationType, isKeyOf } from './utils';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
 import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand, WSIncomeEventResponse, WSIncomeEventActions } from './common-types/ws-events';
 import { downloadResources } from './resource-downloader';
-import { getCommand } from './chat-commands';
+import { COMMAND_CONFIG, CommandProcessor } from './chat-commands';
+import type { SendChatMessageRequest } from './types';
+import type { EventSubNotification } from './common-types/eventsub-types';
 
 const STATIC_ROOT = __dirname + '/../../static/';
 const CLIENT_ROOT = __dirname + '/../client/';
@@ -18,6 +20,8 @@ const wsServer = startWSServer();
 const streamInfoPolling = config.startChat ? createPolling(120000, getStreamInfo, function (streamInfo) {
   wsServer.sendData({ type: 'streamInfo', payload: streamInfo });
 }) : null;
+
+const commandProcessor = new CommandProcessor(COMMAND_CONFIG);
 
 const apiStorage = {
   getBadges: dataStorage(function () {
@@ -61,6 +65,34 @@ downloadResources().then(function (result) {
   console.log('Resources statuses:', result);
 });
 
+function sendMessage(message: string, { prefix = '', replyTo }: { prefix?: string; replyTo?: EventSubNotification<'channel.chat.message'> } = {}) {
+  getUserInfo().then(function (info) {
+    if (info && message) {
+      const params: SendChatMessageRequest = {
+        sender_id: info.id,
+        broadcaster_id: info.id,
+        message: prefix + message,
+      };
+      if (replyTo && replyTo.payload.event.chatter_user_id !== info.id) {
+        params.reply_parent_message_id = replyTo.metadata.message_id;
+      }
+
+      api.Chat.sendChatMessage(params).then(function (response) {
+        response.data.forEach(function (data) {
+          if (!data.is_sent) {
+            console.log(
+              'Message has not been sent. ' +
+              `Reason: [${data.drop_reason?.code || 'no-code'}] ${data.drop_reason?.message || 'No reason'}`
+            );
+          }
+        });
+      }).catch(function (error) {
+        console.log(error);
+      });
+    }
+  });
+}
+
 const incomingMessageProcessor: {
   [T in WSIncomeEventActions]: (message: WSIncomeEvent<T>) => WSIncomeEventResponse<T>;
 } = {
@@ -87,26 +119,7 @@ const incomingMessageProcessor: {
       return;
     }
 
-    getUserInfo().then(function (info) {
-      if (info && messageText) {
-        api.Chat.sendChatMessage({
-          sender_id: info.id,
-          broadcaster_id: info.id,
-          message: '[AUTO] ' + messageText,
-        }).then(function (response) {
-          response.data.forEach(function (data) {
-            if (!data.is_sent) {
-              console.log(
-                'Message has not been sent. ' +
-                `Reason: [${data.drop_reason?.code || 'no-code'}] ${data.drop_reason?.message || 'No reason'}`
-              );
-            }
-          });
-        }).catch(function (error) {
-          console.log(error);
-        });
-      }
-    });
+    sendMessage(messageText, { prefix: '[AUTO] ' });
   },
 
   async 'get-categories'(message) {
@@ -144,16 +157,36 @@ function processIncomingMessage<T extends WSIncomeEventActions> (message: WSInco
   return incomingMessageProcessor[message.action](message);
 }
 
-function processCommand(command: ChatCommand | null) {
-  if (command && command.cmd === '!so') {
-    const mention = command.params[0]?.mention;
-    mention && getUserInfo().then(function (info) {
-      api.Chat.sendShoutout({
-        from_broadcaster_id: info.id,
-        to_broadcaster_id: mention.user_id,
-        moderator_id: info.id,
+function processCommand(command: ChatCommand | null, notification: EventSubNotification<'channel.chat.message'>) {
+  if (!command) {
+    return;
+  }
+
+  switch (command.cmd) {
+    case '!so': {
+      const mention = command.params[0]?.mention;
+      mention && getUserInfo().then(function (info) {
+        api.Chat.sendShoutout({
+          from_broadcaster_id: info.id,
+          to_broadcaster_id: mention.user_id,
+          moderator_id: info.id,
+        }).catch(console.log);
       }).catch(console.log);
-    }).catch(console.log);
+      break;
+    }
+    case '!commands': {
+      const group = getGroupFromBadges(notification.payload.event.badges);
+      const list = commandProcessor.getList(group);
+      let message = '';
+      for (const command in list) if (isKeyOf(command, list) && list[command] && list[command].description) {
+        message += `${message ? ' / ' : ''} ${command} (${list[command].description})`;
+      }
+      if (message) {
+        sendMessage(`Available commands for you: ${message}`, { replyTo: notification });
+      } else {
+        sendMessage('No commands available for you, sorry...', { replyTo: notification });
+      }
+    }
   }
 }
 
@@ -167,18 +200,17 @@ try {
         command: null,
       };
 
-      const messagePayload = message.payload;
-      const promise = isEventType(messagePayload, 'channel.chat.message')
+      const promise = isEventSubNotificationType(message, 'channel.chat.message')
         ? Promise.all([
           apiStorage.getBadges(),
-          apiStorage.getUser([messagePayload.event.chatter_user_id]),
+          apiStorage.getUser([message.payload.event.chatter_user_id]),
         ]).then(function ([badgeStore, user]) {
           if (badgeStore) {
-            payload.badges = getUserBadges(messagePayload.event.badges, badgeStore);
+            payload.badges = getUserBadges(message.payload.event.badges, badgeStore);
           }
-          payload.user = user[messagePayload.event.chatter_user_id] || null;
-          payload.command = getCommand(messagePayload);
-          processCommand(payload.command);
+          payload.user = user[message.payload.event.chatter_user_id] || null;
+          payload.command = commandProcessor.getCommand(message.payload);
+          processCommand(payload.command, message);
         })
         : Promise.resolve(payload);
       promise.then(function () {
@@ -197,7 +229,6 @@ try {
 }
 
 export async function server (request: Request) {
-  console.log(request.request.url);
   // console.log(request.request.url);
   request.match(/^\/@client\/(.+)$/, function (regMatch) {
     switch (regMatch[1]) {

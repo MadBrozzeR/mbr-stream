@@ -38,8 +38,8 @@ export type UserStore = {
   description: string;
 };
 
-export type ChatCommand = {
-  cmd: string;
+export type ChatCommand<T extends string = string> = {
+  cmd: T;
   params: MessageFragment[];
 };
 
