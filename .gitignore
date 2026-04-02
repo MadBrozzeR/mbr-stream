@@ -5,3 +5,4 @@ static/downloaded/
 .token.json
 log.txt
 eventsub.log
+*.ignore.*
