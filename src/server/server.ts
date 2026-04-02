@@ -65,7 +65,12 @@ downloadResources().then(function (result) {
   console.log('Resources statuses:', result);
 });
 
-function sendMessage(message: string, { prefix = '', replyTo }: { prefix?: string; replyTo?: EventSubNotification<'channel.chat.message'> } = {}) {
+type SendMessageOptions = {
+  prefix?: string;
+  replyTo?: EventSubNotification<'channel.chat.message'>;
+};
+
+function sendMessage(message: string, { prefix = '', replyTo }: SendMessageOptions = {}) {
   getUserInfo().then(function (info) {
     if (info && message) {
       const params: SendChatMessageRequest = {
@@ -73,8 +78,8 @@ function sendMessage(message: string, { prefix = '', replyTo }: { prefix?: strin
         broadcaster_id: info.id,
         message: prefix + message,
       };
-      if (replyTo && replyTo.payload.event.chatter_user_id !== info.id) {
-        params.reply_parent_message_id = replyTo.metadata.message_id;
+      if (replyTo) {
+        params.reply_parent_message_id = replyTo.payload.event.message_id;
       }
 
       api.Chat.sendChatMessage(params).then(function (response) {
@@ -174,6 +179,7 @@ function processCommand(command: ChatCommand | null, notification: EventSubNotif
       }).catch(console.log);
       break;
     }
+
     case '!commands': {
       const group = getGroupFromBadges(notification.payload.event.badges);
       const list = commandProcessor.getList(group);

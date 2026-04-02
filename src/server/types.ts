@@ -27,7 +27,7 @@ export type TokenResponse = {
   token_type: 'bearer';
 };
 
-export type CommandGroup = 'broadcaster' | 'moderator' | 'chatter';
+export type CommandGroup = 'broadcaster' | 'moderator' | 'chatter' | 'artist';
 
 export type GetChannelsInfoRequest = {
   broadcaster_id: string[];

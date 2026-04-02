@@ -240,7 +240,11 @@ export function getGroupFromBadges (badges: BadgeInfo[]) {
         group = 'broadcaster';
         return true;
       case 'moderator':
+      case 'lead_moderator':
         group = 'moderator';
+        return true;
+      case 'artist-badge':
+        group = 'artist';
         return true;
     }
 
