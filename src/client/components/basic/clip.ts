@@ -1,17 +1,11 @@
 import { newComponent } from '/@client/splux-host';
 import { getExtension } from '/@client/utils/utils';
 
-const STYLES = {
-  '.clip': {
-    height: '100%',
-  },
-};
-
 type Params = {
   src: string;
-  audio?: string,
-  width?: number;
-  type?: string;
+  audio?: string | undefined;
+  type?: string | undefined;
+  className?: string | undefined;
 };
 
 const TYPES: Record<string, string> = {
@@ -20,13 +14,11 @@ const TYPES: Record<string, string> = {
   webm: 'video/webm',
 };
 
-const ROOT_PATH = '/static/';
-
-// DEPRECATED
-export const Clip = newComponent('video.clip', function (clip, { src, width, type, audio }: Params) {
+export const Clip = newComponent('video.clip', function (clip, { src, type, audio, className }: Params) {
   const host = this.host;
-  host.styles.add('clip', STYLES);
+  // host.styles.add('clip', STYLES);
   let resolver: (() => void) | null = null;
+  className && this.node.classList.add(className);
 
   let videoType: string | undefined;
   if (type) {
@@ -35,7 +27,6 @@ export const Clip = newComponent('video.clip', function (clip, { src, width, typ
     videoType = TYPES[getExtension(src)] || undefined;
   }
   this.params({
-    width,
     autoplay: true,
     muted: !!audio,
     onended() {
@@ -44,7 +35,7 @@ export const Clip = newComponent('video.clip', function (clip, { src, width, typ
     },
   });
 
-  this.dom('source').params({ src: ROOT_PATH + src, type: videoType });
+  this.dom('source').params({ src, type: videoType });
 
   return {
     splux: this,
@@ -56,7 +47,7 @@ export const Clip = newComponent('video.clip', function (clip, { src, width, typ
         }
         resolver = resolve;
         clip.node.play();
-        audio && host.play(ROOT_PATH + audio);
+        audio && host.play(audio);
       });
     },
     rewind() {

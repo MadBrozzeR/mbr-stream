@@ -43,8 +43,8 @@ export const LurkClip = newComponent('div.lurk_clip', function () {
   const fader = this.dom(Fade);
 
   const clip = fader.splux.dom(CanvasClip, {
-    src: 'video/shulker_lurk-2500.webm',
-    audio: 'video/shulker_lurk-2500-audio.ogg',
+    src: '/static/video/shulker_lurk-2500.webm',
+    audio: '/static/video/shulker_lurk-2500-audio.ogg',
     chromakey: [229, 165, 9, 20],
   });
 
