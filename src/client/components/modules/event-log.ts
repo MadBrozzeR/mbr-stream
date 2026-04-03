@@ -1,11 +1,12 @@
 import type { BadgeData } from '@common-types/ws-events';
-import { newComponent } from '/@client/splux-host';
+import { ComponentParams, newComponent } from '/@client/splux-host';
 import type { ChatMessageEvent } from '/@client/type';
 import { isCast } from '/@client/utils/broadcaster';
 import { isEventType } from '/@client/utils/utils';
 import { MessageRow } from '../basic/message-row';
-import { UserName } from '../basic/user-name';
+import { UserInfo, UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
+import { Fridge } from '../basic/frige';
 
 type Params = {
   id: string;
@@ -13,6 +14,12 @@ type Params = {
 
 const STYLES = {
   '.event_log': {
+    '--log_wrapper': {
+      height: '100%',
+      width: '100%',
+      position: 'relative',
+    },
+
     '--log': {
       height: '100%',
       overflow: 'auto',
@@ -39,23 +46,51 @@ const INFO_USER = '[INFO]';
 const EMOTE_SCALE_TIMEOUT = 3000;
 
 type LogEntryParams = {
-  user?: string;
+  user?: string | UserInfo;
   badges?: BadgeData[];
   message: string | ChatMessageEvent;
   userColor?: string;
+  onUserClick?: (user: UserInfo) => void;
 };
 
-export const LogEntry = newComponent('div.event_log--entry', function (
+const LogEntry = newComponent('div.event_log--entry', function (
   entry,
-  { user = INFO_USER, message, userColor, badges = [] }: LogEntryParams
+  { user = INFO_USER, message, userColor, badges = [], onUserClick }: LogEntryParams
 ) {
-  entry.dom(UserName, { name: user, badges, color: userColor });
+  const params: ComponentParams<typeof UserName> = { user, badges, color: userColor };
+  if (onUserClick && typeof user !== 'string') {
+    params.onClick = function () {
+      onUserClick(user);
+    }
+  }
+  entry.dom(UserName, params);
   entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
   if (typeof message === 'string') {
     entry.dom('span.event_log--entry_text').params({ innerText: message });
   } else {
     entry.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
   }
+});
+
+const UserFridge = newComponent(Fridge.tag || 'div', function () {
+  const host = this.host;
+  const fridge = Fridge.call(this, this);
+
+  return {
+    open(user: UserInfo) {
+      fridge.setTitle(user.name);
+      fridge.set([
+        {
+          text: 'request clips',
+          action() {
+            host.send({ action: 'get-clips', payload: { broadcaster: user.id } }).then(function (response) {
+              console.log(response);
+            });
+          },
+        },
+      ]);
+    },
+  };
 });
 
 export const EventLog = newComponent('div.event_log', function (_, { id }: Params) {
@@ -79,11 +114,15 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
         append({ user: 'testMessage', message: TEST_MESSAGE });
       },
     },
-  }).dom('div.event_log--log', function (log) {
-    append = function (params) {
-      log.dom(LogEntry, params);
-      log.node.scrollTo(0, log.node.scrollHeight);
-    };
+  }).dom('div.event_log--log_wrapper', function () {
+    const userFridge = this.dom(UserFridge);
+
+    this.dom('div.event_log--log', function (log) {
+      append = function (params) {
+        log.dom(LogEntry, { ...params, onUserClick(user) { userFridge.open(user) } });
+        log.node.scrollTo(0, log.node.scrollHeight);
+      };
+    });
   });
 
   this.tuneIn(function (data) {
@@ -92,7 +131,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
       if (isEventType(event, 'channel.chat.message')) {
         append({
-          user: event.event.chatter_user_name,
+          user: { name: event.event.chatter_user_name, id: event.event.chatter_user_id },
           badges: data.payload.badges,
           message: event.event.message,
           userColor: event.event.color,

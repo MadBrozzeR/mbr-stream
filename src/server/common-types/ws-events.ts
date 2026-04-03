@@ -1,4 +1,5 @@
 import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
+import type { GetClipsResponse } from '../types';
 
 type Chatter = {
   id: string;
@@ -90,6 +91,10 @@ export type WSIncomeEventParams = {
   'update-stream-info': {
     request: { title: string; tags: string; category: string; language: string; };
     response: void;
+  };
+  'get-clips': {
+    request: { broadcaster: string; };
+    response: GetClipsResponse['data'];
   };
 };
 

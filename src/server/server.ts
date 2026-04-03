@@ -155,7 +155,12 @@ const incomingMessageProcessor: {
     });
 
     return;
-  }
+  },
+
+  async 'get-clips'({ payload }) {
+    const clips = await api.Clips.getClips({ broadcaster_id: payload.broadcaster });
+    return clips.data;
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

@@ -17,6 +17,7 @@ import { EventLog } from './components/modules/event-log';
 import { ChatBot } from './components/modules/chat-bot';
 import { ChatterList } from './components/modules/chatter-list';
 import { Reactions } from './components/modules/reactions';
+import { TwitchPlayer } from './components/modules/twitch-clip';
 
 const STYLES = {
   'html, body': {
@@ -72,6 +73,7 @@ Splux.start(function (body, head) {
       chatBot: ChatBot,
       chatters: ChatterList,
       reactions: Reactions,
+      clip: TwitchPlayer,
     });
   });
 

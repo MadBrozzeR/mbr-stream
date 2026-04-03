@@ -105,7 +105,7 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
   let disableAnimation = function () {};
 
   this.dom('div.chatbox--entry_content', function () {
-    this.dom(UserName, { name: user, badges, color: userColor });
+    this.dom(UserName, { user, badges, color: userColor });
 
     this.dom('span.chatbox--entry_separator').params({ innerText: ': ' });
     if (typeof message === 'string') {

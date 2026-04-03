@@ -8,24 +8,47 @@ const STYLES = {
       lineHeight: '1em',
       color: 'var(--color, inherit)',
       verticalAlign: 'middle',
+
+      '-clickable': {
+        cursor: 'pointer',
+        userSelect: 'none',
+
+        ':hover': {
+          color: '#00a',
+        },
+      },
     },
   },
 };
 
-type Params = {
+export type UserInfo = {
   name: string;
-  color?: string | undefined;
-  badges?: BadgeData[] | undefined;
+  id: string;
 };
 
-export const UserName = newComponent('span.user_name', function (_, { name, color, badges }: Params) {
+type Params = {
+  user: string | UserInfo;
+  color?: string | undefined;
+  badges?: BadgeData[] | undefined;
+  onClick?: (user: string | UserInfo) => void;
+};
+
+export const UserName = newComponent('span.user_name', function (_, { user, color, badges, onClick }: Params) {
   this.host.styles.add('user-name', STYLES);
 
   if (badges) {
     this.dom(Badges, { badges });
   }
 
-  const nameSpl = this.dom('span.user_name--name').params({ innerText: name });
+  const userName = typeof user === 'string' ? user : user.name;
+  const nameSpl = this.dom('span.user_name--name').params({ innerText: userName });
+
+  if (onClick) {
+    nameSpl.params({ onclick() {
+      onClick(user);
+    } });
+    nameSpl.node.classList.add('user_name--name-clickable');
+  }
 
   color && nameSpl.node.style.setProperty('--color', color);
 });
