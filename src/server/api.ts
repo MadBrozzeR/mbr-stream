@@ -114,6 +114,55 @@ const api = {
       return userApiRequest<Types.GetUsersResponse>([API.USERS, { id, login }]);
     },
   },
+  ChannelPoints: {
+    createCustomRewards({
+      broadcaster_id, ...params
+    }: Types.CreateCustomRewardsRequest & Types.CreateCustomRewardsRequestParams) {
+      // channel:manage:redemptions
+      return userApiRequest<Types.CreateCustomRewardsResponse>(
+        [API.CHANNEL_POINTS, '/custom_rewards', { broadcaster_id }],
+        'POST',
+        params
+      );
+    },
+    deleteCustomReward(params: Types.DeleteCustomRewardRequest) {
+      // channel:manage:redemptions
+      return userApiRequest<Types.DeleteCustomRewardResponse>(
+        [API.CHANNEL_POINTS, '/custom_rewards', params],
+        'DELETE'
+      );
+    },
+    getCustomReward(params: Types.GetCustomRewardRequest) {
+      // channel:read:redemptions or channel:manage:redemptions
+      return userApiRequest<Types.GetCustomRewardResponse>([API.CHANNEL_POINTS, '/custom_rewards', params]);
+    },
+    getCustomRewardRedemption(params: Types.GetCustomRewardRedemptionRequest) {
+      // channel:read:redemptions or channel:manage:redemptions
+      return userApiRequest<Types.GetCustomRewardRedemptionResponse>(
+        [API.CHANNEL_POINTS, '/custom_rewards/redemptions', params]
+      );
+    },
+    updateCustomReward({
+      broadcaster_id, id, ...params
+    }: Types.UpdateCustomRewardRequest & Types.UpdateCustomRewardRequestParams) {
+      // channel:manage:redemptions
+      return userApiRequest<Types.UpdateCustomRewardResponse>(
+        [API.CHANNEL_POINTS, '/custom_rewards', { broadcaster_id, id }],
+        'PATCH',
+        params
+      );
+    },
+    updateRedemptionStatus({
+      id, broadcaster_id, reward_id, ...params
+    }: Types.UpdateRedemptionStatusRequest & Types.UpdateRedemptionStatusRequestParams) {
+      // channel:manage:redemptions
+      return userApiRequest<Types.UpdateRedemptionStatusResponse>(
+        [API.CHANNEL_POINTS, '/custom_rewards/redemptions', { id, broadcaster_id, reward_id }],
+        'PATCH',
+        params
+      );
+    },
+  },
   Chat: {
     getChatters(params: Types.GetChattersRequest) {
       return userApiRequest<Types.GetChattersResponse>([`${API.CHAT}/chatters`, params]);
@@ -142,6 +191,11 @@ const api = {
     sendShoutout(params: Types.SendShoutoutRequest) {
       // moderator:manage:shoutouts
       return userApiRequest<Types.SendShoutoutResponse>([`${API.CHAT}/shoutouts`, params], 'POST');
+    },
+  },
+  Clips: {
+    getClips(params: Types.GetClipsRequest) {
+      return userApiRequest<Types.GetClipsResponse>([API.CLIPS, params]);
     },
   },
   GuestStar: {
@@ -233,6 +287,7 @@ export class TwitchApi<S extends ETypes.Scope> {
   }
 
   Chat = api.Chat;
+  Clips = api.Clips;
   Channels = api.Channels;
   EventSub = api.EventSub;
   Streams = api.Streams;
