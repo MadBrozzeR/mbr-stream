@@ -365,6 +365,8 @@ export async function server (request: Request) {
         request.status = 405;
         request.send();
       }
-    }
+    },
+
+    '/clip-test': __dirname + '/../../static/clip-embed.html',
   });
 }
