@@ -11,6 +11,7 @@ const TWITCH_PLAYER_DIV_ID = 'twitch-player-embed-id';
 type Instance<T> = T extends new (...args: any[]) => infer C ? C : never;
 type Player = Instance<typeof Twitch.Player>;
 
+// UNUSED YET, AS CLIPS ARE NOT SUPPORTED
 export const TwitchPlayer = newComponent('div.twitch_clip', function (_, { id }: Params) {
   let player: Player | null = null;
   const size = {
