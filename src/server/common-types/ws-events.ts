@@ -55,6 +55,7 @@ export type WSEventsMap = {
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
   moduleSetup: { module: string; setup: Record<string, string> | null; };
+  showClip: { id: string, duration: number; };
   info: string;
 };
 
@@ -95,6 +96,10 @@ export type WSIncomeEventParams = {
   'get-clips': {
     request: { broadcaster: string; };
     response: GetClipsResponse['data'];
+  };
+  'show-clip': {
+    request: { id: string, duration: number; };
+    response: void;
   };
 };
 

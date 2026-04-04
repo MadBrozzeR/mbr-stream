@@ -10,6 +10,7 @@ export type Broadcast = {
   eventSubEvent: WSEvent<'notification'>['payload'];
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
+  showClip: { id: string; duration: number };
   info: string;
 };
 

@@ -161,6 +161,10 @@ const incomingMessageProcessor: {
     const clips = await api.Clips.getClips({ broadcaster_id: payload.broadcaster });
     return clips.data;
   },
+
+  async 'show-clip'({ payload }) {
+    wsServer.sendData({ type: 'showClip', payload });
+  }
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

@@ -533,8 +533,8 @@ export type GetClipsResponse = {
     view_count: number;
     created_at: string;
     thumbnail_url: string;
-    duration: string;
-    vod_offset: string;
+    duration: number;
+    vod_offset: number;
     is_featured: boolean;
   }>;
   pagination: {

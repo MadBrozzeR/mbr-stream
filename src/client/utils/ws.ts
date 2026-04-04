@@ -73,6 +73,10 @@ export const startWebSocket = function (host: Host) {
       case 'moduleSetup':
         urlState.set(message.payload.module, message.payload.setup);
         break;
+
+      case 'showClip':
+        host.cast('showClip', message.payload);
+        break;
     }
   }, function (_, send) {
     host.wsSend = function (message) {
