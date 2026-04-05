@@ -9,6 +9,7 @@ import type { WSEvents, WSIncomeEvent } from './common-types/ws-events';
 import { List } from './list';
 
 const EVENTSUB_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
+// const EVENTSUB_URL = 'ws://localhost:8955/';
 
 const logger = new Logger(config.eventSubLog, {
   listeners: {
@@ -57,6 +58,7 @@ class Timer {
 }
 
 const RECONNECT_ON_ERROR_DELAY = 60000;
+const RECONNECT_ON_DISCONNECT_DELAY = 1000;
 
 const logClients = consoleLogOptimized(1000);
 
@@ -68,6 +70,7 @@ export const startWSClient = function (
   const history: any[] = [];
   const idleTimer = new Timer(function () {
     console.log('Socket is idle for too long; reconnection attempt');
+    infoCallback('Socket is idle for too long; reconnection attempt');
     wsClient?.connect();
   });
   const reconnectionTimer = new Timer(function () {
@@ -100,7 +103,7 @@ export const startWSClient = function (
       infoCallback('Connection is closed');
       idleTimer.stop();
       if (!reconnectionTimer.isActive()) {
-        this.connect();
+        reconnectionTimer.set(RECONNECT_ON_DISCONNECT_DELAY);
       }
     },
 
@@ -122,6 +125,7 @@ export const startWSClient = function (
 
         else if (isEventSubMessageType(message, 'session_reconnect')) {
           this.connect({ url: message.payload.session.reconnect_url });
+          callback(message);
         }
 
         else if (isEventSubMessageType(message, 'notification')) {
@@ -131,6 +135,8 @@ export const startWSClient = function (
 
         else if (isEventSubMessageType(message, 'session_keepalive')) {
           callback(message);
+        } else {
+          infoCallback('Unprocessed message received. Check logs');
         }
       } catch (error) {
         console.log('WebSocket message parsing error', error);
@@ -146,7 +152,7 @@ export const startWSClient = function (
           : data;
 
       console.log(type, this.status, info);
-    }
+    },
   }) : null;
 
   wsClient?.connect();
