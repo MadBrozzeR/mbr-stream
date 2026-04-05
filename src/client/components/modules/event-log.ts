@@ -86,9 +86,10 @@ const UserFridge = newComponent(Fridge.tag || 'div', function () {
             host.send({ action: 'get-clips', payload: { broadcaster: user.id } }).then(function (response) {
               fridge.set(response.map(function (item) {
                 return {
-                  text: item.title,
+                  text: (item.is_featured ? '* ' : '') + item.title,
                   action() {
                     host.send({ action: 'show-clip', payload: { id: item.id, duration: item.duration * 1000 } });
+                    fridge.hide();
                   },
                 };
               }));

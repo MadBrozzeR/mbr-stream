@@ -158,8 +158,10 @@ const incomingMessageProcessor: {
   },
 
   async 'get-clips'({ payload }) {
-    const clips = await api.Clips.getClips({ broadcaster_id: payload.broadcaster });
-    return clips.data;
+    const clips = await api.Clips.getClips({ broadcaster_id: payload.broadcaster, first: 100 });
+    return clips.data.sort(function (item1, item2) {
+      return item1.created_at > item2.created_at ? -1 : 1;
+    });
   },
 
   async 'show-clip'({ payload }) {
@@ -231,6 +233,8 @@ try {
       promise.then(function () {
         wsServer.sendData({ type: 'notification', payload });
       });
+    } else if (isEventSubMessageType(message, 'session_reconnect')) {
+      wsServer.sendData({ type: 'info', payload: 'Reconnecting to Twitch...' })
     }
   }, function (info) {
     wsServer.sendData({ type: 'info', payload: info });
