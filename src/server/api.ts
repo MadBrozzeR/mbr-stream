@@ -289,6 +289,7 @@ export class TwitchApi<S extends ETypes.Scope> {
   Chat = api.Chat;
   Clips = api.Clips;
   Channels = api.Channels;
+  ChannelPoints = api.ChannelPoints;
   EventSub = api.EventSub;
   Streams = api.Streams;
   Users = api.Users;
@@ -308,6 +309,7 @@ const apiInstance = new TwitchApi({
     'user:write:chat',
     'channel:manage:guest_star',
     'moderator:manage:shoutouts',
+    'channel:manage:redemptions',
   ],
 });
 

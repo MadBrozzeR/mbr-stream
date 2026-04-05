@@ -166,7 +166,13 @@ const incomingMessageProcessor: {
 
   async 'show-clip'({ payload }) {
     wsServer.sendData({ type: 'showClip', payload });
-  }
+  },
+
+  async 'get-channel-rewards'() {
+    const userInfo = await getUserInfo();
+    const rewards = await api.ChannelPoints.getCustomReward({ broadcaster_id: userInfo.id });
+    return rewards.data;
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

@@ -1,5 +1,5 @@
 import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
-import type { GetClipsResponse } from '../types';
+import type { GetClipsResponse, GetCustomRewardResponse } from '../types';
 
 type Chatter = {
   id: string;
@@ -100,6 +100,10 @@ export type WSIncomeEventParams = {
   'show-clip': {
     request: { id: string, duration: number; };
     response: void;
+  };
+  'get-channel-rewards': {
+    request: void;
+    response: GetCustomRewardResponse['data'];
   };
 };
 
