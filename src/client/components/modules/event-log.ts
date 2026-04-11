@@ -6,7 +6,7 @@ import { isEventType } from '/@client/utils/utils';
 import { MessageRow } from '../basic/message-row';
 import { UserInfo, UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
-import { Fridge } from '../basic/frige';
+import { UserModal } from '../basic/user-modal';
 
 type Params = {
   id: string;
@@ -72,35 +72,6 @@ const LogEntry = newComponent('div.event_log--entry', function (
   }
 });
 
-const UserFridge = newComponent(Fridge.tag || 'div', function () {
-  const host = this.host;
-  const fridge = Fridge.call(this, this);
-
-  return {
-    open(user: UserInfo) {
-      fridge.setTitle(user.name);
-      fridge.set([
-        {
-          text: 'request clips',
-          action() {
-            host.send({ action: 'get-clips', payload: { broadcaster: user.id } }).then(function (response) {
-              fridge.set(response.map(function (item) {
-                return {
-                  text: (item.is_featured ? '* ' : '') + item.title,
-                  action() {
-                    host.send({ action: 'show-clip', payload: { id: item.id, duration: item.duration * 1000 } });
-                    fridge.hide();
-                  },
-                };
-              }));
-            });
-          },
-        },
-      ]);
-    },
-  };
-});
-
 export const EventLog = newComponent('div.event_log', function (_, { id }: Params) {
   const host = this.host;
   host.styles.add('event-log', STYLES);
@@ -123,11 +94,11 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       },
     },
   }).dom('div.event_log--log_wrapper', function () {
-    const userFridge = this.dom(UserFridge);
+    const userModal = this.dom(UserModal);
 
     this.dom('div.event_log--log', function (log) {
       append = function (params) {
-        log.dom(LogEntry, { ...params, onUserClick(user) { userFridge.open(user) } });
+        log.dom(LogEntry, { ...params, onUserClick(user) { userModal.open(user) } });
         log.node.scrollTo(0, log.node.scrollHeight);
       };
     });
