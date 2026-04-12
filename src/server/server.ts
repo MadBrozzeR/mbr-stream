@@ -6,7 +6,7 @@ import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
 import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand, WSIncomeEventResponse, WSIncomeEventActions } from './common-types/ws-events';
-import { downloadResources } from './resource-downloader';
+import { downloadResources, PRELOAD_RESOURCES } from './resource-downloader';
 import { COMMAND_CONFIG, CommandProcessor } from './chat-commands';
 import type { SendChatMessageRequest } from './types';
 import type { EventSubNotification } from './common-types/eventsub-types';
@@ -61,7 +61,7 @@ const apiStorage = {
   }),
 };
 
-downloadResources().then(function (result) {
+downloadResources(PRELOAD_RESOURCES).then(function (result) {
   console.log('Resources statuses:', result);
 });
 

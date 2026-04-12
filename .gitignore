@@ -2,6 +2,7 @@ node_modules/
 build/
 static/downloaded/
 .config.json
+.config.secret.json
 .token.json
 log.txt
 eventsub.log

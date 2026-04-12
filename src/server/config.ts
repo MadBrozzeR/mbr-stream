@@ -1,15 +1,22 @@
 import Config from 'mbr-config';
 import type { TokenResponse } from './types';
 
-export const config = Config.use(__dirname + '/../../.config.json', {
+const secretConfig = Config.use(__dirname + '/../../.config.secret.json', {
   clientId: '',
   clientSecret: '',
+});
+
+const sharedConfig = Config.use(__dirname + '/../../.config.json', {
   redirectUri: 'http://localhost/',
   logFile: __dirname + '/../../log.txt',
   eventSubLog: __dirname + '/../../eventsub.log',
-  download: {} as Record<string, string>,
   startChat: true,
 });
+
+export const config = {
+  ...secretConfig,
+  ...sharedConfig,
+};
 
 type TokenStorage = {
   app: TokenResponse;
