@@ -166,7 +166,13 @@ const incomingMessageProcessor: {
 
   async 'show-clip'({ payload }) {
     wsServer.sendData({ type: 'showClip', payload });
-  }
+  },
+
+  async 'get-streams'({ payload }) {
+    const streams = await api.Streams.getStreams(payload);
+    wsServer.sendData({ type: 'getStreams',  payload: streams });
+    return streams;
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

@@ -1,5 +1,5 @@
 import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
-import type { GetClipsResponse } from '../types';
+import type { GetClipsResponse, GetStreamsResponse } from '../types';
 
 type Chatter = {
   id: string;
@@ -56,6 +56,7 @@ export type WSEventsMap = {
   interfaceAction: 'chat-clear';
   moduleSetup: { module: string; setup: Record<string, string> | null; };
   showClip: { id: string, duration: number; };
+  getStreams: GetStreamsResponse;
   info: string;
 };
 
@@ -88,7 +89,7 @@ export type WSIncomeEventParams = {
   'get-categories': {
     request: { query: string; };
     response: Array<{ id: string; name: string; }>;
-  },
+  };
   'update-stream-info': {
     request: { title: string; tags: string; category: string; language: string; };
     response: void;
@@ -100,6 +101,10 @@ export type WSIncomeEventParams = {
   'show-clip': {
     request: { id: string, duration: number; };
     response: void;
+  };
+  'get-streams': {
+    request: { game_id?: string; language?: string; first?: number; before?: string; after?: string; view?: string; };
+    response: GetStreamsResponse;
   };
 };
 
