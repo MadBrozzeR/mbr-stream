@@ -3,6 +3,8 @@ import { Host, newComponent } from '/@client/splux-host';
 import { compareKeys, keyMapper } from '/@client/utils/utils';
 import { Splux } from '/@client/lib-ref/splux';
 import { ModuleBox } from '../basic/module-box';
+import { UserName } from '../basic/user-name';
+import { UserModal } from '../basic/user-modal';
 
 const STYLES = {};
 
@@ -14,10 +16,11 @@ type ChatterInfo = StreamInfo['chatters'][number];
 
 type ChatterParams = {
   info: ChatterInfo;
+  onClick: () => void;
 };
 
-const Chatter = newComponent('div.chatters--chater', function (_, { info }: ChatterParams) {
-  this.params({ innerText: info.name });
+const Chatter = newComponent('div.chatters--chater', function (_, { info, onClick }: ChatterParams) {
+  this.dom(UserName, { user: info, onClick });
 });
 
 export const ChatterList = newComponent('div.chatters', function (_, { id }: Params) {
@@ -27,6 +30,8 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
     streamInfo;
   }
   const list: Record<string, Splux<HTMLDivElement, Host>> = {};
+
+  const userModal = this.dom(UserModal);
 
   this.dom(ModuleBox, {
     id,
@@ -46,7 +51,9 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
           if (status === 'removed') {
             list[key]?.remove();
           } else if (status === 'new' && currentChatters[key]) {
-            list[key] = wrapper.dom(Chatter, { info: currentChatters[key] });
+            list[key] = wrapper.dom(Chatter, { info: currentChatters[key], onClick() {
+              currentChatters[key] && userModal.open(currentChatters[key]);
+            } });
           }
         });
       }
