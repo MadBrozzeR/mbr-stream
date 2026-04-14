@@ -1,3 +1,4 @@
+import type { Socket } from 'net';
 import { MadSocket, MadSocketClient, ClientConnection } from 'madsocket';
 import { Logger } from 'mbr-logger';
 import { config } from './config';
@@ -67,15 +68,21 @@ export const startWSClient = function (
   infoCallback: (message: string) => void
 ) {
   let sessionId = '';
+  let oldSocket: Socket | null = null;
   const history: any[] = [];
   const idleTimer = new Timer(function () {
     console.log('Socket is idle for too long; reconnection attempt');
     infoCallback('Socket is idle for too long; reconnection attempt');
-    wsClient?.connect();
+    reconnect();
   });
   const reconnectionTimer = new Timer(function () {
-    wsClient?.connect();
+    reconnect();
   });
+
+  function reconnect(url?: string) {
+    oldSocket = wsClient?.socket || null;
+    wsClient?.connect({ url: url || wsClient.url });
+  }
 
   const wsClient = config.startChat ? new MadSocketClient({
     connect() {
@@ -120,11 +127,16 @@ export const startWSClient = function (
           if (message.payload.session.keepalive_timeout_seconds) {
             idleTimer.set(message.payload.session.keepalive_timeout_seconds * 1500);
           }
-          subscribe(sessionId);
+          if (oldSocket) {
+            wsClient?.close(oldSocket);
+            oldSocket = null;
+          } else {
+            subscribe(sessionId);
+          }
         }
 
         else if (isEventSubMessageType(message, 'session_reconnect')) {
-          this.connect({ url: message.payload.session.reconnect_url });
+          reconnect(message.payload.session.reconnect_url);
           callback(message);
         }
 
@@ -144,6 +156,7 @@ export const startWSClient = function (
     },
   }, {
     url: EVENTSUB_URL,
+    closeOldSocket: 'keep',
     debug(type, data) {
       const info = data === undefined
         ? ''
