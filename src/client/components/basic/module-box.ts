@@ -5,6 +5,9 @@ import { Toolbox } from './toolbar';
 
 type MoverParams = ComponentParams<typeof Mover>;
 type ToolboxParams = ComponentParams<typeof Toolbox>;
+export type ModuleParams = {
+  id: string;
+};
 
 type Params = {
   component: MoverParams['component'];

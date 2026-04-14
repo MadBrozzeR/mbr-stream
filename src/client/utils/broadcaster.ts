@@ -1,4 +1,4 @@
-import type { StreamInfo, WSEvent } from '@common-types/ws-events';
+import type { StreamInfo, WSEvent, WSEventsMap } from '@common-types/ws-events';
 
 type Cast<T extends string, P extends {}> = {
   type: T;
@@ -11,6 +11,7 @@ export type Broadcast = {
   streamInfo: StreamInfo;
   interfaceAction: 'chat-clear';
   showClip: { id: string; duration: number };
+  getStreams: WSEventsMap['getStreams'];
   info: string;
 };
 
