@@ -34,6 +34,21 @@ const STYLES = {
       lineHeight: '1em',
       verticalAlign: 'middle',
     },
+
+    '--notification': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#d00',
+      color: 'white',
+      whiteSpace: 'pre',
+      padding: '4px',
+
+      '-hidden': {
+        display: 'none',
+      },
+    },
   },
 };
 
@@ -96,13 +111,61 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
   }).dom('div.event_log--log_wrapper', function () {
     const userModal = this.dom(UserModal);
 
+    const notificator = this.dom('div.event_log--notification.event_log--notification-hidden', function (notification) {
+      const currentNotifications: string[] = [];
+
+      function update () {
+        if (currentNotifications.length) {
+          notification.node.innerText = currentNotifications.join('\n');
+          notification.node.classList.remove('event_log--notification-hidden');
+        } else {
+          notification.node.classList.add('event_log--notification-hidden');
+        }
+      }
+
+      function add (message: string) {
+        if (currentNotifications.indexOf(message) === -1) {
+          currentNotifications.push(message);
+          update();
+        }
+      }
+
+      function remove (message: string) {
+        const messageIndex = currentNotifications.indexOf(message);
+        if (messageIndex > -1) {
+          currentNotifications.splice(messageIndex, 1);
+          update();
+        }
+      }
+
+      return { add, remove };
+    });
+
     this.dom('div.event_log--log', function (log) {
       append = function (params) {
         log.dom(LogEntry, { ...params, onUserClick(user) { userModal.open(user) } });
         log.node.scrollTo(0, log.node.scrollHeight);
       };
     });
+
+    function wsStateListener (state: boolean) {
+      const message = 'It feels like connection is broken. Check your server!';
+      if (state) {
+       notificator.remove(message);
+      } else {
+       notificator.add(message);
+      }
+    }
+
+    host.state.wsStatus.listen(wsStateListener);
+
+    this.on({
+      remove() {
+        host.state.wsStatus.unlisten(wsStateListener);
+      }
+    });
   });
+
 
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {

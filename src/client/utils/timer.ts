@@ -52,3 +52,39 @@ export class Timer {
     }
   }
 }
+
+export class Timer2 {
+  ref: ReturnType<typeof setTimeout> | null = null;
+  timeout = 0;
+  callback: () => void;
+
+  constructor(callback: () => void = function () {}) {
+    this.callback = callback;
+  }
+
+  set(timeout?: number) {
+    const timer = this;
+
+    if (timeout !== undefined) {
+      this.timeout = timeout;
+    }
+
+    this.stop();
+    if (this.timeout) {
+      this.ref = setTimeout(function () {
+        timer.stop();
+        timer.callback();
+      }, this.timeout);
+    }
+  }
+
+  stop() {
+    this.ref && clearTimeout(this.ref);
+    this.ref = null;
+  }
+
+  isActive() {
+    return !!this.ref;
+  }
+}
+
