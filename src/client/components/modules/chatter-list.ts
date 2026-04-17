@@ -26,9 +26,6 @@ const Chatter = newComponent('div.chatters--chater', function (_, { info, onClic
 export const ChatterList = newComponent('div.chatters', function (_, { id }: Params) {
   const host = this.host;
   host.styles.add('chatters', STYLES);
-  let updateFromStreamInfo = function update (streamInfo: StreamInfo | null) {
-    streamInfo;
-  }
   const list: Record<string, Splux<HTMLDivElement, Host>> = {};
 
   const userModal = this.dom(UserModal);
@@ -44,7 +41,7 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
       bottom: '0',
     },
    }).dom('div.chatters--wrapper', function (wrapper) {
-    updateFromStreamInfo = function (streamInfo) {
+    const unlistenStreamInfo = host.state.streamInfo.listen(function (streamInfo) {
       if (streamInfo) {
         const currentChatters = keyMapper(streamInfo?.chatters);
         compareKeys(list, currentChatters, function (key, status) {
@@ -57,14 +54,12 @@ export const ChatterList = newComponent('div.chatters', function (_, { id }: Par
           }
         });
       }
-    }
-  });
+    });
 
-  host.state.streamInfo.listen(updateFromStreamInfo)
-
-  this.on({
-    remove() {
-      host.state.streamInfo.unlisten(updateFromStreamInfo);
-    },
+    this.on({
+      remove() {
+        unlistenStreamInfo();
+      },
+    });
   });
 });

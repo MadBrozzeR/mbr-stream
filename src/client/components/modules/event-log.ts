@@ -148,20 +148,18 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       };
     });
 
-    function wsStateListener (state: boolean) {
+    const unlistenWSState = host.state.wsStatus.listen(function (state: boolean) {
       const message = 'It feels like connection is broken. Check your server!';
       if (state) {
        notificator.remove(message);
       } else {
        notificator.add(message);
       }
-    }
-
-    host.state.wsStatus.listen(wsStateListener);
+    });
 
     this.on({
       remove() {
-        host.state.wsStatus.unlisten(wsStateListener);
+        unlistenWSState();
       }
     });
   });
