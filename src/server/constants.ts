@@ -23,4 +23,5 @@ export const API = {
   POLLS: `${HELIX}/polls`,
   SEARCH: `${HELIX}/search`,
   STREAMS: `${HELIX}/streams`,
+  RAIDS: `${HELIX}/raids`,
 };

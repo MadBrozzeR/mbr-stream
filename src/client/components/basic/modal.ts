@@ -1,4 +1,5 @@
 import { LoaderCover } from './loader';
+import { SYMBOL } from '/@client/constants';
 import { newComponent } from '/@client/splux-host';
 
 const STYLES = {
@@ -39,7 +40,7 @@ const ModalTitle = newComponent(
   function (_block, { title, onClose }: { title: string; onClose: () => void }
 ) {
   const titleName = this.dom('div.modal--title_name').params({ innerText: title });
-  this.dom('div.modal--title_close').params({ innerText: '✕', onclick() { onClose() } });
+  this.dom('div.modal--title_close').params({ innerText: SYMBOL.CLOSE, onclick() { onClose() } });
 
   return {
     setTitle(text: string) {

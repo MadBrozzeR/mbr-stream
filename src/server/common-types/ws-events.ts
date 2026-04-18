@@ -44,6 +44,16 @@ export type ChatCommand<T extends string = string> = {
   params: MessageFragment[];
 };
 
+export type BroadcastMessage = {
+  type: 'stream-list-hover';
+  payload: string;
+} | {
+  type: 'stream-list-watch';
+  payload: string;
+} | {
+  type: 'stream-list-stop-watching';
+};
+
 export type WSEventsMap = {
   keepalive: {};
   notification: {
@@ -58,6 +68,7 @@ export type WSEventsMap = {
   showClip: { id: string, duration: number; };
   getStreams: GetStreamsResponse;
   info: string;
+  broadcast: BroadcastMessage;
 };
 
 export type WSEvents = {
@@ -105,6 +116,14 @@ export type WSIncomeEventParams = {
   'get-streams': {
     request: { game_id?: string; language?: string; first?: number; before?: string; after?: string; view?: string; };
     response: GetStreamsResponse;
+  };
+  'broadcast': {
+    request: BroadcastMessage;
+    response: void;
+  };
+  'raid-channel': {
+    request: string;
+    response: string;
   };
 };
 

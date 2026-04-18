@@ -784,6 +784,24 @@ export type UpdateRedemptionStatusResponse = {
   }>;
 };
 
+export type StartRaidRequest = {
+  from_broadcaster_id: string;
+  to_broadcaster_id: string;
+};
+
+export type StartRaidResponse = {
+  data: Array<{
+    created_at: string;
+    is_mature: boolean;
+  }>;
+};
+
+export type CancelRaidRequest = {
+  broadcaster_id: string;
+};
+
+export type CancelRaidResponse = void;
+
 /*
 MACRO
 :s/ //gIexport type ARequest = {};hiVkkkyPjjjjj:s/Request/Response/^wwyiwjjop^~:s/Response//>>>>A(params: Types.m18k02wyiw`1pa) {  return userApiRequest<Types.m15k02wyiw`1pa>();},0xx

@@ -257,6 +257,15 @@ const api = {
       return userApiRequest<Types.SearchCategoriesResponse>([API.SEARCH, '/categories', params]);
     },
   },
+  Raids: {
+    startRaid(params: Types.StartRaidRequest) {
+      // channel:manage:raids
+      return userApiRequest<Types.StartRaidResponse>([API.RAIDS, params], 'POST');
+    },
+    cancelRaid(params: Types.CancelRaidRequest) {
+      return userApiRequest<Types.CancelRaidResponse>([API.RAIDS, params], 'DELETE');
+    },
+  },
 };
 
 type TwitchApiParams<S extends ETypes.Scope> = {
@@ -294,6 +303,7 @@ export class TwitchApi<S extends ETypes.Scope> {
   Users = api.Users;
   GuestStar = api.GuestStar;
   Search = api.Search;
+  Raids = api.Raids;
 };
 
 const apiInstance = new TwitchApi({

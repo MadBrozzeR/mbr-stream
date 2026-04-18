@@ -173,6 +173,23 @@ const incomingMessageProcessor: {
     wsServer.sendData({ type: 'getStreams',  payload: streams });
     return streams;
   },
+
+  async 'raid-channel'({ payload }) {
+    const userInfo = await getUserInfo();
+
+    try {
+      await api.Raids.startRaid({ from_broadcaster_id: userInfo.id, to_broadcaster_id: payload });
+      console.log('Successfull raid');
+      return '';
+    } catch (error) {
+      console.log(error);
+      return 'Failed to raid';
+    }
+  },
+
+  async 'broadcast'({ payload }) {
+    wsServer.sendData({ type: 'broadcast', payload });
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

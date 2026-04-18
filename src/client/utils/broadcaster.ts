@@ -1,4 +1,4 @@
-import type { StreamInfo, WSEvent, WSEventsMap } from '@common-types/ws-events';
+import type { BroadcastMessage, StreamInfo, WSEvent, WSEventsMap } from '@common-types/ws-events';
 
 type Cast<T extends string, P extends {}> = {
   type: T;
@@ -13,6 +13,7 @@ export type Broadcast = {
   showClip: { id: string; duration: number };
   getStreams: WSEventsMap['getStreams'];
   info: string;
+  broadcast: BroadcastMessage;
 };
 
 export function createCast<K extends keyof Broadcast> (type: K, payload: Broadcast[K]): Cast<K, Broadcast[K]> {

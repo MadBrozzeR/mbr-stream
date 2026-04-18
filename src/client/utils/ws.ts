@@ -94,6 +94,10 @@ export const startWebSocket = function (host: Host) {
       case 'getStreams':
         host.cast('getStreams', message.payload);
         break;
+
+      case 'broadcast':
+        host.cast('broadcast', message.payload);
+        break;
     }
   }, function (_, send) {
     host.wsSend = function (message) {

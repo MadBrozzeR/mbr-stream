@@ -80,4 +80,15 @@ export class StoragePull<T> {
 
     return false;
   }
+
+  find(callback: (info: T) => boolean) {
+    for (let index = this.state.state.length -1 ; index >= 0 ; --index) {
+      const item = this.state.state[index];
+      if (item && callback(item)) {
+        return item;
+      }
+    }
+
+    return null;
+  }
 }
