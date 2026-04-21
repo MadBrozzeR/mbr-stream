@@ -41,12 +41,12 @@ const STYLES = {
 
     '--display_time': {
       display: 'flex',
-      fontSize: '42px',
+      fontSize: 'var(--font-size, 42px)',
       width: '100%',
       height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'monospace',
+      fontFamily: 'var(--font-family, monospace)',
 
       '-hidden': {
         display: 'none',
@@ -55,12 +55,12 @@ const STYLES = {
 
     '--display_text': {
       display: 'flex',
-      fontSize: '32px',
+      fontSize: 'var(--font-size-text, 32px)',
       width: '100%',
       height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
-      fontFamily: 'monospace',
+      fontFamily: 'var(--font-family, monospace)',
       whiteSpace: 'nowrap',
 
       '-hidden': {
@@ -174,7 +174,15 @@ export const Countdown = newComponent('div.countdown', function (_div, { id }: P
       left: '20px',
       width: '400px',
       height: '60px',
+      font: 'monospace',
+      fontSize: '42px',
+      textFontSize: '32px',
       time: '2025-12-05T21:00:00.000+03:00',
+    },
+    varsToCSS: {
+      fontSize: '--font-size',
+      textFontSize: '--font-size-text',
+      font: '--font-family',
     },
     onPreview(values) {
       resizeFrame(values);
