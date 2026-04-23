@@ -128,7 +128,7 @@ export const startWSClient = function (
             idleTimer.set(message.payload.session.keepalive_timeout_seconds * 1500);
           }
           if (oldSocket) {
-            wsClient?.close(oldSocket);
+            wsClient?.closeSocket(oldSocket);
             oldSocket = null;
           } else {
             subscribe(sessionId);
