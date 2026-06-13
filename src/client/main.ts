@@ -19,6 +19,7 @@ import { ChatterList } from './components/modules/chatter-list';
 import { Reactions } from './components/modules/reactions';
 import { TwitchClip } from './components/modules/twitch-clip';
 import { StreamList } from './components/modules/stream-list';
+import { MusicPlayer } from './components/modules/music-player';
 
 const STYLES = {
   'html, body': {
@@ -76,6 +77,7 @@ Splux.start(function (body, head) {
       reactions: Reactions,
       clip: TwitchClip,
       streamList: StreamList,
+      music: MusicPlayer,
     });
   });
 
