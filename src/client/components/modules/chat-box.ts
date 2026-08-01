@@ -6,6 +6,7 @@ import { changeModes, checkForAutoMessage, isDefined, isEventType } from '/@clie
 import { MessageRow } from '../basic/message-row';
 import { UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
+import { ComponentSplux } from '/@client/lib-ref/splux';
 
 type Props = {
   id: string;
@@ -91,6 +92,7 @@ const STYLES = {
 };
 
 type ChatEntryParams = {
+  id?: string;
   user: string;
   badges: BadgeData[];
   message: string | ChatMessageEvent;
@@ -129,9 +131,17 @@ const ChatEntry = newComponent('div.chatbox--entry', function (
 export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props) {
   const host = this.host;
   host.styles.add('chat', STYLES);
+  const messages: Record<string, ComponentSplux<typeof ChatEntry>> = {};
 
   let clear = function () {};
   let append = function (params: Omit<ChatEntryParams, 'persistent'>) { console.log(params) };
+
+  function remove (id: string) {
+    if (messages[id]) {
+      messages[id].remove();
+      delete messages[id];
+    }
+  }
 
   const events = {
     message: false,
@@ -169,7 +179,12 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
   }).dom('div.chatbox--wrapper', function () {
     this.dom('div.chatbox--log', function (log) {
       clear = function () { log.clear() };
-      append = function (params) { log.dom(ChatEntry, { ...params, persistent: events.persistent }) };
+      append = function (params) {
+        const entry = log.dom(ChatEntry, { ...params, persistent: events.persistent });
+        if (params.id) {
+          messages[params.id] = entry;
+        }
+      };
     });
   });
 
@@ -183,12 +198,15 @@ export const ChatBox = newComponent('div.chatbox', function (_box, { id }: Props
         const isAutoMessage = checkForAutoMessage(data.payload.event.event, host.state.streamInfo.state);
         if (!isAutoMessage) {
           append({
+            id: data.payload.event.event.message_id,
             user: data.payload.event.event.chatter_user_name,
             badges: data.payload.badges,
             message: data.payload.event.event.message,
             userColor: data.payload.event.event.color,
           });
         }
+      } else if (isEventType(data.payload.event, 'channel.chat.message_delete')) {
+        remove(data.payload.event.event.message_id);
       } else if (isEventType(data.payload.event, 'channel.follow') && events.follow) {
         append({
           user: '[INFO]',

@@ -190,7 +190,15 @@ export type EventSubType = {
   'channel.chat.message_delete': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;
     user_id: Condition;
-  }, {}>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_name: string;
+    broadcaster_user_login: string;
+    target_user_id: string;
+    target_user_name: string;
+    target_user_login: string;
+    message_id: string;
+  }>;
 
   'channel.chat.notification': EventSubTypeEntity<1, {
     broadcaster_user_id: Condition;

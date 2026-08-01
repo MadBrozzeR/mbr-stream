@@ -46,6 +46,11 @@ const SUBSCRIPTIONS: {
     version: '1',
     condition: { broadcaster_user_id: condition.broadcaster_user_id, user_id: condition.user_id },
   }),
+  'channel.chat.message_delete': (condition) => ({
+    type: 'channel.chat.message_delete',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id, user_id: condition.user_id },
+  }),
   'channel.follow': (condition) => ({
     type: 'channel.follow',
     version: '2',
