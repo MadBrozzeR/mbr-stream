@@ -17,6 +17,7 @@ export function newHost () {
         'mbr-stream/stream-list',
         function (item, info) { return item.title === info.title }
       ),
+      wsStatus: new State(false),
     },
     play(src: string) {
       console.log(src);

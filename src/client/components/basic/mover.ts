@@ -10,6 +10,7 @@ type Props = {
   id: string;
   title?: string | undefined;
   vars?: Values | undefined;
+  varsToCSS?: Record<string, string> | undefined;
   onSetupChange?: ((values: Values) => void) | undefined;
   prepareValues?: ((values: Values) => Values) | undefined;
   onPreview?: ((values: Values) => void) | undefined;
@@ -68,6 +69,14 @@ const DEFAULT_VARS: Record<string, string> = {
   width: '',
   height: '',
 };
+const DEFAULT_VARS_CSS: Record<string, string> = {
+  top: '--mover-top',
+  bottom: '--mover-bottom',
+  left: '--mover-left',
+  right: '--mover-right',
+  width: '--mover-width',
+  height: '--mover-height',
+};
 
 function adoptPosition (oldValues: Values, newValues: Values, element: Splux<HTMLElement, Host>) {
   let result = newValues;
@@ -82,15 +91,20 @@ function adoptPosition (oldValues: Values, newValues: Values, element: Splux<HTM
   return result;
 }
 
-function applyVars (vars: Values | undefined, element: Splux<HTMLElement, Host>, prevVars?: Values) {
+function applyVars (
+  vars: Values | undefined,
+  cssPropertyNames: Record<string, string>,
+  element: Splux<HTMLElement, Host>,
+  prevVars?: Values
+) {
   const newPosition = (prevVars && vars) ? adoptPosition(prevVars, vars, element) : vars;
   for (const key in newPosition) if (newPosition[key] !== undefined) {
-    const name = key in DEFAULT_VARS ? `--mover-${key}` : key;
+    const name = cssPropertyNames[key] || key;
     element.node.style.setProperty(name, newPosition[key]);
   }
   if (newPosition !== vars) {
     window.requestAnimationFrame(function () {
-      applyVars(vars, element);
+      applyVars(vars, cssPropertyNames, element);
     });
   }
 }
@@ -116,26 +130,28 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
   title,
   component,
   vars: initialVars,
+  varsToCSS,
   onSetupChange,
   onPreview,
   prepareValues,
 }: Props) {
   const host = this.host;
+  const cssPropertyNames = varsToCSS ? Object.assign({}, DEFAULT_VARS_CSS, varsToCSS) : DEFAULT_VARS_CSS;
   host.styles.add('mover', STYLES);
   component.node.classList.add(CLASS_NAME);
   const initialValues = { ...DEFAULT_VARS, ...initialVars };
   let currentVars = initialValues;
-  applyVars(currentVars, component);
+  applyVars(currentVars, cssPropertyNames, component);
   const [, elementName] = splitByFirst(id, '+');
   const dashName = getDashName();
 
   function preview (values: Values) {
-    applyVars(values, component);
+    applyVars(values, cssPropertyNames, component);
     onPreview && onPreview(values);
   }
 
   function resetPreview () {
-    applyVars(currentVars, component);
+    applyVars(currentVars, cssPropertyNames, component);
   }
 
   function setAnimation (value: boolean) {
@@ -157,7 +173,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       const valueChange = prepareValues ? Object.assign({}, values, prepareValues(values)) : values;
       onSetupChange && onSetupChange(valueChange);
       currentVars = Object.assign({}, currentVars, valueChange);
-      applyVars(currentVars, component, prevValues);
+      applyVars(currentVars, cssPropertyNames, component, prevValues);
       urlState.set(id, currentVars);
       if (dashName) {
         host.send({ action: 'module-setup', payload: { view: dashName, module: id, setup: currentVars } });
@@ -182,7 +198,7 @@ export const Mover = newComponent(`${ParamsDialog.tag}.mover`, function (_, {
       currentVars = data.payload[id] || initialValues;
       onSetupChange && onSetupChange(currentVars);
       dialog.set(currentVars);
-      applyVars(currentVars, component, prevValues);
+      applyVars(currentVars, cssPropertyNames, component, prevValues);
     }
   });
 

@@ -15,6 +15,7 @@ type Params = {
   id: MoverParams['id'];
   title?: MoverParams['title'];
   vars?: MoverParams['vars'];
+  varsToCSS?: MoverParams['varsToCSS'];
   prepareValues?: MoverParams['prepareValues'];
   onSetupChange?: MoverParams['onSetupChange'];
   onPreview?: MoverParams['onPreview'];
@@ -28,6 +29,7 @@ export const ModuleBox = newComponent(`${Toolbox.tag || 'div'}.module_box`, func
     id: params.id,
     title: params.title,
     vars: params.vars,
+    varsToCSS: params.varsToCSS,
     prepareValues: params.prepareValues,
     onSetupChange: function (values) {
       params.onSetupChange && params.onSetupChange(values);

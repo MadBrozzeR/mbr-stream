@@ -2,14 +2,18 @@ import type { Host } from '../splux-host';
 import type { WSEvents, WSIncomeEvent } from '@common-types/ws-events';
 import { getDashName } from './utils';
 import { urlState } from './url-state';
+import { Timer2 } from './timer';
 
 // const WS_URL = 'wss://eventsub.wss.twitch.tv/ws?keepalive_timeout_seconds=30';
 const WS_URL = 'ws://localhost:8922/ws';
+const KEEP_ALIVE_TIME = 60000;
 
 export function wsConnect (
   url: string,
   handler: (wsEvent: WSEvents) => void,
-  onCreate?: (ws: WebSocket, send: (message: WSIncomeEvent) => void) => void
+  onCreate?: (ws: WebSocket, send: (message: WSIncomeEvent) => void) => void,
+  onConnect?: () => void,
+  onClose?: () => void
 ) {
   const ws = new WebSocket(url);
   const pendingMessages: WSIncomeEvent[] = [];
@@ -31,7 +35,8 @@ export function wsConnect (
   };
   ws.onclose = function (event) {
     console.log('close', event);
-    wsConnect(url, handler, onCreate);
+    onClose && onClose();
+    wsConnect(url, handler, onCreate, onConnect, onClose);
   };
   ws.onopen = function () {
     isConnected = true;
@@ -41,6 +46,7 @@ export function wsConnect (
         send(message);
       }
     }
+    onConnect && onConnect();
   }
   ws.onerror = function (event) {
     console.log(event);
@@ -52,7 +58,14 @@ export function wsConnect (
 }
 
 export const startWebSocket = function (host: Host) {
+  const keepAliveTimer = new Timer2(function () {
+    host.state.wsStatus.set(false);
+  });
+
   wsConnect(WS_URL + `?dash=${getDashName()}`, function (message) {
+    host.state.wsStatus.set(true);
+    keepAliveTimer.set(KEEP_ALIVE_TIME);
+
     switch (message.type) {
       case 'notification':
         host.cast('eventSubEvent', message.payload);
@@ -82,5 +95,11 @@ export const startWebSocket = function (host: Host) {
     host.wsSend = function (message) {
       send(message);
     };
+  }, function () {
+    host.state.wsStatus.set(true);
+    keepAliveTimer.set(KEEP_ALIVE_TIME);
+  }, function () {
+    host.state.wsStatus.set(false);
+    keepAliveTimer.stop();
   });
 };

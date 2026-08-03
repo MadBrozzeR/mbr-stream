@@ -1,8 +1,8 @@
 node_modules/
 build/
 static/downloaded/
-.config.json
-.token.json
+.config.*
+.token.*
 log.txt
 eventsub.log
 *.ignore.*

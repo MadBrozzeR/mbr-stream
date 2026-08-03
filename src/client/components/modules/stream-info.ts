@@ -139,20 +139,18 @@ export const StreamInfo = newComponent('div.stream_info', function (_, { id }: P
       title.setCurrent(streamInfo.info.title);
     }
 
-    function updateTitleFromStreamList (list: Array<StreamInfoData['info']>) {
+    const unlistenStreamInfo = host.state.streamInfo.listen(set);
+    const unlistenStreamList = host.state.streamList.state.listen(function (list: Array<StreamInfoData['info']>) {
       const last = list[list.length - 1];
       if (last) {
         title.setUpdated(last.title);
       }
-    }
-
-    host.state.streamInfo.listen(set);
-    host.state.streamList.state.listen(updateTitleFromStreamList);
+    });
 
     this.on({
       remove() {
-        host.state.streamInfo.unlisten(set);
-        host.state.streamList.state.listen(updateTitleFromStreamList);
+        unlistenStreamInfo();
+        unlistenStreamList();
       },
     })
   });

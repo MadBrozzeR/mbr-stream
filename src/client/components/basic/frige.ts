@@ -59,6 +59,7 @@ type Option = {
   action: () => void;
 };
 
+// DEPRECATED
 export const Fridge = newComponent('div.fridge.fridge-hidden', function (fridge) {
   const host = this.host;
   host.styles.add('fridge', STYLES);

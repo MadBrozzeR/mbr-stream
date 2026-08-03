@@ -6,7 +6,8 @@ import { isEventType } from '/@client/utils/utils';
 import { MessageRow } from '../basic/message-row';
 import { UserInfo, UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
-import { Fridge } from '../basic/frige';
+import { UserModal } from '../basic/user-modal';
+import { ComponentSplux } from '/@client/lib-ref/splux';
 
 type Params = {
   id: string;
@@ -34,6 +35,38 @@ const STYLES = {
       lineHeight: '1em',
       verticalAlign: 'middle',
     },
+
+    '--entry_moderator': {
+      lineHeight: '1em',
+      verticalAlign: 'middle',
+    },
+
+    '--notification': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      backgroundColor: '#d00',
+      color: 'white',
+      whiteSpace: 'pre',
+      padding: '4px',
+
+      '-hidden': {
+        display: 'none',
+      },
+    },
+
+    '--entry-striked': {
+      ' .user_name': {
+        textDecoration: 'line-through',
+      },
+      ' .event_log--entry_text': {
+        textDecoration: 'line-through',
+      },
+      ' .message_row': {
+        textDecoration: 'line-through',
+      },
+    },
   },
 };
 
@@ -46,6 +79,7 @@ const INFO_USER = '[INFO]';
 const EMOTE_SCALE_TIMEOUT = 3000;
 
 type LogEntryParams = {
+  id?: string;
   user?: string | UserInfo;
   badges?: BadgeData[];
   message: string | ChatMessageEvent;
@@ -70,42 +104,30 @@ const LogEntry = newComponent('div.event_log--entry', function (
   } else {
     entry.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
   }
-});
-
-const UserFridge = newComponent(Fridge.tag || 'div', function () {
-  const host = this.host;
-  const fridge = Fridge.call(this, this);
 
   return {
-    open(user: UserInfo) {
-      fridge.setTitle(user.name);
-      fridge.set([
-        {
-          text: 'request clips',
-          action() {
-            host.send({ action: 'get-clips', payload: { broadcaster: user.id } }).then(function (response) {
-              fridge.set(response.map(function (item) {
-                return {
-                  text: (item.is_featured ? '* ' : '') + item.title,
-                  action() {
-                    host.send({ action: 'show-clip', payload: { id: item.id, duration: item.duration * 1000 } });
-                    fridge.hide();
-                  },
-                };
-              }));
-            });
-          },
-        },
-      ]);
+    remove(moderator?: string) {
+      entry.node.classList.add('event_log--entry-striked');
+      if (moderator) {
+        entry.dom('span.event_log--entry_moderator').params({ innerText: ' [' + moderator + ']' });
+      }
     },
-  };
+  }
 });
 
 export const EventLog = newComponent('div.event_log', function (_, { id }: Params) {
   const host = this.host;
   host.styles.add('event-log', STYLES);
 
+  const messages: Record<string, ComponentSplux<typeof LogEntry>> = {};
+
   let append = function (params: LogEntryParams) { console.log(params) };
+
+  function remove(id: string, moderator: string) {
+    if (messages[id]) {
+      messages[id].remove(moderator);
+    }
+  }
 
   this.dom(ModuleBox, {
     component: this,
@@ -123,15 +145,62 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
       },
     },
   }).dom('div.event_log--log_wrapper', function () {
-    const userFridge = this.dom(UserFridge);
+    const userModal = this.dom(UserModal);
+
+    const notificator = this.dom('div.event_log--notification.event_log--notification-hidden', function (notification) {
+      const currentNotifications: string[] = [];
+
+      function update () {
+        if (currentNotifications.length) {
+          notification.node.innerText = currentNotifications.join('\n');
+          notification.node.classList.remove('event_log--notification-hidden');
+        } else {
+          notification.node.classList.add('event_log--notification-hidden');
+        }
+      }
+
+      function add (message: string) {
+        if (currentNotifications.indexOf(message) === -1) {
+          currentNotifications.push(message);
+          update();
+        }
+      }
+
+      function remove (message: string) {
+        const messageIndex = currentNotifications.indexOf(message);
+        if (messageIndex > -1) {
+          currentNotifications.splice(messageIndex, 1);
+          update();
+        }
+      }
+
+      return { add, remove };
+    });
 
     this.dom('div.event_log--log', function (log) {
       append = function (params) {
-        log.dom(LogEntry, { ...params, onUserClick(user) { userFridge.open(user) } });
+        const entry = log.dom(LogEntry, { ...params, onUserClick(user) { userModal.open(user) } });
+        params.id && (messages[params.id] = entry);
         log.node.scrollTo(0, log.node.scrollHeight);
       };
     });
+
+    const unlistenWSState = host.state.wsStatus.listen(function (state: boolean) {
+      const message = 'It feels like connection is broken. Check your server!';
+      if (state) {
+       notificator.remove(message);
+      } else {
+       notificator.add(message);
+      }
+    });
+
+    this.on({
+      remove() {
+        unlistenWSState();
+      }
+    });
   });
+
 
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {
@@ -139,11 +208,14 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
       if (isEventType(event, 'channel.chat.message')) {
         append({
+          id: event.event.message_id,
           user: { name: event.event.chatter_user_name, id: event.event.chatter_user_id },
           badges: data.payload.badges,
           message: event.event.message,
           userColor: event.event.color,
         });
+      } else if (isEventType(event, 'channel.chat.message_delete')) {
+        remove(event.event.message_id, event.event.target_user_name);
       } else if (isEventType(event, 'channel.follow')) {
         append({
           message: `${event.event.user_name} is now FOLLOWING!`,

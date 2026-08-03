@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { config } from './config';
 import { doRequest, getResponseData } from './utils';
 
 type Resource = {
@@ -55,13 +54,13 @@ function getFile (resource: Resource): Promise<FileStatus> {
     });
 }
 
-export function downloadResources () {
+export function downloadResources (resources: Record<string, string>) {
   return new Promise<Record<string, boolean>>(function (resolve) {
     const promises: Array<Promise<FileStatus>> = [];
 
-    for (const fileName in config.download) {
-      if (config.download[fileName]) {
-        promises.push(getFile({ file: fileName, source: config.download[fileName] }))
+    for (const fileName in resources) {
+      if (resources[fileName]) {
+        promises.push(getFile({ file: fileName, source: resources[fileName] }))
       }
     }
 
@@ -74,3 +73,11 @@ export function downloadResources () {
     });
   });
 }
+
+export const PRELOAD_RESOURCES = {
+  'sound/witch-ambient1.ogg': 'https://resources.download.minecraft.net/31/312745ed858214dfc2215346cd9a3012c90018b5',
+  'sound/raidhorn4.ogg': 'https://resources.download.minecraft.net/3b/3beb96e88535529e6e24f557e927fffd57956a3a',
+  'sound/amethyst-break1.ogg': 'https://resources.download.minecraft.net/97/97b47b7a62f22addf6ff1db0c57b2fce22504098',
+  'sound/zombie-say1.ogg': 'https://resources.download.minecraft.net/65/65b762da90c8b192ee065692fcd50068f571b3fc',
+  'sound/zombie-say3.ogg': 'https://resources.download.minecraft.net/7e/7e86ced51d049411a28627854c633a3977f45332',
+};

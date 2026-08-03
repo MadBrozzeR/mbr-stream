@@ -147,19 +147,19 @@ export const ChangeStreamInfo = newComponent('div.change_stream_info', function 
     },
   });
 
-  function updateFromList (values: typeof host.state.streamList.state.state) {
+  type StreamListState = typeof host.state.streamList.state.state;
+
+  const unlistenStreamState = host.state.streamList.state.listen(function (values: StreamListState) {
     const last = values[values.length - 1];
 
     if (last) {
       set(last);
     }
-  }
-
-  host.state.streamList.state.listen(updateFromList);
+  });
 
   this.on({
     remove() {
-      host.state.streamList.state.unlisten(updateFromList);
+      unlistenStreamState();
     },
   });
 });
