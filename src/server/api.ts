@@ -310,6 +310,7 @@ const apiInstance = new TwitchApi({
     'channel:manage:guest_star',
     'moderator:manage:shoutouts',
     'channel:manage:redemptions',
+    'bits:read',
   ],
 });
 

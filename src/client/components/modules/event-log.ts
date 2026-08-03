@@ -239,6 +239,30 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
           message:
             `You just gave ${event.event.broadcaster_user_name} a SHOUTOUT for ${event.event.viewer_count} viewers`,
         });
+      } else if (isEventType(event, 'channel.channel_points_custom_reward_redemption.add')) {
+        let message = `[${event.event.status}] ${event.event.user_name} just redeemed "${event.event.reward.title}" (${event.event.reward.cost})`;
+        if (event.event.user_input) {
+          message += ` saying "${event.event.user_input}"`;
+        }
+        append({ message });
+      } else if (isEventType(event, 'channel.channel_points_custom_reward_redemption.update')) {
+        let message = `[${event.event.status}] ${event.event.user_name} updated "${event.event.reward.title}" (${event.event.reward.cost})`;
+        if (event.event.user_input) {
+          message += ` saying "${event.event.user_input}"`;
+        }
+        append({ message });
+      } else if (isEventType(event, 'channel.channel_points_automatic_reward_redemption.add')) {
+        let message = `${event.event.user_name} just redeemed "${event.event.reward.type}" (${event.event.reward.channel_points})`;
+        if (event.event.message) {
+          message += ` saying "${event.event.message.text}"`;
+        }
+        append({ message });
+      } else if (isEventType(event, 'channel.custom_power_up_redemption.add')) {
+        let message = `${event.event.user_name} just redeemed "${event.event.custom_power_up.title}" (${event.event.custom_power_up.bits})`;
+        if (event.event.user_input) {
+          message += ` saying "${event.event.user_input}"`;
+        }
+        append({ message });
       }
     } else if (isCast('info', data)) {
       append({

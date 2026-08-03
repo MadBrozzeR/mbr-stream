@@ -96,6 +96,41 @@ const SUBSCRIPTIONS: {
     version: '1',
     condition: { broadcaster_user_id: condition.broadcaster_user_id, moderator_user_id: condition.moderator_user_id },
   }),
+  'channel.channel_points_automatic_reward_redemption.add': (condition) => ({
+    type: 'channel.channel_points_automatic_reward_redemption.add',
+    version: '2',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.channel_points_custom_reward.add': (condition) => ({
+    type: 'channel.channel_points_custom_reward.add',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.channel_points_custom_reward.update': (condition) => ({
+    type: 'channel.channel_points_custom_reward.update',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.channel_points_custom_reward.remove': (condition) => ({
+    type: 'channel.channel_points_custom_reward.remove',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.channel_points_custom_reward_redemption.add': (condition) => ({
+    type: 'channel.channel_points_custom_reward_redemption.add',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.channel_points_custom_reward_redemption.update': (condition) => ({
+    type: 'channel.channel_points_custom_reward_redemption.update',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
+  'channel.custom_power_up_redemption.add': (condition) => ({
+    type: 'channel.custom_power_up_redemption.add',
+    version: '1',
+    condition: { broadcaster_user_id: condition.broadcaster_user_id },
+  }),
 };
 
 export async function subscribe (sessionId: string) {

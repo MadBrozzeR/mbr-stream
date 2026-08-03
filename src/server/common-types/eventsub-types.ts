@@ -264,24 +264,24 @@ export type EventSubType = {
     broadcaster_user_id: Condition<string>;
     moderator_user_id: Condition<string>;
   }, {
-  broadcaster_user_id: string;
-  broadcaster_user_name: string;
-  broadcaster_user_login: string;
-  session_id: string;
-  moderator_user_id: string;
-  moderator_user_name: string;
-  moderator_user_login: string;
-  guest_user_id: string;
-  guest_user_name: string;
-  guest_user_login: string;
-  slot_id: string;
-  state: 'invited' | 'accepted' | 'ready' | 'backstage' | 'live' | 'removed';
-  host_user_id: string;
-  host_user_name: string;
-  host_user_login: string;
-  host_video_enabled: boolean;
-  host_audio_enabled: boolean;
-  host_volume: number;
+    broadcaster_user_id: string;
+    broadcaster_user_name: string;
+    broadcaster_user_login: string;
+    session_id: string;
+    moderator_user_id: string;
+    moderator_user_name: string;
+    moderator_user_login: string;
+    guest_user_id: string;
+    guest_user_name: string;
+    guest_user_login: string;
+    slot_id: string;
+    state: 'invited' | 'accepted' | 'ready' | 'backstage' | 'live' | 'removed';
+    host_user_id: string;
+    host_user_name: string;
+    host_user_login: string;
+    host_video_enabled: boolean;
+    host_audio_enabled: boolean;
+    host_volume: number;
   }>;
 
   'channel.guest_star_settings.update': EventSubTypeEntity<'beta', {
@@ -325,6 +325,242 @@ export type EventSubType = {
     from_broadcaster_user_name: string;
     viewer_count: number;
     started_at: string;
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_automatic_reward_redemption.add': EventSubTypeEntity<2, {
+    broadcaster_user_id: Condition<string>;
+  }, {
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    id: string;
+    reward: {
+      type: 'single_message_bypass_sub_mode'
+        | 'send_highlighted_message'
+        | 'random_sub_emote_unlock'
+        | 'chosen_sub_emote_unlock'
+        | 'chosen_modified_sub_emote_unlock';
+      channel_points: number;
+      emote?: {
+        id: string;
+        name: string;
+      };
+    };
+    message?: {
+      text: string;
+      fragments: Array<{
+        text: string;
+        type: 'text' | 'emote';
+        emote?: {
+          id: string;
+        };
+      }>;
+    };
+    redeemed_at: string;
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_custom_reward.add': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    is_enabled: boolean;
+    is_paused: boolean;
+    is_in_stock: boolean;
+    title: string;
+    cost: number;
+    prompt: string;
+    is_user_input_required: boolean;
+    should_redemptions_skip_request_queue: boolean;
+    max_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    max_per_user_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    background_color: string;
+    image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    default_image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    global_cooldown: {
+      is_enabled: boolean;
+      seconds: number;
+    };
+    cooldown_expires_at: string;
+    redemptions_redeemed_current_stream: number;
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_custom_reward.update': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    reward_id: Condition<string, false>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    is_enabled: boolean;
+    is_paused: boolean;
+    is_in_stock: boolean;
+    title: string;
+    cost: number;
+    prompt: string;
+    is_user_input_required: boolean;
+    should_redemptions_skip_request_queue: boolean;
+    max_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    max_per_user_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    background_color: string;
+    image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    default_image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    global_cooldown: {
+      is_enabled: boolean;
+      seconds: number;
+    };
+    cooldown_expires_at: string;
+    redemptions_redeemed_current_stream: number;
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_custom_reward.remove': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    reward_id: Condition<string, false>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    is_enabled: boolean;
+    is_paused: boolean;
+    is_in_stock: boolean;
+    title: string;
+    cost: number;
+    prompt: string;
+    is_user_input_required: boolean;
+    should_redemptions_skip_request_queue: boolean;
+    max_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    max_per_user_per_stream: {
+      is_enabled: boolean;
+      value: number;
+    };
+    background_color: string;
+    image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    default_image: {
+      url_1x: string;
+      url_2x: string;
+      url_4x: string;
+    };
+    global_cooldown: {
+      is_enabled: boolean;
+      seconds: number;
+    };
+    cooldown_expires_at: string;
+    redemptions_redeemed_current_stream: number;
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_custom_reward_redemption.add': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    reward_id: Condition<string, false>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    user_input: string;
+    status: 'unfulfilled' | 'unknown' | 'fulfilled' | 'canceled';
+    redeemed_at: string;
+    reward: {
+      id: string;
+      title: string;
+      cost: number;
+      prompt: string;
+    };
+  }>;
+
+  // channel:read:redemptions or channel:manage:redemptions
+  'channel.channel_points_custom_reward_redemption.update': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    reward_id: Condition<string, false>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    user_input: string;
+    status: 'unfulfilled' | 'unknown' | 'fulfilled' | 'canceled';
+    redeemed_at: string;
+    reward: {
+      id: string;
+      title: string;
+      cost: number;
+      prompt: string;
+    };
+  }>;
+
+  // bits:read
+  'channel.custom_power_up_redemption.add': EventSubTypeEntity<1, {
+    broadcaster_user_id: Condition<string>;
+    reward_id: Condition<string, false>;
+  }, {
+    id: string;
+    broadcaster_user_id: string;
+    broadcaster_user_login: string;
+    broadcaster_user_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    user_input: string;
+    status: 'unfulfilled' | 'unknown' | 'fulfilled' | 'canceled';
+    redeemed_at: string;
+    custom_power_up: {
+      id: string;
+      title: string;
+      bits: number;
+      prompt: string;
+    };
   }>;
 };
 

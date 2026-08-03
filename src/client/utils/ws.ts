@@ -69,6 +69,7 @@ export const startWebSocket = function (host: Host) {
     switch (message.type) {
       case 'notification':
         host.cast('eventSubEvent', message.payload);
+        // console.log(message.payload);
         break;
 
       case 'streamInfo':
