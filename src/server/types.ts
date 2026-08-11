@@ -695,9 +695,9 @@ export type UpdateCustomRewardRequestParams = {
 };
 
 export type UpdateCustomRewardRequest = {
-  title: string;
+  title?: string;
   prompt?: string;
-  cost: number;
+  cost?: number;
   background_color?: string;
   is_enabled?: boolean;
   is_user_input_required?: boolean;

@@ -1,5 +1,5 @@
 import type { BadgeData } from '@common-types/ws-events';
-import { ComponentParams, newComponent } from '/@client/splux-host';
+import { ComponentParams, Host, newComponent } from '/@client/splux-host';
 import type { ChatMessageEvent } from '/@client/type';
 import { isCast } from '/@client/utils/broadcaster';
 import { isEventType } from '/@client/utils/utils';
@@ -8,6 +8,7 @@ import { UserInfo, UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
 import { UserModal } from '../basic/user-modal';
 import { ComponentSplux } from '/@client/lib-ref/splux';
+import { Splux } from 'splux';
 
 type Params = {
   id: string;
@@ -78,6 +79,25 @@ const TEST_MESSAGE: ChatMessageEvent = {
 const INFO_USER = '[INFO]';
 const EMOTE_SCALE_TIMEOUT = 3000;
 
+type Actions = {
+  rewardFulfill?: {
+    id: string;
+    reward_id: string;
+  };
+  rewardCancel?: {
+    id: string;
+    reward_id: string;
+  };
+};
+
+type LogEntryMode = {
+  mode: 'string';
+  node: Splux<HTMLSpanElement, Host>;
+} | {
+  mode: 'complex';
+  node: ComponentSplux<typeof MessageRow>;
+} | { mode: 'empty' };
+
 type LogEntryParams = {
   id?: string;
   user?: string | UserInfo;
@@ -85,11 +105,24 @@ type LogEntryParams = {
   message: string | ChatMessageEvent;
   userColor?: string;
   onUserClick?: (user: UserInfo) => void;
+  onActionClick?: <T extends keyof Actions>(type: T, data: Actions[T]) => void;
+  actions?: Actions;
 };
+
+type EntryActionsParams = {
+  actions: Actions;
+  onClick: <T extends keyof Actions>(type: T, data: Actions[T]) => void;
+};
+
+const EntryActions = newComponent('div.event_log--entry_actions', function (_, {
+  actions, onClick
+}: EntryActionsParams) {
+  console.log(actions, onClick);
+});
 
 const LogEntry = newComponent('div.event_log--entry', function (
   entry,
-  { user = INFO_USER, message, userColor, badges = [], onUserClick }: LogEntryParams
+  { user = INFO_USER, message, userColor, badges = [], onUserClick, actions, onActionClick }: LogEntryParams
 ) {
   const params: ComponentParams<typeof UserName> = { user, badges, color: userColor };
   if (onUserClick && typeof user !== 'string') {
@@ -97,21 +130,56 @@ const LogEntry = newComponent('div.event_log--entry', function (
       onUserClick(user);
     }
   }
+  if (actions && onActionClick) {
+    entry.dom(EntryActions, { actions, onClick: onActionClick });
+  }
   entry.dom(UserName, params);
   entry.dom('span.event_log--entry_separator').params({ innerText: ': ' });
-  if (typeof message === 'string') {
-    entry.dom('span.event_log--entry_text').params({ innerText: message });
-  } else {
-    entry.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT });
-  }
+  const messageBlock = entry.dom('span.event_log--entry_message', function (messageBlock) {
+    let mode: LogEntryMode = { mode: 'empty' };
+
+    function set(message: string | ChatMessageEvent) {
+      if (typeof message === 'string') {
+        if (mode.mode === 'string') {
+          mode.node.node.innerText = message;
+          return;
+        } else if (mode.mode === 'complex') {
+          mode.node.remove();
+        }
+
+        mode = {
+          mode: 'string',
+          node: messageBlock.dom('span.event_log--entry_text').params({ innerText: message }),
+        };
+      } else {
+        if (mode.mode === 'complex') {
+          mode.node.setText(message);
+          return;
+        } else if (mode.mode === 'string') {
+          mode.node.remove();
+        }
+
+        mode = {
+          mode: 'complex',
+          node: messageBlock.dom(MessageRow, { message, scaleEmotesFor: EMOTE_SCALE_TIMEOUT }),
+        };
+      }
+    }
+
+    set(message);
+
+    return {
+      set,
+    }
+  });
 
   return {
-    remove(moderator?: string) {
+    remove() {
       entry.node.classList.add('event_log--entry-striked');
-      if (moderator) {
-        entry.dom('span.event_log--entry_moderator').params({ innerText: ' [' + moderator + ']' });
-      }
     },
+    update(message: LogEntryParams['message']) {
+      messageBlock.set(message);
+    }
   }
 });
 
@@ -123,9 +191,9 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   let append = function (params: LogEntryParams) { console.log(params) };
 
-  function remove(id: string, moderator: string) {
+  function remove(id: string) {
     if (messages[id]) {
-      messages[id].remove(moderator);
+      messages[id].remove();
     }
   }
 
@@ -201,6 +269,11 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
     });
   });
 
+  function update (id: string, message: string | ChatMessageEvent) {
+    if (messages[id]) {
+      messages[id].update(message);
+    }
+  }
 
   this.tuneIn(function (data) {
     if (isCast('eventSubEvent', data)) {
@@ -215,7 +288,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
           userColor: event.event.color,
         });
       } else if (isEventType(event, 'channel.chat.message_delete')) {
-        remove(event.event.message_id, event.event.target_user_name);
+        remove(event.event.message_id);
       } else if (isEventType(event, 'channel.follow')) {
         append({
           message: `${event.event.user_name} is now FOLLOWING!`,
@@ -244,13 +317,14 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
         if (event.event.user_input) {
           message += ` saying "${event.event.user_input}"`;
         }
-        append({ message });
+        append({ id: event.event.id, message });
       } else if (isEventType(event, 'channel.channel_points_custom_reward_redemption.update')) {
         let message = `[${event.event.status}] ${event.event.user_name} updated "${event.event.reward.title}" (${event.event.reward.cost})`;
         if (event.event.user_input) {
           message += ` saying "${event.event.user_input}"`;
         }
-        append({ message });
+        // append({ message });
+        update(event.event.id, message);
       } else if (isEventType(event, 'channel.channel_points_automatic_reward_redemption.add')) {
         let message = `${event.event.user_name} just redeemed "${event.event.reward.type}" (${event.event.reward.channel_points})`;
         if (event.event.message) {

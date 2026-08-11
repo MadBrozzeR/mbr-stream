@@ -36,30 +36,36 @@ export const MessageRow = newComponent('div.message_row', function (row, { messa
   this.host.styles.add('message-row', STYLES);
   const emotes: Array<ReturnType<typeof Emote>> = [];
 
-  for (let index = 0 ; index < message.fragments.length ; ++index) {
-    const fragment = message.fragments[index];
+  function render(message: ChatMessageEvent) {
+    row.clear();
 
-    switch (fragment?.type) {
-      case 'text':
-      case 'cheermote':
-      case 'mention':
-        row.dom('span.message_row--text').params({ innerText: fragment.text });
-        break;
-      case 'emote':
-        if (fragment.emote) {
-          const emote = row.dom(Emote, {
-            id: fragment.emote.id,
-            alt: fragment.text,
-            className: 'message_row--emote',
-          });
-          if (scaleEmotesFor) {
-            emote.splux.node.classList.add('message_row--emote-scaled');
+    for (let index = 0 ; index < message.fragments.length ; ++index) {
+      const fragment = message.fragments[index];
+
+      switch (fragment?.type) {
+        case 'text':
+        case 'cheermote':
+        case 'mention':
+          row.dom('span.message_row--text').params({ innerText: fragment.text });
+          break;
+        case 'emote':
+          if (fragment.emote) {
+            const emote = row.dom(Emote, {
+              id: fragment.emote.id,
+              alt: fragment.text,
+              className: 'message_row--emote',
+            });
+            if (scaleEmotesFor) {
+              emote.splux.node.classList.add('message_row--emote-scaled');
+            }
+            emotes.push(emote);
           }
-          emotes.push(emote);
-        }
-        break;
+          break;
+      }
     }
   }
+
+  render(message);
 
   if (scaleEmotesFor) {
     setTimeout(function () {
@@ -74,6 +80,12 @@ export const MessageRow = newComponent('div.message_row', function (row, { messa
       emotes.forEach(function (emote) {
         emote.setAnimation(animation);
       });
+    },
+    setText(message: ChatMessageEvent) {
+      render(message);
+    },
+    remove() {
+      row.remove();
     },
   };
 });

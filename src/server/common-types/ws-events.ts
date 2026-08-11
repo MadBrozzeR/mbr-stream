@@ -1,5 +1,5 @@
 import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
-import type { GetClipsResponse, GetCustomRewardResponse } from '../types';
+import type { GetClipsResponse, GetCustomRewardResponse, UpdateRedemptionStatusRequest, UpdateRedemptionStatusResponse } from '../types';
 
 type Chatter = {
   id: string;
@@ -104,6 +104,10 @@ export type WSIncomeEventParams = {
   'get-channel-rewards': {
     request: void;
     response: GetCustomRewardResponse['data'];
+  };
+  'update-custom-reward': {
+    request: { id: string; reward_id: string; status: UpdateRedemptionStatusRequest['status'] };
+    response: UpdateRedemptionStatusResponse;
   };
 };
 

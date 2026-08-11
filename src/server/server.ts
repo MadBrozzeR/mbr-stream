@@ -173,6 +173,17 @@ const incomingMessageProcessor: {
     const rewards = await api.ChannelPoints.getCustomReward({ broadcaster_id: userInfo.id });
     return rewards.data;
   },
+
+  async 'update-custom-reward'({ payload }) {
+    const userInfo = await getUserInfo();
+    const reward = await api.ChannelPoints.updateRedemptionStatus({
+      id: payload.id,
+      reward_id: payload.reward_id,
+      broadcaster_id: userInfo.id,
+      status: payload.status,
+    });
+    return reward;
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {
