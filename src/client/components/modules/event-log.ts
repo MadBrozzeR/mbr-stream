@@ -2,7 +2,7 @@ import type { BadgeData } from '@common-types/ws-events';
 import { ComponentParams, Host, newComponent } from '/@client/splux-host';
 import type { ChatMessageEvent } from '/@client/type';
 import { isCast } from '/@client/utils/broadcaster';
-import { isEventType } from '/@client/utils/utils';
+import { isEventType, isKeyOf } from '/@client/utils/utils';
 import { MessageRow } from '../basic/message-row';
 import { UserInfo, UserName } from '../basic/user-name';
 import { ModuleBox } from '../basic/module-box';
@@ -68,6 +68,34 @@ const STYLES = {
         textDecoration: 'line-through',
       },
     },
+
+    '--action': {
+      '_reward_fulfill': {
+        ':before': {
+          display: 'block',
+          content: '"✓"'
+        },
+
+        display: 'inline-block',
+        width: '1em',
+        height: '1em',
+        borderRadius: '2px',
+        backgroundColor: '#00ee00',
+      },
+
+      '_reward_cancel': {
+        ':before': {
+          display: 'block',
+          content: '"✕"'
+        },
+
+        display: 'inline-block',
+        width: '1em',
+        height: '1em',
+        borderRadius: '2px',
+        backgroundColor: '#ee0000',
+      },
+    },
   },
 };
 
@@ -79,15 +107,35 @@ const TEST_MESSAGE: ChatMessageEvent = {
 const INFO_USER = '[INFO]';
 const EMOTE_SCALE_TIMEOUT = 3000;
 
+const ACTIONS = {
+  rewardFulfill: {
+    className: 'event_log--action_reward_fulfill',
+    action: function (host: Host, data: { id: string; reward_id: string }) {
+      host.send({
+        action: 'update-custom-reward',
+        payload: { reward_id: data.reward_id, id: data.id, status: 'FULFILLED' },
+      });
+    },
+  },
+  rewardCancel: {
+    className: 'event_log--action_reward_cancel',
+    action: function (host: Host, data: { id: string; reward_id: string }) {
+      host.send({
+        action: 'update-custom-reward',
+        payload: { reward_id: data.reward_id, id: data.id, status: 'CANCELED' },
+      });
+    },
+  },
+  removeMessage: {
+    className: 'event_log--action_remove_message',
+    action: function (host: Host, data: { id: string }) {
+      console.log(host, data);
+    },
+  },
+};
+
 type Actions = {
-  rewardFulfill?: {
-    id: string;
-    reward_id: string;
-  };
-  rewardCancel?: {
-    id: string;
-    reward_id: string;
-  };
+  [K in keyof typeof ACTIONS]?: Parameters<(typeof ACTIONS)[K]['action']>[1];
 };
 
 type LogEntryMode = {
@@ -114,10 +162,20 @@ type EntryActionsParams = {
   onClick: <T extends keyof Actions>(type: T, data: Actions[T]) => void;
 };
 
-const EntryActions = newComponent('div.event_log--entry_actions', function (_, {
+const EntryActions = newComponent('span.event_log--entry_actions', function (_, {
   actions, onClick
 }: EntryActionsParams) {
-  console.log(actions, onClick);
+  // console.log(actions, onClick);
+  for (const type in actions) {
+    if (isKeyOf(type, ACTIONS) && ACTIONS[type]) {
+      this.dom('span').params({
+        className: ACTIONS[type].className,
+        onclick() {
+          onClick(type, actions[type]);
+        },
+      });
+    }
+  }
 });
 
 const LogEntry = newComponent('div.event_log--entry', function (
@@ -191,6 +249,13 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   let append = function (params: LogEntryParams) { console.log(params) };
 
+  function handleAction <K extends keyof Actions>(type: K, data: Actions[K]) {
+    if (data) {
+      const handler = ACTIONS[type].action as (host: Host, data: Actions[K]) => void;
+      handler(host, data);
+    }
+  }
+
   function remove(id: string) {
     if (messages[id]) {
       messages[id].remove();
@@ -247,7 +312,11 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
     this.dom('div.event_log--log', function (log) {
       append = function (params) {
-        const entry = log.dom(LogEntry, { ...params, onUserClick(user) { userModal.open(user) } });
+        const entry = log.dom(LogEntry, {
+          ...params,
+          onUserClick(user) { userModal.open(user) },
+          onActionClick: handleAction,
+        });
         params.id && (messages[params.id] = entry);
         log.node.scrollTo(0, log.node.scrollHeight);
       };
@@ -317,9 +386,13 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
         if (event.event.user_input) {
           message += ` saying "${event.event.user_input}"`;
         }
-        append({ id: event.event.id, message });
+        const actions = {
+          rewardFulfill: { id: event.event.id, reward_id: event.event.reward.id },
+          rewardCancel: { id: event.event.id, reward_id: event.event.reward.id },
+        };
+        append({ id: event.event.id, message, actions });
       } else if (isEventType(event, 'channel.channel_points_custom_reward_redemption.update')) {
-        let message = `[${event.event.status}] ${event.event.user_name} updated "${event.event.reward.title}" (${event.event.reward.cost})`;
+        let message = `[${event.event.status}] ${event.event.user_name} just redeemed (updated) "${event.event.reward.title}" (${event.event.reward.cost})`;
         if (event.event.user_input) {
           message += ` saying "${event.event.user_input}"`;
         }
