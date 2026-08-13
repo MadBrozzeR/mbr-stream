@@ -69,31 +69,49 @@ const STYLES = {
       },
     },
 
+    '--entry_actions': {
+      verticalAlign: 'middle',
+      display: 'inline-block',
+      marginRight: '2px',
+    },
+
     '--action': {
+      ':before': {
+        display: 'block',
+        lineHeight: '1em',
+        textAlign: 'center',
+        color: 'white',
+      },
+
+      display: 'inline-block',
+      width: '1em',
+      height: '1em',
+      borderRadius: '2px',
+      margin: '2px',
+      cursor: 'pointer',
+
       '_reward_fulfill': {
         ':before': {
-          display: 'block',
-          content: '"✓"'
+          content: '"\u2714"', // \u2713
         },
 
-        display: 'inline-block',
-        width: '1em',
-        height: '1em',
-        borderRadius: '2px',
-        backgroundColor: '#00ee00',
+        backgroundColor: '#00aa00',
       },
 
       '_reward_cancel': {
         ':before': {
-          display: 'block',
-          content: '"✕"'
+          content: '"\u2718"', // \u2717
         },
 
-        display: 'inline-block',
-        width: '1em',
-        height: '1em',
-        borderRadius: '2px',
-        backgroundColor: '#ee0000',
+        backgroundColor: '#aa0000',
+      },
+
+      '_remove_message': {
+        ':before': {
+          content: '"\u2718"', // \u2717
+        },
+
+        backgroundColor: '#aa0000',
       },
     },
   },
@@ -107,10 +125,21 @@ const TEST_MESSAGE: ChatMessageEvent = {
 const INFO_USER = '[INFO]';
 const EMOTE_SCALE_TIMEOUT = 3000;
 
-const ACTIONS = {
+type EventActionPayload = {
+  rewardFulfill: { id: string; reward_id: string; };
+  rewardCancel: { id: string; reward_id: string; };
+  removeMessage: { id: string };
+};
+
+type EventActionConfig<K extends keyof EventActionPayload> = {
+  className: string;
+  action: (host: Host, data: EventActionPayload[K]) => void;
+};
+
+const ACTIONS: { [K in keyof EventActionPayload]: EventActionConfig<K> } = {
   rewardFulfill: {
     className: 'event_log--action_reward_fulfill',
-    action: function (host: Host, data: { id: string; reward_id: string }) {
+    action(host, data) {
       host.send({
         action: 'update-custom-reward',
         payload: { reward_id: data.reward_id, id: data.id, status: 'FULFILLED' },
@@ -119,7 +148,7 @@ const ACTIONS = {
   },
   rewardCancel: {
     className: 'event_log--action_reward_cancel',
-    action: function (host: Host, data: { id: string; reward_id: string }) {
+    action(host, data) {
       host.send({
         action: 'update-custom-reward',
         payload: { reward_id: data.reward_id, id: data.id, status: 'CANCELED' },
@@ -128,7 +157,7 @@ const ACTIONS = {
   },
   removeMessage: {
     className: 'event_log--action_remove_message',
-    action: function (host: Host, data: { id: string }) {
+    action(host, data) {
       console.log(host, data);
     },
   },
@@ -169,7 +198,7 @@ const EntryActions = newComponent('span.event_log--entry_actions', function (_, 
   for (const type in actions) {
     if (isKeyOf(type, ACTIONS) && ACTIONS[type]) {
       this.dom('span').params({
-        className: ACTIONS[type].className,
+        className: 'event_log--action ' + ACTIONS[type].className,
         onclick() {
           onClick(type, actions[type]);
         },
@@ -251,8 +280,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
 
   function handleAction <K extends keyof Actions>(type: K, data: Actions[K]) {
     if (data) {
-      const handler = ACTIONS[type].action as (host: Host, data: Actions[K]) => void;
-      handler(host, data);
+      ACTIONS[type].action(host, data);
     }
   }
 
@@ -341,6 +369,9 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
   function update (id: string, message: string | ChatMessageEvent) {
     if (messages[id]) {
       messages[id].update(message);
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -396,8 +427,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
         if (event.event.user_input) {
           message += ` saying "${event.event.user_input}"`;
         }
-        // append({ message });
-        update(event.event.id, message);
+        update(event.event.id, message) || append({ message });
       } else if (isEventType(event, 'channel.channel_points_automatic_reward_redemption.add')) {
         let message = `${event.event.user_name} just redeemed "${event.event.reward.type}" (${event.event.reward.channel_points})`;
         if (event.event.message) {
