@@ -184,6 +184,28 @@ const incomingMessageProcessor: {
     });
     return reward;
   },
+
+  async 'remove-message'({ payload }) {
+    const userInfo = await getUserInfo();
+    try {
+      await api.Moderation.deleteChatMessages({
+        broadcaster_id: userInfo.id,
+        moderator_id: userInfo.id,
+        message_id: payload.id,
+      });
+      return { result: true, reason: '' };
+    } catch (error) {
+      console.log(error);
+      const reason = (
+        error instanceof Object &&
+        'data' in error &&
+        error.data instanceof Object &&
+        'message' in error.data &&
+        typeof error.data.message === 'string'
+      ) ? error.data.message : '';
+      return { result: false, reason: reason };
+    }
+  },
 }
 
 function processIncomingMessage<T extends WSIncomeEventActions> (message: WSIncomeEvent<T>) {

@@ -109,6 +109,10 @@ export type WSIncomeEventParams = {
     request: { id: string; reward_id: string; status: UpdateRedemptionStatusRequest['status'] };
     response: UpdateRedemptionStatusResponse;
   };
+  'remove-message': {
+    request: { id: string };
+    response: { result: boolean; reason: string; };
+  };
 };
 
 export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEventParams> = {

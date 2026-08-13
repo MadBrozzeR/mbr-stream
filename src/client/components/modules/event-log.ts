@@ -158,7 +158,10 @@ const ACTIONS: { [K in keyof EventActionPayload]: EventActionConfig<K> } = {
   removeMessage: {
     className: 'event_log--action_remove_message',
     action(host, data) {
-      console.log(host, data);
+      host.send({
+        action: 'remove-message',
+        payload: { id: data.id },
+      });
     },
   },
 };
