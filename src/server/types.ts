@@ -784,6 +784,130 @@ export type UpdateRedemptionStatusResponse = {
   }>;
 };
 
+export type GetBannedUsersRequest = {
+  broadcaster_id: string;
+  user_id?: string;
+  first?: number;
+  after?: string;
+  before?: string;
+};
+
+export type GetBannedUsersResponse = {
+  data: Array<{
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    expires_at: string;
+    created_at: string;
+    reason: string;
+    moderator_id: string;
+    moderator_login: string;
+    moderator_name: string;
+  }>;
+  pagination: {
+    cursor: string;
+  };
+};
+
+export type BanUserRequestParams = {
+  broadcaster_id: string;
+  moderator_id: string;
+};
+
+export type BanUserRequest = {
+  data: {
+    user_id: string;
+    duration?: number;
+    reason?: string;
+  };
+};
+
+export type BanUserResponse = {
+  data: Array<{
+    broadcaster_id: string;
+    moderator_id: string;
+    user_id: string;
+    created_at: string;
+    end_time: string;
+  }>;
+};
+
+export type UnbanUserRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  user_id: string;
+};
+
+export type UnbanUserResponse = void;
+
+export type GetUnbanRequestsRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  status: string;
+  user_id?: string;
+  after?: string;
+  first?: number;
+};
+
+export type GetUnbanResponsesRequest = {
+  data: Array<{
+    id: string;
+    broadcaster_id: string;
+    broadcaster_name: string;
+    broadcaster_login: string;
+    moderator_id: string;
+    moderator_login: string;
+    moderator_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    text: string;
+    status: 'pending' | 'approved' | 'denied' | 'acknowledged' | 'canceled';
+    created_at: string;
+    resolved_at: string;
+    resolution_text: string;
+  }>;
+  pagination: {
+    cursor: string;
+  };
+};
+
+export type ResolveUnbanRequestsRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  unban_request_id: string;
+  status: 'approved' | 'denied';
+  resolution_text?: string;
+};
+
+export type ResolveUnbanResponsesRequest = {
+  data: Array<{
+    id: string;
+    broadcaster_id: string;
+    broadcaster_name: string;
+    broadcaster_login: string;
+    moderator_id: string;
+    moderator_login: string;
+    moderator_name: string;
+    user_id: string;
+    user_login: string;
+    user_name: string;
+    text: string;
+    status: 'approved' | 'denied';
+    created_at: string;
+    resolved_at: string;
+    resolution_text: string;
+  }>;
+};
+
+export type DeleteChatMessagesRequest = {
+  broadcaster_id: string;
+  moderator_id: string;
+  message_id?: string;
+};
+
+export type DeleteChatMessagesResponse = void;
+
 /*
 MACRO
 :s/ //gIexport type ARequest = {};hiVkkkyPjjjjj:s/Request/Response/^wwyiwjjop^~:s/Response//>>>>A(params: Types.m18k02wyiw`1pa) {  return userApiRequest<Types.m15k02wyiw`1pa>();},0xx

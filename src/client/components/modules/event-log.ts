@@ -386,6 +386,7 @@ export const EventLog = newComponent('div.event_log', function (_, { id }: Param
           badges: data.payload.badges,
           message: event.event.message,
           userColor: event.event.color,
+          actions: { removeMessage: { id: event.event.message_id } },
         });
       } else if (isEventType(event, 'channel.chat.message_delete')) {
         remove(event.event.message_id);

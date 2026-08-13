@@ -163,6 +163,36 @@ const api = {
       );
     },
   },
+  Moderation: {
+    getBannedUsers(params: Types.GetBannedUsersRequest) {
+      // moderation:read or moderator:manage:banned_users
+      return userApiRequest<Types.GetBannedUsersResponse>([API.MODERATION, '/banned', params]);
+    },
+    banUser({ broadcaster_id, moderator_id, ...params }: Types.BanUserRequestParams & Types.BanUserRequest) {
+      // moderator:manage:banned_users
+      return userApiRequest<Types.BanUserResponse>(
+        [API.MODERATION, '/bans', { broadcaster_id, moderator_id }],
+        'POST',
+        params
+      );
+    },
+    unbanUser(params: Types.UnbanUserRequest) {
+      // moderator:manage:banned_users
+      return userApiRequest<Types.UnbanUserResponse>([API.MODERATION, '/bans', params], 'DELETE');
+    },
+    getUnbansRequest(params: Types.GetUnbanRequestsRequest) {
+      // moderator:read:unban_requests or moderator:manage:unban_requests
+      return userApiRequest<Types.GetUnbanResponsesRequest>([API.MODERATION, '/unban_requests', params]);
+    },
+    resolveUnbansRequest(params: Types.ResolveUnbanRequestsRequest) {
+      // moderator:manage:unban_requests
+      return userApiRequest<Types.ResolveUnbanResponsesRequest>([API.MODERATION, '/unban_requests', params], 'PATCH');
+    },
+    deleteChatMessages(params: Types.DeleteChatMessagesRequest) {
+      // moderator:manage:chat_messages
+      return userApiRequest<Types.DeleteChatMessagesResponse>([API.MODERATION, '/chat', params], 'DELETE');
+    },
+  },
   Chat: {
     getChatters(params: Types.GetChattersRequest) {
       return userApiRequest<Types.GetChattersResponse>([`${API.CHAT}/chatters`, params]);
@@ -286,6 +316,7 @@ export class TwitchApi<S extends ETypes.Scope> {
     return `${API.AUTHORIZE}?${params}`;
   }
 
+  Moderation = api.Moderation;
   Chat = api.Chat;
   Clips = api.Clips;
   Channels = api.Channels;
@@ -305,10 +336,13 @@ const apiInstance = new TwitchApi({
     'channel:manage:broadcast',
     'moderator:read:followers',
     'moderator:read:chatters',
+    'moderator:manage:banned_users',
+    'moderator:manage:unban_requests',
+    'moderator:manage:chat_messages',
+    'moderator:manage:shoutouts',
     'user:read:chat',
     'user:write:chat',
     'channel:manage:guest_star',
-    'moderator:manage:shoutouts',
     'channel:manage:redemptions',
     'bits:read',
   ],
