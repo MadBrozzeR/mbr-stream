@@ -242,3 +242,28 @@ export function debounce<T extends Array<any>> (delay: number, callback: (...arg
     }, delay);
   }
 }
+
+export function wait (delay: number) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, delay);
+  });
+}
+
+export function useAppearator (element: HTMLElement, delay: number, className: string) {
+  element.style.setProperty('display', 'none');
+
+  return {
+    show() {
+      element.style.removeProperty('display');
+      requestAnimationFrame(function () {
+        element.classList.add(className);
+      });
+    },
+    hide() {
+      element.classList.remove(className);
+      setTimeout(function () {
+        element.style.setProperty('display', 'none');
+      }, delay);
+    },
+  };
+}

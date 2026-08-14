@@ -1,7 +1,7 @@
 import type { Request } from 'mbr-serv-request';
 import { requestUserGrantToken } from './auth';
 import { config } from './config';
-import { getGroupFromBadges, getStringRecord, getUserBadges, isEventSubMessageType, isEventSubNotificationType, isKeyOf } from './utils';
+import { getActionResponse, getGroupFromBadges, getStringRecord, getUserBadges, isEventSubMessageType, isEventSubNotificationType, isKeyOf } from './utils';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
@@ -174,37 +174,40 @@ const incomingMessageProcessor: {
     return rewards.data;
   },
 
-  async 'update-custom-reward'({ payload }) {
+  async 'create-custom-reward'({ payload }) {
     const userInfo = await getUserInfo();
-    const reward = await api.ChannelPoints.updateRedemptionStatus({
+    return getActionResponse(api.ChannelPoints.createCustomRewards({
+      broadcaster_id: userInfo.id,
+      ...payload,
+    }));
+  },
+
+  async 'update-custom-reward'({ payload: { id, ...payload } }) {
+    const userInfo = await getUserInfo();
+    return getActionResponse(api.ChannelPoints.updateCustomReward({
+      broadcaster_id: userInfo.id,
+      id,
+      ...payload,
+    }));
+  },
+
+  async 'update-custom-reward-redemption'({ payload }) {
+    const userInfo = await getUserInfo();
+    return getActionResponse(api.ChannelPoints.updateRedemptionStatus({
       id: payload.id,
       reward_id: payload.reward_id,
       broadcaster_id: userInfo.id,
       status: payload.status,
-    });
-    return reward;
+    }));
   },
 
   async 'remove-message'({ payload }) {
     const userInfo = await getUserInfo();
-    try {
-      await api.Moderation.deleteChatMessages({
-        broadcaster_id: userInfo.id,
-        moderator_id: userInfo.id,
-        message_id: payload.id,
-      });
-      return { result: true, reason: '' };
-    } catch (error) {
-      console.log(error);
-      const reason = (
-        error instanceof Object &&
-        'data' in error &&
-        error.data instanceof Object &&
-        'message' in error.data &&
-        typeof error.data.message === 'string'
-      ) ? error.data.message : '';
-      return { result: false, reason: reason };
-    }
+    return getActionResponse(api.Moderation.deleteChatMessages({
+      broadcaster_id: userInfo.id,
+      moderator_id: userInfo.id,
+      message_id: payload.id,
+    }));
   },
 }
 

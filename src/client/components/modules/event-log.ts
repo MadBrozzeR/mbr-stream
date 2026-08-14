@@ -141,7 +141,7 @@ const ACTIONS: { [K in keyof EventActionPayload]: EventActionConfig<K> } = {
     className: 'event_log--action_reward_fulfill',
     action(host, data) {
       host.send({
-        action: 'update-custom-reward',
+        action: 'update-custom-reward-redemption',
         payload: { reward_id: data.reward_id, id: data.id, status: 'FULFILLED' },
       });
     },
@@ -150,7 +150,7 @@ const ACTIONS: { [K in keyof EventActionPayload]: EventActionConfig<K> } = {
     className: 'event_log--action_reward_cancel',
     action(host, data) {
       host.send({
-        action: 'update-custom-reward',
+        action: 'update-custom-reward-redemption',
         payload: { reward_id: data.reward_id, id: data.id, status: 'CANCELED' },
       });
     },

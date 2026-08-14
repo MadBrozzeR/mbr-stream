@@ -34,6 +34,9 @@ const STYLES = {
       width: '100px',
       fontSize: '1em',
       lineHeight: '30px',
+      whiteSpace: 'nowrap',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
     },
 
     '--row_content': {
@@ -200,7 +203,7 @@ const FormRow = newComponent('label.form--row', function (_, { label, setInterfa
   label: string,
   setInterface: (content: Splux<HTMLSpanElement, Host>) => InputInterface
 }) {
-  this.dom('span.form--row_label').params({ innerText: label });
+  this.dom('span.form--row_label').params({ innerText: label, title: label });
   const content = this.dom('span.form--row_content');
   const ifc = setInterface(content);
 
@@ -216,6 +219,7 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
   const inputs: Record<string, RowInterface> = {};
   let searchInput: Splux<HTMLInputElement, Host> | null = null;
   let currentName = '';
+  let initialValues: Values = {};
 
   const curtain = this.dom('div.form--curtain', function (curtain) {
     function show() {
@@ -306,13 +310,15 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
       const field = fields[name];
 
       if (!field) continue;
+      const initialValue = field.value;
+      initialValues[name] = initialValue;
 
       if (field.type === 'select') {
         inputs[name] = this.dom(FormRow, {
           label: field.label || name,
           setInterface(content) {
             const dom = content.dom('span.form--select', function () {
-              const input = this.dom('input.form--input.form--input-hidden').params({ value: fields[name]?.value });
+              const input = this.dom('input.form--input.form--input-hidden').params({ value: initialValue, name });
               const display = this.dom('span.form--select_display').params({
                 onclick() {
                   curtain.getOptions(name, '');
@@ -343,7 +349,8 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
           label: field.label || name,
           setInterface(content) {
             const input = content.dom('input.form--input').params({
-              value: field.value,
+              value: initialValue,
+              name,
               oninput() {
                 onChange && onChange(name, input.node.value);
               },
@@ -392,11 +399,14 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
   }
 
   return {
-    get() {
+    get(onlyChanged = false) {
       const result: Values<string> = {};
 
       iterateInputs(inputs, function (input, name) {
-        result[name] = input.ifc.get();
+        const value = input.ifc.get();
+        if (!onlyChanged || value !== initialValues[name]) {
+          result[name] = value;
+        }
       });
 
       return result;
@@ -408,6 +418,11 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
           input.ifc.set(values[name]);
         }
       });
+    },
+
+    initialize(values: Values) {
+      initialValues = values;
+      this.set(initialValues);
     },
   };
 });

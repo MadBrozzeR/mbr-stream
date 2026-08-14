@@ -1,4 +1,5 @@
 import { newComponent } from '/@client/splux-host';
+import { useAppearator } from '/@client/utils/utils';
 
 const FLOATER_SIZE = '16px';
 
@@ -39,16 +40,16 @@ const STYLES = {
     top: 0,
     bottom: 0,
     left: 0,
-    width: '0%',
+    width: '100%',
     padding: '24px',
     backgroundColor: 'rgba(50 50 50 / 80%)',
     opacity: 0,
-    transition: '.2s opacity ease-in-out, .2s width step-end',
+    transition: '.2s opacity ease-in-out',
+    zIndex: 1,
 
     '-visible': {
       opacity: 1,
-      width: '100%',
-      transition: '.2s opacity ease-in-out, .2s width step-start',
+      transition: '.2s opacity ease-in-out',
     },
 
     '--content': {
@@ -83,14 +84,15 @@ const STYLES = {
   },
 };
 
-export const LoaderCover = newComponent('div.loader_cover', function (loader) {
+export const LoaderCover = newComponent('div.loader_cover', function () {
   this.host.styles.add('loader-cover', STYLES);
   this.dom('div.loader_cover--content');
+  const appearator = useAppearator(this.node, 200, 'loader_cover-visible');
 
   return function<T> (promise: Promise<T>) {
-    loader.node.classList.add('loader_cover-visible');
+    appearator.show();
     promise.finally(function () {
-      loader.node.classList.remove('loader_cover-visible');
+      appearator.hide();
     });
     return promise;
   }

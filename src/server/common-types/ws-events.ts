@@ -1,5 +1,5 @@
 import type { EventSubMessageMap, MessageFragment } from './eventsub-types';
-import type { GetClipsResponse, GetCustomRewardResponse, UpdateRedemptionStatusRequest, UpdateRedemptionStatusResponse } from '../types';
+import type * as Types from '../types';
 
 type Chatter = {
   id: string;
@@ -38,6 +38,8 @@ export type UserStore = {
   image: string;
   description: string;
 };
+
+export type ActionResult<D> = { result: true; data: D } | { result: false; reason: string };
 
 export type ChatCommand<T extends string = string> = {
   cmd: T;
@@ -95,7 +97,7 @@ export type WSIncomeEventParams = {
   };
   'get-clips': {
     request: { broadcaster: string; };
-    response: GetClipsResponse['data'];
+    response: Types.GetClipsResponse['data'];
   };
   'show-clip': {
     request: { id: string, duration: number; };
@@ -103,15 +105,23 @@ export type WSIncomeEventParams = {
   };
   'get-channel-rewards': {
     request: void;
-    response: GetCustomRewardResponse['data'];
+    response: Types.GetCustomRewardResponse['data'];
   };
+  'create-custom-reward': {
+    request: Types.CreateCustomRewardsRequest;
+    response: ActionResult<Types.CreateCustomRewardsResponse>;
+  },
   'update-custom-reward': {
-    request: { id: string; reward_id: string; status: UpdateRedemptionStatusRequest['status'] };
-    response: UpdateRedemptionStatusResponse;
+    request: Types.UpdateCustomRewardRequest & { id: string };
+    response: ActionResult<Types.UpdateCustomRewardResponse>;
+  },
+  'update-custom-reward-redemption': {
+    request: { id: string; reward_id: string; status: Types.UpdateRedemptionStatusRequest['status'] };
+    response: ActionResult<Types.UpdateRedemptionStatusResponse>;
   };
   'remove-message': {
     request: { id: string };
-    response: { result: boolean; reason: string; };
+    response: ActionResult<Types.DeleteChatMessagesResponse>;
   };
 };
 
@@ -126,4 +136,5 @@ export type WSIncomeEvent<T extends keyof WSIncomeEventParams = keyof WSIncomeEv
 
 export type WSIncomeEventActions = keyof WSIncomeEventParams;
 
+export type WSIncomeEventRequest<T extends WSIncomeEventActions> = WSIncomeEventParams[T]['request'];
 export type WSIncomeEventResponse<T extends WSIncomeEventActions> = Promise<WSIncomeEventParams[T]['response']>;

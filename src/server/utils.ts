@@ -5,7 +5,7 @@ import { Logger } from 'mbr-logger';
 import type { RequestParams, RequestUrl, RESTMethod, Notification, CommandGroup } from './types';
 import { config } from './config';
 import type { BadgeInfo, EventSubMessageMap, EventSubNotification, EventSubType } from './common-types/eventsub-types';
-import type { BadgeData, BadgeStore } from './common-types/ws-events';
+import type { ActionResult, BadgeData, BadgeStore } from './common-types/ws-events';
 
 export function jsonToUrlEncoded<D extends RequestParams> (data: D) {
   let result = '';
@@ -252,4 +252,21 @@ export function getGroupFromBadges (badges: BadgeInfo[]) {
   });
 
   return group;
+}
+
+export function getActionResponse <R>(promise: Promise<R>): Promise<ActionResult<R>> {
+  return promise
+    .then(function (data) {
+      return { result: true as const, data };
+    })
+    .catch(function (error) {
+      const reason: string = (
+        error instanceof Object &&
+        'data' in error &&
+        error.data instanceof Object &&
+        'message' in error.data &&
+        typeof error.data.message === 'string'
+      ) ? error.data.message : '';
+      return { result: false as const, reason };
+    });
 }
