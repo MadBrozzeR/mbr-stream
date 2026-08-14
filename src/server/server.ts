@@ -401,6 +401,7 @@ export async function server (request: Request) {
           const result = await processIncomingMessage(data);
 
           if (result !== undefined) {
+            request.headers['Content-Type'] = 'application/json';
             request.send(JSON.stringify(result));
           } else {
             request.status = 204;

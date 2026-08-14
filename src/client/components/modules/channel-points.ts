@@ -1,4 +1,4 @@
-import { WSIncomeEventRequest, WSIncomeEventResponse } from '@common-types/ws-events';
+import { ActionResult, WSIncomeEventRequest, WSIncomeEventResponse } from '@common-types/ws-events';
 import { ModuleBox, ModuleBoxParams } from '../basic/module-box';
 import { newComponent } from '/@client/splux-host';
 import { Promised } from '/@client/utils/types';
@@ -9,7 +9,23 @@ import { Values } from '/@client/type';
 
 const STYLES = {
   '.channel_points': {
+    '--wrapper': {
+      height: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+    },
+
+    '--content': {
+      flex: 1,
+      overflowY: 'auto',
+    },
+
     '--content_row': {
+      ':hover': {
+        textDecoration: 'underline',
+      },
+
+      cursor: 'pointer',
       display: 'flex',
       width: '100%',
     },
@@ -25,8 +41,31 @@ const STYLES = {
       overflow: 'hidden',
     },
 
+    '--buttons': {
+      marginBottom: '8px',
+    },
+
     '--button': {
+      display: 'inline-block',
+      marginRight: '4px',
+      cursor: 'pointer',
+      fontSize: '1.6em',
+      lineHeight: '1.2em',
+      width: '1.2em',
+      height: '1.2em',
+      textAlign: 'center',
+
       '_add': {
+        ':before': {
+          display: 'block',
+          content: '"+"',
+        },
+      },
+      '_refresh': {
+        ':before': {
+          display: 'block',
+          content: '"\u21ba"',
+        },
       },
     },
   },
@@ -104,7 +143,11 @@ function getValuesFromUpdateResponse(data: PointsResponse[number]): Values {
     }
 }
 
-const Editor = newComponent(Modal.tag, function () {
+type EditorParams = {
+  onSuccess?: () => void;
+};
+
+const Editor = newComponent(Modal.tag, function (_, { onSuccess }: EditorParams) {
   const host = this.host;
   const modal = Modal.call(this, this, {});
   let currentId = '';
@@ -123,18 +166,25 @@ const Editor = newComponent(Modal.tag, function () {
       save: {
         action() {
           const values = form.get(true);
+          let promise: Promise<ActionResult<unknown>> | null = null;
           if (currentId) {
             const payload = getUpdatePayloadFromValues(values);
-            modal.loader(host.send({ action: 'update-custom-reward', payload: { id: currentId, ...payload, } }));
-            // console.log(payload);
+            promise = host.send({ action: 'update-custom-reward', payload: { id: currentId, ...payload, } });
           } else {
             const payload = getUpdatePayloadFromValues({ ...INITIAL_VALUES,  ...values });
             if (isDefined(payload.cost) && isDefined(payload.title)) {
               const title = payload.title;
               const cost = payload.cost;
-              modal.loader(host.send({ action: 'create-custom-reward', payload: { ...payload, title, cost, } }));
-              // console.log({ ...payload, title, cost, });
+              promise = host.send({ action: 'create-custom-reward', payload: { ...payload, title, cost, } });
             }
+          }
+          if (promise) {
+            modal.loader(promise).then(function ({ result }) {
+              if (result) {
+                modal.close();
+                onSuccess && onSuccess();
+              }
+            });
           }
         },
       },
@@ -178,7 +228,20 @@ export const ChannelPoints = newComponent('div.channel_points', function (_, { i
       });
     }
 
-    const editor = this.dom(Editor);
+    const editor = this.dom(Editor, { onSuccess: refresh });
+
+    this.dom('div.channel_points--buttons', function () {
+      this.dom('span.channel_points--button.channel_points--button_add').params({
+        onclick() {
+          editor.open();
+        },
+      });
+      this.dom('span.channel_points--button.channel_points--button_refresh').params({
+        onclick() {
+          refresh();
+        },
+      });
+    });
 
     const content = this.dom('div.channel_points--content', function (content) {
       return {
@@ -198,14 +261,6 @@ export const ChannelPoints = newComponent('div.channel_points', function (_, { i
           });
         }
       };
-    });
-    this.dom('div.channel_points--buttons', function () {
-      this.dom('div.channel_points--button.channel_points--button_add').params({
-        innerText: 'Add',
-        onclick() {
-          editor.open();
-        },
-      });
     });
 
     refresh();
