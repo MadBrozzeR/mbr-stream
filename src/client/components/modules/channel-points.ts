@@ -37,9 +37,9 @@ const INITIAL_VALUES = {
   prompt: '',
   cost: '100',
   background: '', // #451093
-  maxPerStream: '-1',
-  maxPerUser: '-1',
-  cooldown: '-1',
+  maxPerStream: '',
+  maxPerUser: '',
+  cooldown: '',
 };
 
 function getUpdatePayloadFromValues(values: Values) {
@@ -105,7 +105,7 @@ function getValuesFromUpdateResponse(data: PointsResponse[number]): Values {
 }
 
 const Editor = newComponent(Modal.tag, function () {
-  // const host = this.host;
+  const host = this.host;
   const modal = Modal.call(this, this, {});
   let currentId = '';
 
@@ -125,15 +125,15 @@ const Editor = newComponent(Modal.tag, function () {
           const values = form.get(true);
           if (currentId) {
             const payload = getUpdatePayloadFromValues(values);
-            // modal.loader(host.send({ action: 'update-custom-reward', payload: { id: currentId, ...payload, } }));
-            console.log(payload);
+            modal.loader(host.send({ action: 'update-custom-reward', payload: { id: currentId, ...payload, } }));
+            // console.log(payload);
           } else {
-            const payload = getUpdatePayloadFromValues(values);
+            const payload = getUpdatePayloadFromValues({ ...INITIAL_VALUES,  ...values });
             if (isDefined(payload.cost) && isDefined(payload.title)) {
               const title = payload.title;
               const cost = payload.cost;
-              // modal.loader(host.send({ action: 'create-custom-reward', payload: { ...payload, title, cost, } }));
-              console.log({ ...payload, title, cost, });
+              modal.loader(host.send({ action: 'create-custom-reward', payload: { ...payload, title, cost, } }));
+              // console.log({ ...payload, title, cost, });
             }
           }
         },

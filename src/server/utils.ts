@@ -260,6 +260,7 @@ export function getActionResponse <R>(promise: Promise<R>): Promise<ActionResult
       return { result: true as const, data };
     })
     .catch(function (error) {
+      console.log(error);
       const reason: string = (
         error instanceof Object &&
         'data' in error &&
