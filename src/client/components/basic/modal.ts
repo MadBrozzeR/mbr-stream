@@ -4,12 +4,15 @@ import { newComponent } from '/@client/splux-host';
 const STYLES = {
   '.modal': {
     position: 'relative',
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
 
     '--title': {
       display: 'flex',
-      marginBottom: '12px',
       fontSize: '24px',
       gap: '8px',
+      padding: '16px',
     },
 
     '--title_name': {
@@ -25,6 +28,12 @@ const STYLES = {
       alignItems: 'center',
       justifyContent: 'center',
       cursor: 'pointer',
+    },
+
+    '--content': {
+      padding: '16px',
+      overflowY: 'auto',
+      paddingTop: 0,
     },
   },
 };
