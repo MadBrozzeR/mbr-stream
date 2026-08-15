@@ -9,6 +9,7 @@ import { ModuleBox } from '../basic/module-box';
 import { UserModal } from '../basic/user-modal';
 import { ComponentSplux } from '/@client/lib-ref/splux';
 import { Splux } from 'splux';
+import { CHECKMARK_1_HEAVY, CROSS_1_HEAVY } from '/@client/constants';
 
 type Params = {
   id: string;
@@ -92,7 +93,7 @@ const STYLES = {
 
       '_reward_fulfill': {
         ':before': {
-          content: '"\u2714"', // \u2713
+          content: '"' + CHECKMARK_1_HEAVY + '"',
         },
 
         backgroundColor: '#00aa00',
@@ -100,7 +101,7 @@ const STYLES = {
 
       '_reward_cancel': {
         ':before': {
-          content: '"\u2718"', // \u2717
+          content: '"' + CROSS_1_HEAVY + '"',
         },
 
         backgroundColor: '#aa0000',
@@ -108,7 +109,7 @@ const STYLES = {
 
       '_remove_message': {
         ':before': {
-          content: '"\u2718"', // \u2717
+          content: '"' + CROSS_1_HEAVY + '"',
         },
 
         backgroundColor: '#aa0000',

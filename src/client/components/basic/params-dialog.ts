@@ -1,6 +1,7 @@
 import { Splux } from '/@client/lib-ref/splux';
 import { Host, newComponent } from '/@client/splux-host';
 import { Modal } from './modal';
+import { BUCKET, CROSS } from '/@client/constants';
 
 type Values = Record<string, string>;
 
@@ -151,7 +152,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
           }
         }).node;
         this.dom('div.params_dialog--clear_input').params({
-          innerText: '✕',
+          innerText: CROSS,
           onclick() {
             inputs[name] && (inputs[name].value = '');
             onChange && onChange('', name);
@@ -167,7 +168,7 @@ export const ParamsDialog = newComponent(`${Modal.tag}.params_dialog`, function 
       });
 
       onDelete && this.dom('button.params_dialog--delete').params({
-        innerHTML: '&#x1F5D1',
+        innerText: BUCKET,
         onclick(event) {
           event.preventDefault();
           onDelete();

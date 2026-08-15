@@ -3,9 +3,12 @@ import { newComponent } from '/@client/splux-host';
 
 const STYLES = {
   '.modal': {
+    '[open]': {
+      display: 'flex',
+    },
+
     position: 'relative',
     padding: 0,
-    display: 'flex',
     flexDirection: 'column',
 
     '--title': {

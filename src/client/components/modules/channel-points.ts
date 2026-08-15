@@ -6,6 +6,7 @@ import { Modal } from '../basic/modal';
 import { Form } from '../basic/form';
 import { isDefined } from '/@client/utils/utils';
 import { Values } from '/@client/type';
+import { RELOAD } from '/@client/constants';
 
 const STYLES = {
   '.channel_points': {
@@ -64,7 +65,7 @@ const STYLES = {
       '_refresh': {
         ':before': {
           display: 'block',
-          content: '"\u21ba"',
+          content: '"' + RELOAD + '"',
         },
       },
     },
