@@ -6,7 +6,7 @@ import { Modal } from '../basic/modal';
 import { Form } from '../basic/form';
 import { isDefined } from '/@client/utils/utils';
 import { Values } from '/@client/type';
-import { RELOAD } from '/@client/constants';
+import { BUCKET, RELOAD } from '/@client/constants';
 
 const STYLES = {
   '.channel_points': {
@@ -164,7 +164,7 @@ const Editor = newComponent(Modal.tag, function (_, { onSuccess }: EditorParams)
       cooldown: { type: 'text', value: INITIAL_VALUES.cooldown, label: 'global cooldown' },
     },
     buttons: {
-      save: {
+      Save: {
         action() {
           const values = form.get(true);
           let promise: Promise<ActionResult<unknown>> | null = null;
@@ -180,11 +180,26 @@ const Editor = newComponent(Modal.tag, function (_, { onSuccess }: EditorParams)
             }
           }
           if (promise) {
-            modal.loader(promise).then(function ({ result }) {
+            return modal.loader(promise).then(function ({ result }) {
               if (result) {
                 modal.close();
                 onSuccess && onSuccess();
               }
+            });
+          }
+          return;
+        },
+      },
+      [BUCKET]: {
+        type: 'small_red',
+        action() {
+          if (currentId) {
+            modal.loader(host.send({ action: 'remove-custom-reward', payload: { id: currentId } }))
+              .then(function ({ result }) {
+                if (result) {
+                  modal.close();
+                  onSuccess && onSuccess();
+                }
             });
           }
         },

@@ -52,13 +52,21 @@ const STYLES = {
     },
 
     '--button': {
-      flex: 1,
       cursor: 'pointer',
       boxSizing: 'border-box',
       fontSize: '1em',
       height: '1.5em',
       border: '1px solid black',
       borderRadius: '4px',
+
+      '-type_default': {
+        flex: 1,
+      },
+
+      '-type_small_red': {
+        width: '1.5em',
+        backgroundColor: '#faa',
+      },
 
       '-await': {
         ':before': {
@@ -173,7 +181,7 @@ type Field = {
 
 type Button = {
   action?: () => void | Promise<void>;
-  className?: string;
+  type?: 'small_red' | 'default';
 };
 
 type Params = {
@@ -390,8 +398,14 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
             }
           } });
 
-          if (buttonParams.className) {
-            button.node.classList.add(buttonParams.className);
+          switch (buttonParams.type) {
+            case 'small_red':
+              button.node.classList.add('form--button-type_small_red');
+              break;
+            case 'default':
+            case undefined:
+              button.node.classList.add('form--button-type_default');
+              break;
           }
         }
       }

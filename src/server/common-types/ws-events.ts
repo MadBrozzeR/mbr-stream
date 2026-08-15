@@ -115,6 +115,10 @@ export type WSIncomeEventParams = {
     request: Types.UpdateCustomRewardRequest & { id: string };
     response: ActionResult<Types.UpdateCustomRewardResponse>;
   },
+  'remove-custom-reward': {
+    request: { id: string };
+    response: ActionResult<Types.DeleteCustomRewardResponse>;
+  },
   'update-custom-reward-redemption': {
     request: { id: string; reward_id: string; status: Types.UpdateRedemptionStatusRequest['status'] };
     response: ActionResult<Types.UpdateRedemptionStatusResponse>;

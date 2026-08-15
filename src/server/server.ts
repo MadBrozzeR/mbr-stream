@@ -191,6 +191,14 @@ const incomingMessageProcessor: {
     }));
   },
 
+  async 'remove-custom-reward'({ payload }) {
+    const userInfo = await getUserInfo();
+    return getActionResponse(api.ChannelPoints.deleteCustomReward({
+      broadcaster_id: userInfo.id,
+      id: payload.id,
+    }));
+  },
+
   async 'update-custom-reward-redemption'({ payload }) {
     const userInfo = await getUserInfo();
     return getActionResponse(api.ChannelPoints.updateRedemptionStatus({
