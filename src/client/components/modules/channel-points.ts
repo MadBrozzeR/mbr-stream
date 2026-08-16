@@ -80,9 +80,13 @@ const INITIAL_VALUES = {
   maxPerStream: '',
   maxPerUser: '',
   cooldown: '',
+  userInput: '',
+  skipQueue: '',
+  enabled: 'yes',
+  paused: '',
 };
 
-function getUpdatePayloadFromValues(values: Values) {
+function getCreatePayloadFromValues(values: Values) {
   const payload: Partial<WSIncomeEventRequest<'create-custom-reward'>> = {};
   const cost = values['cost'] && parseInt(values['cost'], 10);
   const maxPerStream = values['maxPerStream'] && parseInt(values['maxPerStream'], 10);
@@ -121,6 +125,28 @@ function getUpdatePayloadFromValues(values: Values) {
     }
   }
 
+  if (typeof values['userInput'] === 'string') {
+    payload.is_user_input_required = values['userInput'] === 'yes' ? true : false;
+  }
+
+  if (typeof values['skipQueue'] === 'string') {
+    payload.should_redemptions_skip_request_queue = values['skipQueue'] === 'yes' ? true : false;
+  }
+
+  if (typeof values['enabled'] === 'string') {
+    payload.is_enabled = values['enabled'] === 'yes' ? true : false;
+  }
+
+  return payload;
+}
+
+function getUpdatePayloadFromValues(values: Values) {
+  const payload: Partial<WSIncomeEventRequest<'update-custom-reward'>> = getCreatePayloadFromValues(values);
+
+  if (typeof values['paused'] === 'string') {
+    payload.is_paused = values['paused'] === 'yes' ? true : false;
+  }
+
   return payload;
 }
 
@@ -141,6 +167,10 @@ function getValuesFromUpdateResponse(data: PointsResponse[number]): Values {
       cooldown: data.global_cooldown_setting.is_enabled
         ? data.global_cooldown_setting.global_cooldown_seconds.toString()
         : '-1',
+      userInput: data.is_user_input_required ? 'yes' : '',
+      skipQueue: data.should_redemptions_skip_request_queue ? 'yes' : '',
+      enabled: data.is_enabled ? 'yes' : '',
+      paused: data.is_paused ? 'yes' : '',
     }
 }
 
@@ -162,6 +192,10 @@ const Editor = newComponent(Modal.tag, function (_, { onSuccess }: EditorParams)
       maxPerStream: { type: 'text', value: INITIAL_VALUES.maxPerStream, label: 'max per stream' },
       maxPerUser: { type: 'text', value: INITIAL_VALUES.maxPerUser, label: 'max per user' },
       cooldown: { type: 'text', value: INITIAL_VALUES.cooldown, label: 'global cooldown' },
+      userInput: { type: 'checkbox', value: INITIAL_VALUES.userInput, label: 'user input required' },
+      skipQueue: { type: 'checkbox', value: INITIAL_VALUES.skipQueue, label: 'skip redemption queue' },
+      enabled: { type: 'checkbox', value: INITIAL_VALUES.enabled },
+      paused: { type: 'checkbox', value: INITIAL_VALUES.paused },
     },
     buttons: {
       Save: {
@@ -172,7 +206,7 @@ const Editor = newComponent(Modal.tag, function (_, { onSuccess }: EditorParams)
             const payload = getUpdatePayloadFromValues(values);
             promise = host.send({ action: 'update-custom-reward', payload: { id: currentId, ...payload, } });
           } else {
-            const payload = getUpdatePayloadFromValues({ ...INITIAL_VALUES,  ...values });
+            const payload = getCreatePayloadFromValues({ ...INITIAL_VALUES,  ...values });
             if (isDefined(payload.cost) && isDefined(payload.title)) {
               const title = payload.title;
               const cost = payload.cost;

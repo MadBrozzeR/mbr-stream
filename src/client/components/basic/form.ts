@@ -1,3 +1,4 @@
+import { CHECKMARK_1_HEAVY } from '/@client/constants';
 import type { ComponentSplux, Splux } from '/@client/lib-ref/splux';
 import { Host, newComponent } from '/@client/splux-host';
 import { debounce } from '/@client/utils/utils';
@@ -43,6 +44,8 @@ const STYLES = {
       width: '300px',
       height: '30px',
       fontSize: '1em',
+      display: 'flex',
+      alignItems: 'center',
     },
 
     '--button_row': {
@@ -80,7 +83,23 @@ const STYLES = {
       flex: 1,
     },
 
+    '--checkbox_styled': {
+      display: 'inline-block',
+      width: '1em',
+      height: '1em',
+      border: '1px solid black',
+      borderRadius: '0.3em',
+    },
+
     '--input': {
+      '[type=checkbox]': {
+        ':checked+.form--checkbox_styled:before': {
+          display: 'block',
+          content: '"' + CHECKMARK_1_HEAVY + '"',
+          fontSize: '1.2em',
+          lineHeight: '0.9em',
+        },
+      },
       boxSizing: 'border-box',
       width: '100%',
       height: '100%',
@@ -175,6 +194,10 @@ type Field = {
 } | {
   type: 'select';
   search?: boolean;
+  label?: string;
+  value: string;
+} | {
+  type: 'checkbox',
   label?: string;
   value: string;
 };
@@ -326,7 +349,7 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
           label: field.label || name,
           setInterface(content) {
             const dom = content.dom('span.form--select', function () {
-              const input = this.dom('input.form--input.form--input-hidden').params({ value: initialValue, name });
+              const input = this.dom('input.form--input-hidden').params({ value: initialValue, name });
               const display = this.dom('span.form--select_display').params({
                 onclick() {
                   curtain.getOptions(name, '');
@@ -348,6 +371,40 @@ export const Form = newComponent('form.form', function (_, { fields, onChange, b
               },
               get() {
                 return dom.input.node.value;
+              },
+            };
+          },
+        });
+      } else if (field.type === 'checkbox') {
+        inputs[name] = this.dom(FormRow, {
+          label: field.label || name,
+          setInterface(content) {
+            const checkbox = content.dom('input.form--input.form--input-hidden').params({
+              type: 'checkbox',
+              onchange() {
+                if (checkbox.node.checked) {
+                  input.node.value = 'yes';
+                } else {
+                  input.node.value = '';
+                }
+              }
+            });
+            content.dom('span.form--checkbox_styled');
+            const input = content.dom('input.form--input-hidden').params({ value: initialValue, name });
+
+            return {
+              set(value) {
+                if (value === 'yes') {
+                  input.node.value = 'yes';
+                  checkbox.node.checked = true;
+                } else {
+                  input.node.value = '';
+                  checkbox.node.checked = false;
+                }
+              },
+
+              get() {
+                return input.node.value;
               },
             };
           },
