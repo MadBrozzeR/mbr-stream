@@ -4,12 +4,14 @@ import type { TokenResponse } from './types';
 const secretConfig = Config.use(__dirname + '/../../.config.secret.json', {
   clientId: '',
   clientSecret: '',
+  obsPassword: '',
 });
 
 const sharedConfig = Config.use(__dirname + '/../../.config.json', {
   redirectUri: 'http://localhost/',
   logFile: __dirname + '/../../log.txt',
   eventSubLog: __dirname + '/../../eventsub.log',
+  obsWebSocket: '',
   startChat: true,
 });
 

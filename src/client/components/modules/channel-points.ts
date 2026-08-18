@@ -171,7 +171,7 @@ function getValuesFromUpdateResponse(data: PointsResponse[number]): Values {
       skipQueue: data.should_redemptions_skip_request_queue ? 'yes' : '',
       enabled: data.is_enabled ? 'yes' : '',
       paused: data.is_paused ? 'yes' : '',
-    }
+    };
 }
 
 type EditorParams = {
