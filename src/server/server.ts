@@ -4,6 +4,7 @@ import { config } from './config';
 import { getActionResponse, getGroupFromBadges, getStringRecord, getUserBadges, isEventSubMessageType, isEventSubNotificationType, isKeyOf } from './utils';
 import { api } from './api';
 import { startWSClient, startWSServer } from './ws';
+import { OBSSocket } from './obs-socket';
 import { createPolling, dataStorage, dataStorageKeys, getStreamInfo, getUserInfo, getUserInfoWithReconnect } from './api-wrappers';
 import type { WSIncomeEvent, BadgeStore, WSEvent, ChatCommand, WSIncomeEventResponse, WSIncomeEventActions } from './common-types/ws-events';
 import { downloadResources, PRELOAD_RESOURCES } from './resource-downloader';
@@ -16,6 +17,8 @@ const CLIENT_ROOT = __dirname + '/../client/';
 const MODULES_ROOT = __dirname + '/../../node_modules/';
 
 const wsServer = startWSServer();
+const obsSocket = new OBSSocket(config.obsWebSocket, config.obsPassword);
+obsSocket.connect();
 
 const streamInfoPolling = config.startChat ? createPolling(120000, getStreamInfo, function (streamInfo) {
   wsServer.sendData({ type: 'streamInfo', payload: streamInfo });

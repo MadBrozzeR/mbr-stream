@@ -19,7 +19,7 @@ function handleHello(messageData: ObsMessage<0>) {
     const hashedPassword = crypto.createHash('sha256').update(config.obsPassword + salt).digest('base64');
     const secret = crypto.createHash('sha256').update(hashedPassword + challenge).digest('base64');
 
-    result.d.auth = secret;
+    result.d.authentication = secret;
   }
 
   return result;
@@ -54,11 +54,13 @@ export class OBSSocket {
             [K in keyof ObsMessageData]: ObsMessage<K>
           }[keyof ObsMessageData] = JSON.parse(message.toString());
 
+          console.log(JSON.stringify(messageData, null, 2));
+
           switch (messageData.op) {
             case 0:
               if (obsSocket.status === 'connected') {
                 const response = handleHello(messageData);
-                obsSocket.send(response);
+                obsSocket.send(response, { withStatus: 'connected' });
               }
               break;
             case 2:
@@ -74,12 +76,18 @@ export class OBSSocket {
           console.error('Failed to parse OBS Socket message:', error);
         }
       },
-    }, { url });
+    }, {
+      url,
+      debug(/* type, data */) {
+        // console.log(22222, type, data);
+      }
+    });
   }
 
   send(message: ObsMessage, { withStatus = 'active' }: { withStatus?: Status } = {}) {
     if (this.status === withStatus) {
-      this.socket.send(JSON.stringify(message));
+      console.log('OBS Send', message);
+      this.socket.send(JSON.stringify(message), {});
     }
   }
 

@@ -53,7 +53,7 @@ export type ObsMessageData = {
   };
   1: {
     rpcVersion: number;
-    auth?: string; // Base64 SHA256 string if helloData.authentication exists
+    authentication?: string; // Base64 SHA256 string if helloData.authentication exists
     eventSubscriptions?: number; // Bitmask value (e.g., 128 for SceneItems)
   };
   2: {
